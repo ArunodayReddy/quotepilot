@@ -1,28 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Seo } from "../components/Seo";
 import { Reveal } from "../components/Reveal";
 import { AgentMap } from "../components/AgentMap";
 import { SelectField, TextField, STATE_OPTIONS } from "../components/fields";
 import { api, ApiError } from "../lib/api";
 import { useAnalytics } from "../lib/analytics";
-import { WIZARD_STORAGE_KEY } from "../lib/wizard";
+import { readQuoteLocation } from "../lib/wizard";
 import type { AgentEntry } from "../lib/types";
 
 const ZIP_RE = /^\d{5}$/;
+const STATE_RE = /^[A-Z]{2}$/;
 
-function readQuoteZip(): string | null {
-  try {
-    const raw = window.localStorage.getItem(WIZARD_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { contact?: { zip?: string } };
-    const zip = parsed?.contact?.zip?.trim() ?? "";
-    return ZIP_RE.test(zip) ? zip : null;
-  } catch {
-    return null;
-  }
-}
-
-function SourceBadge({ source }: { source: AgentEntry["source"] }) {
+export function SourceBadge({ source }: { source: AgentEntry["source"] }) {
   if (source === "google_places") {
     return (
       <span className="live-badge" title="Live listing from the Google Places directory.">
@@ -38,6 +28,7 @@ function SourceBadge({ source }: { source: AgentEntry["source"] }) {
 }
 
 export function Agents() {
+  const [searchParams] = useSearchParams();
   const [state, setState] = useState("MA");
   const [zip, setZip] = useState("");
   const [agents, setAgents] = useState<AgentEntry[] | null>(null);
@@ -46,21 +37,21 @@ export function Agents() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
-  const [quoteZipAvailable, setQuoteZipAvailable] = useState(() => readQuoteZip() !== null);
+  const [quoteZipAvailable, setQuoteZipAvailable] = useState(() => readQuoteLocation() !== null);
   const track = useAnalytics("agents");
 
-  const runSearch = async (searchZip: string) => {
+  const runSearch = async (searchState: string, searchZip: string) => {
     setError(null);
     setLoading(true);
     setSearched(true);
     try {
-      const res = await api.getAgents(state, searchZip);
+      const res = await api.getAgents(searchState, searchZip);
       setAgents(res.agents);
       setNote(res.note);
       setGeocoded(res.geocoded);
       track("cta_clicked", {
         element: "agent_search",
-        metadata: { state, resultCount: res.agents.length, geocoded: res.geocoded },
+        metadata: { state: searchState, resultCount: res.agents.length, geocoded: res.geocoded },
       });
     } catch (e) {
       setError(
@@ -75,6 +66,20 @@ export function Agents() {
     }
   };
 
+  // Deep-link support: /agents?zip=76201&state=TX prefills and auto-searches
+  // (used by the "See all agents" link on the quote results page).
+  useEffect(() => {
+    const qz = (searchParams.get("zip") ?? "").trim();
+    const qs = (searchParams.get("state") ?? "").trim().toUpperCase();
+    if (ZIP_RE.test(qz)) {
+      const st = STATE_RE.test(qs) ? qs : "MA";
+      setZip(qz);
+      setState(st);
+      void runSearch(st, qz);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const search = (e: React.FormEvent) => {
     e.preventDefault();
     const z = zip.trim();
@@ -82,16 +87,17 @@ export function Agents() {
       setError("Enter a valid 5-digit ZIP code.");
       return;
     }
-    void runSearch(z);
+    void runSearch(state, z);
   };
 
   const useQuoteZip = () => {
-    const z = readQuoteZip();
-    if (z) {
-      setZip(z);
+    const loc = readQuoteLocation();
+    if (loc) {
+      setZip(loc.zip);
+      setState(loc.state);
       setQuoteZipAvailable(true);
       track("cta_clicked", { element: "agent_use_quote_zip" });
-      void runSearch(z);
+      void runSearch(loc.state, loc.zip);
     } else {
       setQuoteZipAvailable(false);
       setError("No ZIP found in your quote — enter one above.");
