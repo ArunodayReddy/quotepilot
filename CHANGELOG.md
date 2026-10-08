@@ -3,6 +3,14 @@
 All notable changes to this project are documented here. Newest at the top.
 Format: `## [version] — date` with Added / Changed / Fixed / Security sections.
 
+## [0.2.1] — 2026-10-08 — Pushed to GitHub
+
+### Added
+- Full codebase pushed to `ArunodayReddy/quotepilot` on main (6 commits: README seed + 5 batches,
+  95 files). Verified: CONTEXT.md, web App.tsx, API adapters, MA carrier registry all download clean.
+- `package-lock.json` files excluded from the push (GitHub connector per-arg size limit); `npm install`
+  regenerates them — same approach as the FDE project.
+
 ## [0.2.0] — 2026-10-08 — Demo MVP (three-track parallel build + coordinator integration)
 
 ### Added — web app (`apps/web`, quotepilot-web, React 18 + Vite 6 + TS strict, :5173)

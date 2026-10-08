@@ -120,6 +120,12 @@ change must be recorded there with a date.
 
 ## 8. Rule log (append-only; newest at bottom)
 
+- 2026-10-08 (github push): GitHub App cannot create repos (403) and cannot git-push (no token);
+  bulk push goes through the `push_files` MCP tool, one approval per call. Keep each call's JSON args
+  under ~120KB (shell single-arg limit) — split into batches. Skip `package-lock.json` (oversized);
+  `npm install` regenerates. Local git history and GitHub history are intentionally divergent; all
+  GitHub-side changes go through `push_files`, never `git push`.
+
 - 2026-10-08 (kickoff): Rules 1–13 ratified. Adapter interface is the law; simulation pricing must anchor to
   real researched quotes. Sample data stays masked forever.
 - 2026-10-08 (dashboard+docs track): analytics dashboard polls GET /api/analytics/summary every 30s
