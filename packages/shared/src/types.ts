@@ -104,14 +104,39 @@ export interface QuoteResult {
   errorCode?: "ADAPTER_TIMEOUT" | "ADAPTER_ERROR" | "CARRIER_UNAVAILABLE";
 }
 
+export interface AgentHours {
+  weekdays: string;
+  saturday: string;
+  sunday: string;
+}
+
 export interface Agent {
+  id: string;
   name: string;
+  /** Street address (demo: obviously-sample street numbers). */
+  address: string;
   city: string;
+  zip: string;
   phone: string;
+  /** Approximate coordinates (demo-grade; production uses a real directory feed). */
+  lat: number;
+  lng: number;
+  hours: AgentHours;
   carriers: string[];
   languages: string[];
   /** true for seeded demo entries — never real people's numbers. */
   sample: boolean;
+}
+
+/** Where an agent listing came from. */
+export type AgentSource = "google_places" | "sample";
+
+/** Agent as returned by GET /api/agents when a ZIP was geocoded. */
+export interface AgentWithDistance extends Agent {
+  /** Miles from the searched ZIP centroid, 1 decimal; null when not geocoded. */
+  distance_mi: number | null;
+  /** Data provenance — "live" badge vs "sample" badge in the UI. */
+  source: AgentSource;
 }
 
 export interface CarrierRegistryEntry {

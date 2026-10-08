@@ -117,6 +117,34 @@ describe("agents routes", () => {
     for (const a of res.body.agents) {
       expect(a.sample).toBe(true);
       expect(a.phone).toMatch(/^555-010-/);
+      expect(a.source).toBe("sample");
+    }
+  });
+
+  it("known ZIP → geocoded:true, sorted by distance, Cambridge first for 02139", async () => {
+    const res = await request(app).get("/api/agents?state=MA&zip=02139");
+    expect(res.status).toBe(200);
+    expect(res.body.geocoded).toBe(true);
+    const agents = res.body.agents as { city: string; distance_mi: number }[];
+    expect(agents[0].city).toBe("Cambridge");
+    expect(agents[0].distance_mi).toBe(0);
+    const dists = agents.map((a) => a.distance_mi);
+    expect([...dists].sort((x, y) => x - y)).toEqual(dists);
+    for (const a of agents) {
+      expect(a.distance_mi).toBeGreaterThanOrEqual(0);
+      expect(Number.isInteger(a.distance_mi * 10)).toBe(true); // 1-decimal
+    }
+  });
+
+  it("unknown ZIP → 200, geocoded:false, unsorted sample list + note", async () => {
+    const res = await request(app).get("/api/agents?state=MA&zip=99999");
+    expect(res.status).toBe(200);
+    expect(res.body.geocoded).toBe(false);
+    expect(res.body.note).toMatch(/isn't in our demo geocoder/);
+    expect(res.body.agents).toHaveLength(8);
+    for (const a of res.body.agents) {
+      expect(a.distance_mi).toBeNull();
+      expect(a.source).toBe("sample");
     }
   });
 

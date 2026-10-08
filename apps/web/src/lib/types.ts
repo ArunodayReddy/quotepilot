@@ -86,18 +86,36 @@ export interface QuoteJobCreated {
   estimatedSeconds: number;
 }
 
+export interface AgentHours {
+  weekdays: string;
+  saturday: string;
+  sunday: string;
+}
+
 export interface AgentEntry {
+  id: string;
   name: string;
+  address: string;
   city: string;
+  zip: string;
   phone: string;
+  lat: number;
+  lng: number;
+  hours: AgentHours;
   carriers: string[];
   languages: string[];
   sample: boolean;
+  /** Miles from the searched ZIP centroid (1 decimal); null when not geocoded. */
+  distance_mi: number | null;
+  /** Data provenance: "google_places" → Live data badge, "sample" → Sample data badge. */
+  source: "google_places" | "sample";
 }
 
 export interface AgentsResponse {
   state: string;
-  zip: string;
+  zip: string | null;
+  geocoded: boolean;
+  note: string | null;
   agents: AgentEntry[];
 }
 

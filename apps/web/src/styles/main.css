@@ -843,3 +843,69 @@ input[type="date"].input::-webkit-calendar-picker-indicator { cursor: pointer; o
 /* ---------- Driver card as fieldset ---------- */
 fieldset.driver-card { min-inline-size: 0; }
 fieldset.driver-card legend { padding: 0; }
+
+/* ---- Agent finder: map + enriched cards (v0.4.0) ---- */
+.map-panel { padding: var(--space-5); margin-bottom: var(--space-6); }
+.agent-map {
+  height: 380px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  overflow: hidden;
+  background: var(--input-bg);
+  z-index: 0;
+}
+.agent-map .leaflet-container { font-family: var(--font-sans); }
+/* Numbered pins — themed divIcon (avoids bundler-broken default marker PNGs). */
+.qp-pin-wrap { background: none; border: none; }
+.qp-pin {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50% 50% 50% 4px;
+  transform: rotate(-45deg);
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+  color: #fff; font-weight: 800; font-size: 13px; line-height: 1;
+  border: 2px solid #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+.qp-pin b { transform: rotate(45deg); font-weight: 800; }
+/* Leaflet popup theming */
+.qp-popup { font-family: var(--font-sans); font-size: 13px; line-height: 1.55; color: #0f172a; }
+.qp-popup strong { font-size: 14px; }
+.qp-popup a { color: var(--accent-strong); font-weight: 700; }
+.qp-popup-hours { color: #475569; margin-top: 4px; font-size: 12px; }
+.qp-popup-dist { font-weight: 700; color: #059669; margin-top: 4px; }
+/* Source badges */
+.live-badge {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  background: rgba(5, 150, 105, 0.14); color: #059669;
+  border: 1px solid rgba(5, 150, 105, 0.4);
+  border-radius: var(--radius-pill); padding: var(--space-1) var(--space-3);
+  font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+}
+.live-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #059669; }
+/* Card anatomy */
+.agent-rank {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.6rem; height: 1.6rem; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent-strong);
+  font-size: 0.85rem; font-weight: 800; margin-right: 0.25rem; vertical-align: 1px;
+}
+.agent-distance { font-weight: 700; color: #059669; font-size: 0.95rem; }
+.agent-address { font-style: normal; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.55; }
+.agent-hours { display: grid; gap: 2px; font-size: 0.88rem; background: var(--input-bg);
+  border: 1px solid var(--surface-border); border-radius: var(--radius-sm); padding: 0.6rem 0.8rem; }
+.agent-hours > div { display: flex; justify-content: space-between; gap: 1rem; }
+.agent-hours > div > span:first-child { color: var(--text-tertiary); font-weight: 600; }
+.agent-phone-na { color: var(--text-tertiary); font-weight: 600; }
+/* Search panel + notice */
+.search-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center; }
+.notice {
+  padding: var(--space-4) var(--space-5); margin-bottom: var(--space-5);
+  border-radius: var(--radius-md); color: var(--text-secondary); font-size: 0.95rem;
+}
+@media (max-width: 640px) {
+  .agent-map { height: 300px; }
+  .map-panel { padding: var(--space-4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qp-pin { transition: none; }
+}

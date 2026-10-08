@@ -154,3 +154,16 @@ Store under `docs/screenshots/`; reference from this section when captured.
   states/carriers is interpolated from the live registry (fallback copy when offline).
 - **Snapshot:** `docs/snapshots/v0.2.0-preview.html` wizard screen updated to the Drivers step
   showing the DOB date field and custom dropdowns.
+
+## 2026-10-08 — v0.4.0 agent finder + map
+- New `AgentMap` component (`apps/web/src/components/AgentMap.tsx`): Leaflet + OSM tiles,
+  custom numbered teardrop pins (divIcon, themed gradient — avoids bundler-broken default
+  marker PNGs), popups with name/address/phone/hours/distance, auto-fit bounds,
+  `prefers-reduced-motion` disables zoom animation. Map region labeled; the agent list
+  below is the accessible equivalent of every pin.
+- Agent card anatomy: rank number → name + source badge ("Live data" green / "Sample data"
+  amber) → distance ("1.2 mi away", green) → street address block → tap-to-call phone →
+  open-hours grid (Mon–Fri / Sat / Sun) → carrier chips → languages. Empty carriers/
+  languages (live Places data) hide their rows.
+- New CSS: `.agent-map`, `.qp-pin`, `.qp-popup*`, `.live-badge`, `.agent-distance`,
+  `.agent-address`, `.agent-hours`, `.map-panel`, `.notice`, `.search-actions`.

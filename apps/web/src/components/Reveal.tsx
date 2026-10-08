@@ -5,10 +5,12 @@ export function Reveal({
   children,
   className = "",
   as: Tag = "div",
+  id,
 }: {
   children: ReactNode;
   className?: string;
   as?: "div" | "section" | "li" | "article";
+  id?: string;
 }) {
   const ref = useRef<HTMLElement | null>(null);
 
@@ -35,7 +37,7 @@ export function Reveal({
   }, []);
 
   return (
-    <Tag ref={ref as never} className={`reveal ${className}`}>
+    <Tag ref={ref as never} id={id} className={`reveal ${className}`}>
       {children}
     </Tag>
   );

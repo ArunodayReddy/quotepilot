@@ -52,8 +52,9 @@ export const api = {
   getQuoteJob(jobId: string): Promise<QuoteJob> {
     return request(`/api/quotes/${encodeURIComponent(jobId)}`);
   },
-  getAgents(state: string, zip: string): Promise<AgentsResponse> {
-    const params = new URLSearchParams({ state, zip });
+  getAgents(state: string, zip?: string): Promise<AgentsResponse> {
+    const params = new URLSearchParams({ state });
+    if (zip) params.set("zip", zip);
     return request(`/api/agents?${params.toString()}`);
   },
   getCarriers(state: string): Promise<CarriersResponse> {

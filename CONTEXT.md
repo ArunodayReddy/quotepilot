@@ -120,6 +120,15 @@ change must be recorded there with a date.
 
 ## 8. Rule log (append-only; newest at bottom)
 
+- 2026-10-08 (v0.4.0 agents+map): provider chain is the law for agent data — Google Places
+  (GOOGLE_PLACES_API_KEY) primary, sample seed fallback; `source` on every agent, "Live data"/
+  "Sample data" badges non-negotiable. Never invent real businesses or real phone numbers;
+  sample entries keep 555-01xx phones, approximate coords, obviously-sample street numbers.
+  ZIP centroids are demo-grade approximations (documented in data/geocode/zip_centroids.json);
+  production uses a real geocoder. In-memory Places cache: 24 h TTL, keyed by rounded lat/lng.
+  Maps: Leaflet + OSM tiles (no key); every pin has an accessible list equivalent — the map is
+  never the only path to the data.
+
 - 2026-10-08 (github push): GitHub App cannot create repos (403) and cannot git-push (no token);
   bulk push goes through the `push_files` MCP tool, one approval per call. Keep each call's JSON args
   under ~120KB (shell single-arg limit) — split into batches. Skip `package-lock.json` (oversized);
