@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Seo } from "../components/Seo";
 import { Reveal } from "../components/Reveal";
-import { SelectField, TextField, US_STATES } from "../components/fields";
+import { SelectField, TextField, STATE_OPTIONS } from "../components/fields";
 import { api, ApiError } from "../lib/api";
 import { useAnalytics } from "../lib/analytics";
 import type { AgentEntry } from "../lib/types";
@@ -71,8 +71,8 @@ export function Agents() {
               id="agents-state"
               label="State"
               value={state}
-              onChange={(e) => setState(e.target.value)}
-              options={US_STATES.map((s) => ({ value: s, label: s }))}
+              onChange={(v) => setState(v)}
+              options={STATE_OPTIONS}
             />
             <TextField
               id="agents-zip"

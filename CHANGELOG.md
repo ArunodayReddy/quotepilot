@@ -3,6 +3,33 @@
 All notable changes to this project are documented here. Newest at the top.
 Format: `## [version] — date` with Added / Changed / Fixed / Security sections.
 
+## [0.3.0] — 2026-10-08 — Form overhaul: Apple-grade inputs, dynamic carriers
+
+### Added
+- `GET /api/carriers?state=MA` — carrier registry endpoint (`apps/api/src/routes/carriers.ts`);
+  returns `{ state, carriers }`, unknown states → 200 with empty list + `note`, bad codes → 400.
+  Web client `api.getCarriers()` + `CarrierEntry`/`CarriersResponse` types.
+- Accessible custom `Select` component (`apps/web/src/components/Select.tsx`): button trigger +
+  listbox popup, full keyboard support (arrows/Home/End/Enter/Escape/type-ahead), ARIA
+  listbox pattern (`aria-expanded`, `aria-activedescendant`), click-outside close, focus return,
+  checkmark on selected, animated open (disabled under prefers-reduced-motion), error styling.
+- Wizard field overhaul to insurer form standards: street address (autocomplete), 50-state
+  dropdown with full names, DOB date picker (max=today, age derived client-side), gender and
+  marital-status dropdowns, accident/violation dropdowns (0–4, 5+), vehicle year dropdown
+  (1995–2027), top-25 make dropdown + Other free-text, mileage number + synced slider,
+  coverage limit dropdowns ($25k–$500k), deductible dropdowns ($250–$2,500). Proper
+  `autocomplete` tokens on every field; driver/vehicle groups now `fieldset`/`legend`.
+- Home page carrier marquee + states/carriers FAQ now fetch `GET /api/carriers?state=MA`
+  (loading skeleton, graceful error state); hardcoded `CARRIERS` list removed.
+
+### Changed
+- localStorage wizard key bumped to `quotepilot.wizard.v2` (schema changed: DOB replaces age).
+
+### Fixed
+- Gender value mismatch: web sent `prefer-not-to-say`, API expects `prefer_not_to_say`
+  (sample-data submit would have 400'd). Aligned to the API enum (+ `other`).
+- Wizard validation caps accidents/violations at 10 to match the API schema (was 20).
+
 ## [0.2.1] — 2026-10-08 — Pushed to GitHub
 
 ### Added

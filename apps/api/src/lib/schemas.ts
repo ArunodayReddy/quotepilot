@@ -90,6 +90,11 @@ export const agentsQuerySchema = z.object({
   zip: ZIP.optional(),
 });
 
+/** GET /api/carriers?state=MA — state-only query for the carrier registry. */
+export const carriersQuerySchema = z.object({
+  state: STATE,
+});
+
 export const jobIdParamSchema = z.object({
   jobId: z.string().uuid(),
 });

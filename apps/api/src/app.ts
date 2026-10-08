@@ -16,6 +16,7 @@ import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import { healthRouter } from "./routes/health.js";
 import { quoteRouter } from "./routes/quote.js";
 import { agentsRouter } from "./routes/agents.js";
+import { carriersRouter } from "./routes/carriers.js";
 import { analyticsRouter } from "./routes/analytics.js";
 import { emailRouter } from "./routes/email.js";
 
@@ -53,6 +54,7 @@ export function createApp(): express.Express {
   app.use("/api", healthRouter);
   app.use("/api", quoteRouter);
   app.use("/api", agentsRouter);
+  app.use("/api", carriersRouter);
   app.use("/api", analyticsRouter);
   app.use("/api", emailRouter);
 

@@ -133,6 +133,39 @@ describe("agents routes", () => {
   });
 });
 
+describe("carriers routes", () => {
+  it("GET /api/carriers?state=MA returns the registry with channel info", async () => {
+    const res = await request(app).get("/api/carriers?state=MA");
+    expect(res.status).toBe(200);
+    expect(res.body.state).toBe("MA");
+    expect(res.body.carriers.length).toBeGreaterThanOrEqual(6);
+    const ids = res.body.carriers.map((c: { id: string }) => c.id);
+    expect(ids).toContain("geico");
+    expect(ids).toContain("allstate");
+    for (const c of res.body.carriers as Array<Record<string, unknown>>) {
+      expect(typeof c.id).toBe("string");
+      expect(typeof c.name).toBe("string");
+      expect(["direct", "agent"]).toContain(c.channel);
+      expect(typeof c.quotable).toBe("boolean");
+    }
+    expect(res.body).not.toHaveProperty("note");
+  });
+
+  it("unknown state → 200 with empty carriers + note", async () => {
+    const res = await request(app).get("/api/carriers?state=ZZ");
+    expect(res.status).toBe(200);
+    expect(res.body.state).toBe("ZZ");
+    expect(res.body.carriers).toEqual([]);
+    expect(typeof res.body.note).toBe("string");
+  });
+
+  it("bad state code → 400", async () => {
+    const res = await request(app).get("/api/carriers?state=Mass");
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("VALIDATION_ERROR");
+  });
+});
+
 describe("analytics routes", () => {
   it("POST /api/analytics/event → 201 and stores a hashed session", async () => {
     const res = await request(app).post("/api/analytics/event").send({

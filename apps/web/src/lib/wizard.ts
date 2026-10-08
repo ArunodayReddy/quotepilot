@@ -7,7 +7,7 @@ import type {
   VehicleInput,
 } from "../lib/types";
 
-export const WIZARD_STORAGE_KEY = "quotepilot.wizard.v1";
+export const WIZARD_STORAGE_KEY = "quotepilot.wizard.v2";
 
 export const STEP_TITLES = [
   "Location",
@@ -17,20 +17,53 @@ export const STEP_TITLES = [
   "Contact",
 ] as const;
 
+export type MaritalStatus = "single" | "married" | "divorced" | "widowed";
+
+/**
+ * Wizard-side driver: carries a date of birth (industry-standard field) and
+ * marital status. Age is derived from the DOB at submit time so the API
+ * contract (which takes `age`) never changes.
+ */
+export interface WizardDriver extends Omit<DriverInput, "age"> {
+  dob: string; // YYYY-MM-DD
+  maritalStatus: MaritalStatus;
+}
+
+export interface WizardContact extends ContactInput {
+  streetAddress: string;
+}
+
 export interface WizardData {
-  contact: ContactInput;
-  drivers: DriverInput[];
+  contact: WizardContact;
+  drivers: WizardDriver[];
   vehicles: VehicleInput[];
   coverage: CoverageInput;
   consentEmail: boolean;
 }
 
-export function blankDriver(): DriverInput {
+/** Age in whole years from a YYYY-MM-DD date of birth. NaN when invalid. */
+export function ageFromDob(dob: string, today: Date = new Date()): number {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dob.trim());
+  if (!m) return NaN;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  const dt = new Date(y, mo - 1, d);
+  if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return NaN;
+  let age = today.getFullYear() - y;
+  const hadBirthday =
+    today.getMonth() > mo - 1 || (today.getMonth() === mo - 1 && today.getDate() >= d);
+  if (!hadBirthday) age -= 1;
+  return age;
+}
+
+export function blankDriver(): WizardDriver {
   return {
     firstName: "",
     lastName: "",
-    age: 30,
-    gender: "prefer-not-to-say",
+    dob: "",
+    gender: "prefer_not_to_say",
+    maritalStatus: "single",
     yearsLicensed: 5,
     accidentsLast5Years: 0,
     violationsLast3Years: 0,
@@ -53,7 +86,7 @@ export function blankVehicle(): VehicleInput {
 
 export function defaultWizardData(): WizardData {
   return {
-    contact: { email: "", phone: "", state: "MA", zip: "" },
+    contact: { email: "", phone: "", state: "MA", zip: "", streetAddress: "" },
     drivers: [blankDriver()],
     vehicles: [blankVehicle()],
     coverage: {
@@ -72,7 +105,8 @@ export function defaultWizardData(): WizardData {
   };
 }
 
-/** Masked sample profile for the one-click demo fill (from CONTEXT §6, placeholders only). */
+/** Masked sample profile for the one-click demo fill (from CONTEXT §6, placeholders only).
+ *  DOBs are chosen so the derived ages match the original sample ages (31 and 29). */
 export function sampleWizardData(): WizardData {
   return {
     contact: {
@@ -80,10 +114,11 @@ export function sampleWizardData(): WizardData {
       phone: "555-010-0199",
       state: "MA",
       zip: "02139",
+      streetAddress: "123 Sample St",
     },
     drivers: [
-      { firstName: "Sample", lastName: "Driver", age: 31, gender: "prefer-not-to-say", yearsLicensed: 12, accidentsLast5Years: 0, violationsLast3Years: 0 },
-      { firstName: "Sample", lastName: "Passenger", age: 29, gender: "prefer-not-to-say", yearsLicensed: 10, accidentsLast5Years: 0, violationsLast3Years: 0 },
+      { firstName: "Sample", lastName: "Driver", dob: "1995-04-22", gender: "prefer_not_to_say", maritalStatus: "single", yearsLicensed: 12, accidentsLast5Years: 0, violationsLast3Years: 0 },
+      { firstName: "Sample", lastName: "Passenger", dob: "1997-02-10", gender: "prefer_not_to_say", maritalStatus: "married", yearsLicensed: 10, accidentsLast5Years: 0, violationsLast3Years: 0 },
     ],
     vehicles: [
       {
@@ -154,6 +189,8 @@ export function validateStep(step: number, data: WizardData): FieldErrors {
   const errors: FieldErrors = {};
   if (step === 0) {
     if (!data.contact.state) errors["contact.state"] = "Pick your state so we can match carriers that serve it.";
+    if (data.contact.streetAddress.trim().length < 5)
+      errors["contact.streetAddress"] = "Enter your street address (e.g. 123 Main St).";
     if (!ZIP_RE.test(data.contact.zip.trim()))
       errors["contact.zip"] = "Enter a valid 5-digit ZIP code (e.g. 02139).";
   } else if (step === 1) {
@@ -163,14 +200,17 @@ export function validateStep(step: number, data: WizardData): FieldErrors {
         errors[`${p}.firstName`] = `Driver ${i + 1}: enter a first name (letters, spaces, hyphens).`;
       if (!NAME_RE.test(d.lastName.trim()))
         errors[`${p}.lastName`] = `Driver ${i + 1}: enter a last name (letters, spaces, hyphens).`;
-      if (!Number.isInteger(d.age) || d.age < 16 || d.age > 100)
-        errors[`${p}.age`] = `Driver ${i + 1}: age must be between 16 and 100.`;
-      if (!Number.isInteger(d.yearsLicensed) || d.yearsLicensed < 0 || d.yearsLicensed > d.age - 15)
+      const age = ageFromDob(d.dob);
+      if (!d.dob || Number.isNaN(age))
+        errors[`${p}.dob`] = `Driver ${i + 1}: enter a valid date of birth.`;
+      else if (age < 16 || age > 100)
+        errors[`${p}.dob`] = `Driver ${i + 1}: drivers must be between 16 and 100 years old.`;
+      if (!Number.isInteger(d.yearsLicensed) || d.yearsLicensed < 0 || (!Number.isNaN(age) && d.yearsLicensed > age - 15))
         errors[`${p}.yearsLicensed`] = `Driver ${i + 1}: years licensed can't exceed age minus 15.`;
-      if (!Number.isInteger(d.accidentsLast5Years) || d.accidentsLast5Years < 0 || d.accidentsLast5Years > 20)
-        errors[`${p}.accidentsLast5Years`] = `Driver ${i + 1}: enter a number from 0 to 20.`;
-      if (!Number.isInteger(d.violationsLast3Years) || d.violationsLast3Years < 0 || d.violationsLast3Years > 20)
-        errors[`${p}.violationsLast3Years`] = `Driver ${i + 1}: enter a number from 0 to 20.`;
+      if (!Number.isInteger(d.accidentsLast5Years) || d.accidentsLast5Years < 0 || d.accidentsLast5Years > 10)
+        errors[`${p}.accidentsLast5Years`] = `Driver ${i + 1}: pick 0 to 5 or more.`;
+      if (!Number.isInteger(d.violationsLast3Years) || d.violationsLast3Years < 0 || d.violationsLast3Years > 10)
+        errors[`${p}.violationsLast3Years`] = `Driver ${i + 1}: pick 0 to 5 or more.`;
     });
   } else if (step === 2) {
     data.vehicles.forEach((v, i) => {
@@ -205,7 +245,10 @@ export function validateStep(step: number, data: WizardData): FieldErrors {
   return errors;
 }
 
-/** Assemble the API payload from wizard data (trims strings, strips sample names). */
+/** Assemble the API payload from wizard data.
+ *  Age is derived from the DOB so the API contract never changes; marital
+ *  status and street address are form-parity fields the simulation doesn't
+ *  price on yet (real adapters will consume them later). */
 export function toQuoteRequest(data: WizardData): QuoteRequest {
   return {
     contact: {
@@ -215,9 +258,13 @@ export function toQuoteRequest(data: WizardData): QuoteRequest {
       zip: data.contact.zip.trim(),
     },
     drivers: data.drivers.map((d) => ({
-      ...d,
       firstName: d.firstName.trim(),
       lastName: d.lastName.trim(),
+      age: ageFromDob(d.dob),
+      gender: d.gender,
+      yearsLicensed: d.yearsLicensed,
+      accidentsLast5Years: d.accidentsLast5Years,
+      violationsLast3Years: d.violationsLast3Years,
     })),
     vehicles: data.vehicles.map((v) => ({
       year: v.year,

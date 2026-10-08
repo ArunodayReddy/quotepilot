@@ -1,47 +1,96 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Seo } from "../components/Seo";
 import { SimBadge } from "../components/SimBadge";
 import { Reveal } from "../components/Reveal";
 import { useAnalytics } from "../lib/analytics";
+import { api } from "../lib/api";
+import type { CarrierEntry } from "../lib/types";
 
-const CARRIERS = ["GEICO", "Progressive", "Allstate", "Liberty Mutual", "Plymouth Rock", "Amica"];
-
-const FAQS = [
+const FAQ_DEFS = [
   {
+    id: "how",
     q: "How does QuotePilot work?",
     a: "You fill out one short form — location, drivers, vehicle, coverage, and contact. QuotePilot then asks every relevant carrier for your state to price that exact profile, and shows the results ranked side by side. When everything is in, we email you a copy too.",
   },
   {
+    id: "real",
     q: "Are these real insurance quotes?",
     a: "No. This demo build shows simulated pricing in realistic bands anchored to real Massachusetts quote research (for example, Allstate quoted $1,347 / 6 months for our sample profile in October 2026). Every quote card carries a 'Simulated — demo pricing' badge so it's always clear.",
   },
   {
+    id: "carriers",
     q: "Which states and carriers are supported?",
-    a: "Massachusetts is fully seeded with carriers like GEICO, Progressive, Allstate, Liberty Mutual, Plymouth Rock, and Amica, plus agent-only carriers through the local agent directory. Starter lists exist for NH, CA, and TX. Unknown states degrade gracefully — you'll get a clean empty state, not an error.",
+    a: "", // filled dynamically from the carrier registry (see carriersAnswer)
   },
   {
+    id: "privacy",
     q: "What happens to my personal information?",
     a: "Nothing leaves the demo. Your wizard answers are saved only in your browser (localStorage) so you can resume where you left off. We never log PII, never sell data, and analytics events carry only anonymous metadata — no names, emails, or addresses.",
   },
   {
+    id: "timing",
     q: "How long does it take?",
     a: "Carriers respond at their own pace, so quoting runs as a background job. You'll see live progress ('4 of 6 carriers'), and most demo runs complete in under a minute. You can leave and come back — the job link keeps working.",
   },
 ];
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "QuotePilot",
-  url: "https://quotepilot.example.com",
-  description:
-    "One form. Every carrier. The best deal. QuotePilot gathers car insurance quotes from every relevant carrier in your state.",
-  mainEntity: FAQS.map((f) => ({
-    "@type": "Question",
-    name: f.q,
-    acceptedAnswer: { "@type": "Answer", text: f.a },
-  })),
-};
+/** Human list: "A, B, and C". */
+function formatList(names: string[]): string {
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0];
+  return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+}
+
+/**
+ * The states/carriers FAQ answer, sourced from the live registry instead of a
+ * hardcoded carrier list. Falls back to generic copy when the fetch fails.
+ */
+function carriersAnswer(quotable: string[] | null): string {
+  const base =
+    "Starter lists exist for NH, CA, and TX. Unknown states degrade gracefully — you'll get a clean empty state, not an error.";
+  if (!quotable || quotable.length === 0) {
+    return `Massachusetts is fully seeded with direct and agent-only carriers, plus a local agent directory. ${base}`;
+  }
+  return `Massachusetts is fully seeded with ${formatList(quotable)}, plus agent-only carriers through the local agent directory. ${base}`;
+}
+
+function buildJsonLd(faqs: { q: string; a: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "QuotePilot",
+    url: "https://quotepilot.example.com",
+    description:
+      "One form. Every carrier. The best deal. QuotePilot gathers car insurance quotes from every relevant carrier in your state.",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+}
+
+/** Shared carrier-registry fetch for the home page (marquee + FAQ). */
+function useMaCarriers(): { carriers: CarrierEntry[] | null; failed: boolean } {
+  const [carriers, setCarriers] = useState<CarrierEntry[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .getCarriers("MA")
+      .then((r) => {
+        if (!cancelled) setCarriers(r.carriers);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return { carriers, failed };
+}
 
 function Hero() {
   const track = useAnalytics("home");
@@ -136,9 +185,16 @@ function HowItWorks() {
   );
 }
 
-function CarrierMarquee() {
+function CarrierMarquee({
+  carriers,
+  failed,
+}: {
+  carriers: CarrierEntry[] | null;
+  failed: boolean;
+}) {
+  const quotable = (carriers ?? []).filter((c) => c.quotable);
   // Duplicate the list for a seamless loop.
-  const items = [...CARRIERS, ...CARRIERS];
+  const items = [...quotable, ...quotable];
   return (
     <section className="section" aria-labelledby="carriers-title">
       <div className="container">
@@ -151,20 +207,39 @@ function CarrierMarquee() {
           </p>
         </Reveal>
       </div>
-      <div className="marquee-wrap" role="list" aria-label="Example carriers (simulated)">
-        <div className="marquee">
-          {items.map((c, i) => (
-            <span key={i} className="carrier-badge" role="listitem" aria-hidden={i >= CARRIERS.length}>
-              {c}
-            </span>
-          ))}
+      {carriers === null && !failed && (
+        <div className="container" aria-label="Loading carriers">
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <span key={i} className="skeleton" style={{ width: "9rem", height: "2.25rem" }} aria-hidden="true" />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+      {failed && (
+        <div className="container">
+          <p className="section-sub" role="status">
+            The carrier list is unavailable right now — the demo still works, and carriers
+            load on the results page.
+          </p>
+        </div>
+      )}
+      {quotable.length > 0 && (
+        <div className="marquee-wrap" role="list" aria-label="Example carriers (simulated)">
+          <div className="marquee">
+            {items.map((c, i) => (
+              <span key={`${c.id}-${i}`} className="carrier-badge" role="listitem" aria-hidden={i >= quotable.length}>
+                {c.logo} {c.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
 
-function Faq() {
+function Faq({ faqs }: { faqs: { q: string; a: string }[] }) {
   return (
     <section className="section" aria-labelledby="faq-title">
       <div className="container">
@@ -175,7 +250,7 @@ function Faq() {
           <p className="section-sub">The honest version — including what's simulated and what isn't.</p>
         </Reveal>
         <div className="faq-list">
-          {FAQS.map((f, i) => (
+          {faqs.map((f, i) => (
             <Reveal key={i} className="glass faq-item" as="div">
               <details>
                 <summary className="faq-question">
@@ -218,6 +293,19 @@ function FinalCta() {
 }
 
 export function Home() {
+  const { carriers, failed } = useMaCarriers();
+  const quotableNames = useMemo(
+    () => (carriers ? carriers.filter((c) => c.quotable).map((c) => c.name) : null),
+    [carriers],
+  );
+  const faqs = useMemo(
+    () =>
+      FAQ_DEFS.map((f) =>
+        f.id === "carriers" ? { q: f.q, a: carriersAnswer(quotableNames) } : { q: f.q, a: f.a },
+      ),
+    [quotableNames],
+  );
+  const jsonLd = useMemo(() => buildJsonLd(faqs), [faqs]);
   return (
     <div className="page" style={{ paddingTop: 0 }}>
       <Seo
@@ -228,8 +316,8 @@ export function Home() {
       />
       <Hero />
       <HowItWorks />
-      <CarrierMarquee />
-      <Faq />
+      <CarrierMarquee carriers={carriers} failed={failed} />
+      <Faq faqs={faqs} />
       <FinalCta />
     </div>
   );

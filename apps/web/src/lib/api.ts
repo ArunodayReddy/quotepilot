@@ -2,6 +2,7 @@
 import type {
   AgentsResponse,
   ApiErrorBody,
+  CarriersResponse,
   QuoteJob,
   QuoteJobCreated,
   QuoteRequest,
@@ -54,6 +55,10 @@ export const api = {
   getAgents(state: string, zip: string): Promise<AgentsResponse> {
     const params = new URLSearchParams({ state, zip });
     return request(`/api/agents?${params.toString()}`);
+  },
+  getCarriers(state: string): Promise<CarriersResponse> {
+    const params = new URLSearchParams({ state });
+    return request(`/api/carriers?${params.toString()}`);
   },
   notifyEmail(jobId: string, email: string): Promise<{ ok: boolean }> {
     return request("/api/email/notify", {

@@ -5,7 +5,7 @@ export interface DriverInput {
   firstName: string;
   lastName: string;
   age: number;
-  gender: "male" | "female" | "nonbinary" | "prefer-not-to-say";
+  gender: "male" | "female" | "nonbinary" | "other" | "prefer_not_to_say";
   yearsLicensed: number;
   accidentsLast5Years: number;
   violationsLast3Years: number;
@@ -99,6 +99,25 @@ export interface AgentsResponse {
   state: string;
   zip: string;
   agents: AgentEntry[];
+}
+
+export type CoverageChannel = "direct" | "agent";
+
+export interface CarrierEntry {
+  id: string;
+  name: string;
+  channel: CoverageChannel;
+  statesServed: string[];
+  logo: string;
+  quotable: boolean;
+  notes?: string;
+  available?: boolean;
+}
+
+export interface CarriersResponse {
+  state: string;
+  carriers: CarrierEntry[];
+  note?: string;
 }
 
 export interface ApiErrorBody {

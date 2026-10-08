@@ -143,3 +143,10 @@ change must be recorded there with a date.
 - 2026-10-08 (v0.2.0 integration): analytics stores session IDs as truncated SHA-256 hashes only;
   event metadata matching email-like patterns is dropped on write. No PII in logs, analytics,
   or the public job view — verified by scan and tests.
+- 2026-10-08 (v0.3.0 form overhaul): no hardcoded content lists in the UI — carrier names,
+  marquee, and the states/carriers FAQ all render from GET /api/carriers. The wizard collects
+  industry-standard fields (DOB date picker, marital status, street address) but the API
+  contract is unchanged: age is derived client-side from DOB, marital status and street
+  address stay form-local until real adapters consume them. localStorage schema bumps get a
+  new key version (v1 → v2), never a silent migration. Web gender enum must match the API
+  zod enum exactly (`prefer_not_to_say`); web/API enum drift is a 400-class bug.
