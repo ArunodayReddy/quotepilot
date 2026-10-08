@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Seo } from "../components/Seo";
 import { Reveal } from "../components/Reveal";
 import { AgentMap } from "../components/AgentMap";
+import { LoadingMessages } from "../components/LoadingMessages";
 import { SelectField, TextField, STATE_OPTIONS } from "../components/fields";
 import { api, ApiError } from "../lib/api";
 import { useAnalytics } from "../lib/analytics";
@@ -140,10 +141,14 @@ export function Agents() {
               id="agents-zip"
               label="ZIP code"
               inputMode="numeric"
+              autoComplete="postal-code"
+              pattern="\d{5}"
+              maxLength={5}
               placeholder="02139"
               value={zip}
               onChange={(e) => setZip(e.target.value)}
               error={error ?? undefined}
+              hint="5-digit US ZIP code."
             />
             <div className="search-actions">
               <button type="submit" className="btn btn-primary" disabled={loading}>
@@ -160,7 +165,7 @@ export function Agents() {
 
         {loading && (
           <div className="job-progress" role="status" aria-live="polite">
-            <div className="spinner" aria-hidden="true" />
+            <LoadingMessages context="agents" />
             <p>Looking up agents near {zip}…</p>
           </div>
         )}

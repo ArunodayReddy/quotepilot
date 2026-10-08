@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Seo } from "../components/Seo";
 import { SimBadge } from "../components/SimBadge";
 import { AgentMap } from "../components/AgentMap";
+import { LoadingMessages } from "../components/LoadingMessages";
 import { TextField } from "../components/fields";
 import { api, ApiError } from "../lib/api";
 import { useAnalytics } from "../lib/analytics";
@@ -216,7 +217,7 @@ function ProgressSection({ job }: { job: QuoteJob }) {
   const pending = Math.max(0, job.progress.total - job.progress.completed);
   return (
     <div className="glass job-progress" role="status" aria-live="polite">
-      <div className="spinner" aria-hidden="true" />
+      <LoadingMessages context="quotes" />
       <p>
         Gathering quotes… {job.progress.completed} of {job.progress.total}
       </p>
@@ -445,7 +446,7 @@ function AgentsSection() {
       </p>
       {agents === null ? (
         <div className="glass map-panel" aria-label="Loading agents">
-          <div className="skeleton" style={{ height: "240px", borderRadius: "12px" }} aria-hidden="true" />
+          <LoadingMessages context="agents" />
         </div>
       ) : agents.length === 0 ? (
         <div className="glass agents-teaser">
