@@ -130,6 +130,8 @@ export interface CarrierEntry {
   quotable: boolean;
   notes?: string;
   available?: boolean;
+  /** Carrier homepage domain (no protocol), for honest "quote direct" links. */
+  website?: string;
 }
 
 export interface CarriersResponse {

@@ -150,6 +150,8 @@ export interface CarrierRegistryEntry {
   quotable: boolean;
   notes?: string;
   available?: boolean;
+  /** Carrier homepage domain (no protocol), for honest "quote direct" links. */
+  website?: string;
 }
 
 export interface AnalyticsEvent {

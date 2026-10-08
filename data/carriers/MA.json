@@ -1,1 +1,170 @@
-[{"channel":"direct","id":"geico","logo":"🦎","name":"GEICO","notes":"Direct writer; aggressive pricing posture in MA for clean-record drivers.","quotable":true,"statesServed":["MA"]},{"channel":"direct","id":"progressive","logo":"🛡️","name":"Progressive","notes":"Direct writer; Snapshot telematics program can lower rates after a monitoring period.","quotable":true,"statesServed":["MA"]},{"channel":"direct","id":"allstate","logo":"🏠","name":"Allstate","notes":"Anchor carrier: $1,347/6mo quoted Oct 2026 for 50/100/50 + UM 50/100 + $500 comp/collision (MA).","quotable":true,"statesServed":["MA"]},{"channel":"direct","id":"libertyMutual","logo":"🗽","name":"Liberty Mutual","notes":"Higher base rates; meaningful bundling discounts (home + auto up to ~12%).","quotable":true,"statesServed":["MA"]},{"channel":"direct","id":"plymouthRock","logo":"🪨","name":"Plymouth Rock","notes":"MA-focused carrier; competitive mid-range pricing, strong local presence.","quotable":true,"statesServed":["MA"]},{"channel":"direct","id":"amica","logo":"⭐","name":"Amica","notes":"Premium pricing, consistently top-ranked customer service and claims satisfaction.","quotable":true,"statesServed":["MA"]},{"channel":"agent","id":"stateFarm","logo":"🚜","name":"State Farm","notes":"Agent channel only in this simulation; no adapter wired yet.","quotable":false,"statesServed":["MA"]},{"channel":"direct","id":"usaa","logo":"🎖️","name":"USAA","notes":"Eligibility restricted to military members and families; not quotable in simulation.","quotable":false,"statesServed":["MA"]},{"channel":"agent","id":"commerce","logo":"🧭","name":"Commerce (MAPFRE)","notes":"Agent-only carrier; listed for the agent directory, not for instant quotes.","quotable":false,"statesServed":["MA"]},{"channel":"agent","id":"safety","logo":"🔒","name":"Safety Insurance","notes":"Agent-only carrier; listed for the agent directory, not for instant quotes.","quotable":false,"statesServed":["MA"]},{"channel":"agent","id":"arbella","logo":"🌳","name":"Arbella","notes":"Agent-only carrier; listed for the agent directory, not for instant quotes.","quotable":false,"statesServed":["MA"]},{"channel":"agent","id":"hanover","logo":"🏛️","name":"Hanover","notes":"Agent-only carrier; listed for the agent directory, not for instant quotes.","quotable":false,"statesServed":["MA"]},{"channel":"agent","id":"norfolkDedham","logo":"🏡","name":"Norfolk & Dedham","notes":"Agent-only carrier; listed for the agent directory, not for instant quotes.","quotable":false,"statesServed":["MA"]},{"available":false,"channel":"direct","id":"lemonade","logo":"🍋","name":"Lemonade Car","notes":"Coming soon — Lemonade Car is not available in Massachusetts yet (waiting list only).","quotable":false,"statesServed":["MA"]}]
+[
+ {
+  "channel": "direct",
+  "id": "geico",
+  "logo": "\ud83e\udd8e",
+  "name": "GEICO",
+  "notes": "Direct writer; aggressive pricing posture in MA for clean-record drivers.",
+  "quotable": true,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "geico.com"
+ },
+ {
+  "channel": "direct",
+  "id": "progressive",
+  "logo": "\ud83d\udee1\ufe0f",
+  "name": "Progressive",
+  "notes": "Direct writer; Snapshot telematics program can lower rates after a monitoring period.",
+  "quotable": true,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "progressive.com"
+ },
+ {
+  "channel": "direct",
+  "id": "allstate",
+  "logo": "\ud83c\udfe0",
+  "name": "Allstate",
+  "notes": "Anchor carrier: $1,347/6mo quoted Oct 2026 for 50/100/50 + UM 50/100 + $500 comp/collision (MA).",
+  "quotable": true,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "allstate.com"
+ },
+ {
+  "channel": "direct",
+  "id": "libertyMutual",
+  "logo": "\ud83d\uddfd",
+  "name": "Liberty Mutual",
+  "notes": "Higher base rates; meaningful bundling discounts (home + auto up to ~12%).",
+  "quotable": true,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "libertymutual.com"
+ },
+ {
+  "channel": "direct",
+  "id": "plymouthRock",
+  "logo": "\ud83e\udea8",
+  "name": "Plymouth Rock",
+  "notes": "MA-focused carrier; competitive mid-range pricing, strong local presence.",
+  "quotable": true,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "plymouthrock.com"
+ },
+ {
+  "channel": "direct",
+  "id": "amica",
+  "logo": "\u2b50",
+  "name": "Amica",
+  "notes": "Premium pricing, consistently top-ranked customer service and claims satisfaction.",
+  "quotable": true,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "amica.com"
+ },
+ {
+  "channel": "agent",
+  "id": "stateFarm",
+  "logo": "\ud83d\ude9c",
+  "name": "State Farm",
+  "notes": "Agent channel only in this simulation; no adapter wired yet.",
+  "quotable": false,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "statefarm.com"
+ },
+ {
+  "channel": "direct",
+  "id": "usaa",
+  "logo": "\ud83c\udf96\ufe0f",
+  "name": "USAA",
+  "notes": "Eligibility restricted to military members and families; not quotable in simulation.",
+  "quotable": false,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "usaa.com"
+ },
+ {
+  "channel": "agent",
+  "id": "commerce",
+  "logo": "\ud83e\udded",
+  "name": "Commerce (MAPFRE)",
+  "notes": "Agent-only carrier; listed for the agent directory, not for instant quotes.",
+  "quotable": false,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "commerceinsurance.com"
+ },
+ {
+  "channel": "agent",
+  "id": "safety",
+  "logo": "\ud83d\udd12",
+  "name": "Safety Insurance",
+  "notes": "Agent-only carrier; listed for the agent directory, not for instant quotes.",
+  "quotable": false,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "safetyinsurance.com"
+ },
+ {
+  "channel": "agent",
+  "id": "arbella",
+  "logo": "\ud83c\udf33",
+  "name": "Arbella",
+  "notes": "Agent-only carrier; listed for the agent directory, not for instant quotes.",
+  "quotable": false,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "arbella.com"
+ },
+ {
+  "channel": "agent",
+  "id": "hanover",
+  "logo": "\ud83c\udfdb\ufe0f",
+  "name": "Hanover",
+  "notes": "Agent-only carrier; listed for the agent directory, not for instant quotes.",
+  "quotable": false,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "hanover.com"
+ },
+ {
+  "channel": "agent",
+  "id": "norfolkDedham",
+  "logo": "\ud83c\udfe1",
+  "name": "Norfolk & Dedham",
+  "notes": "Agent-only carrier; listed for the agent directory, not for instant quotes.",
+  "quotable": false,
+  "statesServed": [
+   "MA"
+  ]
+ },
+ {
+  "available": false,
+  "channel": "direct",
+  "id": "lemonade",
+  "logo": "\ud83c\udf4b",
+  "name": "Lemonade Car",
+  "notes": "Coming soon \u2014 Lemonade Car is not available in Massachusetts yet (waiting list only).",
+  "quotable": false,
+  "statesServed": [
+   "MA"
+  ],
+  "website": "lemonade.com"
+ }
+]

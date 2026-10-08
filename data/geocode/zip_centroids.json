@@ -1,1 +1,198 @@
-{"01002":{"city":"Amherst","lat":42.3754,"lng":-72.5193},"01060":{"city":"Northampton","lat":42.3256,"lng":-72.6412},"01103":{"city":"Springfield","lat":42.1015,"lng":-72.5898},"01201":{"city":"Pittsfield","lat":42.4501,"lng":-73.2454},"01608":{"city":"Worcester","lat":42.2626,"lng":-71.8023},"01701":{"city":"Framingham","lat":42.2794,"lng":-71.4162},"01852":{"city":"Lowell","lat":42.6334,"lng":-71.3162},"01901":{"city":"Lynn","lat":42.4668,"lng":-70.9495},"02108":{"city":"Boston","lat":42.3588,"lng":-71.0603},"02118":{"city":"Boston","lat":42.3368,"lng":-71.0717},"02139":{"city":"Cambridge","lat":42.3647,"lng":-71.1042},"02143":{"city":"Somerville","lat":42.3876,"lng":-71.0995},"02151":{"city":"Revere","lat":42.4084,"lng":-71.0117},"02155":{"city":"Medford","lat":42.4184,"lng":-71.1062},"02169":{"city":"Quincy","lat":42.2529,"lng":-71.0023},"02215":{"city":"Boston","lat":42.3456,"lng":-71.1032},"02301":{"city":"Brockton","lat":42.0834,"lng":-71.0184},"02360":{"city":"Plymouth","lat":41.9584,"lng":-70.6678},"02446":{"city":"Brookline","lat":42.3318,"lng":-71.1212},"02451":{"city":"Waltham","lat":42.3765,"lng":-71.2356},"02458":{"city":"Newton","lat":42.337,"lng":-71.2092},"02601":{"city":"Hyannis","lat":41.6525,"lng":-70.2881},"02703":{"city":"Attleboro","lat":41.9445,"lng":-71.2856},"02720":{"city":"Fall River","lat":41.7015,"lng":-71.155},"02740":{"city":"New Bedford","lat":41.6362,"lng":-70.9342},"02780":{"city":"Taunton","lat":41.9001,"lng":-71.0898},"_note":"Approximate city-center centroids for demo geocoding. Production should use a real geocoder (e.g. US Census Geocoder, Mapbox, or Google Geocoding API)."}
+{
+ "01002": {
+  "city": "Amherst",
+  "lat": 42.3754,
+  "lng": -72.5193
+ },
+ "01060": {
+  "city": "Northampton",
+  "lat": 42.3256,
+  "lng": -72.6412
+ },
+ "01103": {
+  "city": "Springfield",
+  "lat": 42.1015,
+  "lng": -72.5898
+ },
+ "01201": {
+  "city": "Pittsfield",
+  "lat": 42.4501,
+  "lng": -73.2454
+ },
+ "01608": {
+  "city": "Worcester",
+  "lat": 42.2626,
+  "lng": -71.8023
+ },
+ "01701": {
+  "city": "Framingham",
+  "lat": 42.2794,
+  "lng": -71.4162
+ },
+ "01852": {
+  "city": "Lowell",
+  "lat": 42.6334,
+  "lng": -71.3162
+ },
+ "01901": {
+  "city": "Lynn",
+  "lat": 42.4668,
+  "lng": -70.9495
+ },
+ "02108": {
+  "city": "Boston",
+  "lat": 42.3588,
+  "lng": -71.0603
+ },
+ "02118": {
+  "city": "Boston",
+  "lat": 42.3368,
+  "lng": -71.0717
+ },
+ "02139": {
+  "city": "Cambridge",
+  "lat": 42.3647,
+  "lng": -71.1042
+ },
+ "02143": {
+  "city": "Somerville",
+  "lat": 42.3876,
+  "lng": -71.0995
+ },
+ "02151": {
+  "city": "Revere",
+  "lat": 42.4084,
+  "lng": -71.0117
+ },
+ "02155": {
+  "city": "Medford",
+  "lat": 42.4184,
+  "lng": -71.1062
+ },
+ "02169": {
+  "city": "Quincy",
+  "lat": 42.2529,
+  "lng": -71.0023
+ },
+ "02215": {
+  "city": "Boston",
+  "lat": 42.3456,
+  "lng": -71.1032
+ },
+ "02301": {
+  "city": "Brockton",
+  "lat": 42.0834,
+  "lng": -71.0184
+ },
+ "02360": {
+  "city": "Plymouth",
+  "lat": 41.9584,
+  "lng": -70.6678
+ },
+ "02446": {
+  "city": "Brookline",
+  "lat": 42.3318,
+  "lng": -71.1212
+ },
+ "02451": {
+  "city": "Waltham",
+  "lat": 42.3765,
+  "lng": -71.2356
+ },
+ "02458": {
+  "city": "Newton",
+  "lat": 42.337,
+  "lng": -71.2092
+ },
+ "02601": {
+  "city": "Hyannis",
+  "lat": 41.6525,
+  "lng": -70.2881
+ },
+ "02703": {
+  "city": "Attleboro",
+  "lat": 41.9445,
+  "lng": -71.2856
+ },
+ "02720": {
+  "city": "Fall River",
+  "lat": 41.7015,
+  "lng": -71.155
+ },
+ "02740": {
+  "city": "New Bedford",
+  "lat": 41.6362,
+  "lng": -70.9342
+ },
+ "02780": {
+  "city": "Taunton",
+  "lat": 41.9001,
+  "lng": -71.0898
+ },
+ "_note": "Approximate city-center centroids for demo geocoding. Production should use a real geocoder (e.g. US Census Geocoder, Mapbox, or Google Geocoding API).",
+ "76201": {
+  "lat": 33.2157,
+  "lng": -97.1329,
+  "city": "Denton"
+ },
+ "76205": {
+  "lat": 33.225,
+  "lng": -97.165,
+  "city": "Denton"
+ },
+ "76210": {
+  "lat": 33.2,
+  "lng": -97.1,
+  "city": "Denton"
+ },
+ "75201": {
+  "lat": 32.7877,
+  "lng": -96.7989,
+  "city": "Dallas"
+ },
+ "75204": {
+  "lat": 32.8,
+  "lng": -96.77,
+  "city": "Dallas"
+ },
+ "75206": {
+  "lat": 32.81,
+  "lng": -96.76,
+  "city": "Dallas"
+ },
+ "76102": {
+  "lat": 32.7555,
+  "lng": -97.3308,
+  "city": "Fort Worth"
+ },
+ "76107": {
+  "lat": 32.74,
+  "lng": -97.37,
+  "city": "Fort Worth"
+ },
+ "77002": {
+  "lat": 29.7558,
+  "lng": -95.362,
+  "city": "Houston"
+ },
+ "77006": {
+  "lat": 29.74,
+  "lng": -95.39,
+  "city": "Houston"
+ },
+ "78701": {
+  "lat": 30.2711,
+  "lng": -97.7437,
+  "city": "Austin"
+ },
+ "78704": {
+  "lat": 30.24,
+  "lng": -97.76,
+  "city": "Austin"
+ },
+ "78205": {
+  "lat": 29.4246,
+  "lng": -98.4946,
+  "city": "San Antonio"
+ }
+}

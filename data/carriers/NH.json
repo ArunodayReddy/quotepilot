@@ -1,1 +1,73 @@
-[{"channel":"direct","id":"geico","logo":"🦎","name":"GEICO","notes":"Direct writer; starter registry entry for NH.","quotable":true,"statesServed":["NH"]},{"channel":"direct","id":"progressive","logo":"🛡️","name":"Progressive","notes":"Direct writer; starter registry entry for NH.","quotable":true,"statesServed":["NH"]},{"channel":"agent","id":"stateFarm","logo":"🚜","name":"State Farm","notes":"Agent channel; no simulation adapter yet.","quotable":false,"statesServed":["NH"]},{"channel":"direct","id":"usaa","logo":"🎖️","name":"USAA","notes":"Military eligibility only; not quotable in simulation.","quotable":false,"statesServed":["NH"]},{"channel":"agent","id":"concord","logo":"🏔️","name":"Concord Group","notes":"Regional agent-only carrier; agent directory only.","quotable":false,"statesServed":["NH"]},{"channel":"direct","id":"libertyMutual","logo":"🗽","name":"Liberty Mutual","notes":"Registry entry only; adapter currently MA-tuned.","quotable":false,"statesServed":["NH"]}]
+[
+ {
+  "channel": "direct",
+  "id": "geico",
+  "logo": "\ud83e\udd8e",
+  "name": "GEICO",
+  "notes": "Direct writer; starter registry entry for NH.",
+  "quotable": true,
+  "statesServed": [
+   "NH"
+  ],
+  "website": "geico.com"
+ },
+ {
+  "channel": "direct",
+  "id": "progressive",
+  "logo": "\ud83d\udee1\ufe0f",
+  "name": "Progressive",
+  "notes": "Direct writer; starter registry entry for NH.",
+  "quotable": true,
+  "statesServed": [
+   "NH"
+  ],
+  "website": "progressive.com"
+ },
+ {
+  "channel": "agent",
+  "id": "stateFarm",
+  "logo": "\ud83d\ude9c",
+  "name": "State Farm",
+  "notes": "Agent channel; no simulation adapter yet.",
+  "quotable": false,
+  "statesServed": [
+   "NH"
+  ],
+  "website": "statefarm.com"
+ },
+ {
+  "channel": "direct",
+  "id": "usaa",
+  "logo": "\ud83c\udf96\ufe0f",
+  "name": "USAA",
+  "notes": "Military eligibility only; not quotable in simulation.",
+  "quotable": false,
+  "statesServed": [
+   "NH"
+  ],
+  "website": "usaa.com"
+ },
+ {
+  "channel": "agent",
+  "id": "concord",
+  "logo": "\ud83c\udfd4\ufe0f",
+  "name": "Concord Group",
+  "notes": "Regional agent-only carrier; agent directory only.",
+  "quotable": false,
+  "statesServed": [
+   "NH"
+  ]
+ },
+ {
+  "channel": "direct",
+  "id": "libertyMutual",
+  "logo": "\ud83d\uddfd",
+  "name": "Liberty Mutual",
+  "notes": "Registry entry only; adapter currently MA-tuned.",
+  "quotable": false,
+  "statesServed": [
+   "NH"
+  ],
+  "website": "libertymutual.com"
+ }
+]

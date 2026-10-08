@@ -292,3 +292,65 @@ describe("email routes", () => {
     expect(res.body.error.code).toBe("VALIDATION_ERROR");
   });
 });
+
+describe("texas support (v0.5.0)", () => {
+  it("GET /api/carriers?state=TX returns 11 carriers with honest channels", async () => {
+    const res = await request(app).get("/api/carriers?state=TX");
+    expect(res.status).toBe(200);
+    expect(res.body.state).toBe("TX");
+    expect(res.body.carriers).toHaveLength(11);
+    const byId = Object.fromEntries(
+      (res.body.carriers as Array<{ id: string; quotable: boolean; channel: string }>).map((c) => [c.id, c]),
+    );
+    for (const id of ["geico", "progressive", "allstate", "libertyMutual"]) {
+      expect(byId[id].quotable).toBe(true);
+      expect(byId[id].channel).toBe("direct");
+    }
+    for (const id of ["stateFarm", "farmers", "texasFarmBureau", "germania", "travelers", "nationwide"]) {
+      expect(byId[id].quotable).toBe(false);
+      expect(byId[id].channel).toBe("agent");
+    }
+    expect(byId["usaa"].quotable).toBe(false);
+    // Every entry carries a website for honest direct/agent links.
+    for (const c of res.body.carriers as Array<{ website?: string }>) {
+      expect(typeof c.website).toBe("string");
+    }
+  });
+
+  it("POST /api/quote with TX/76201 → 202 with 4 carriers, completes with 4 simulated results", async () => {
+    const txBody = JSON.parse(JSON.stringify(quoteBody)) as Record<string, unknown>;
+    (txBody.contact as Record<string, unknown>).state = "TX";
+    (txBody.contact as Record<string, unknown>).zip = "76201";
+    const res = await request(app).post("/api/quote").send(txBody);
+    expect(res.status).toBe(202);
+    expect(res.body.carrierCount).toBe(4);
+    const job = (await waitForComplete(res.body.jobId as string)) as {
+      status: string;
+      results: Array<{ success: boolean; premium6Mo: number; simulated: boolean; carrierId: string }>;
+    };
+    expect(job.status).toBe("complete");
+    expect(job.results).toHaveLength(4);
+    const ids = job.results.map((r) => r.carrierId).sort();
+    expect(ids).toEqual(["allstate", "geico", "libertyMutual", "progressive"]);
+    for (const r of job.results) {
+      expect(r.success).toBe(true);
+      expect(r.simulated).toBe(true);
+    }
+  });
+
+  it("GET /api/agents?state=TX&zip=76201 → 3 Denton sample agents, geocoded, nearest first", async () => {
+    const res = await request(app).get("/api/agents?state=TX&zip=76201");
+    expect(res.status).toBe(200);
+    expect(res.body.geocoded).toBe(true);
+    expect(res.body.agents).toHaveLength(3);
+    const agents = res.body.agents as { city: string; distance_mi: number; sample: boolean; source: string }[];
+    expect(agents[0].city).toBe("Denton");
+    expect(agents[0].distance_mi).toBeLessThan(1);
+    const dists = agents.map((a) => a.distance_mi);
+    expect([...dists].sort((x, y) => x - y)).toEqual(dists);
+    for (const a of agents) {
+      expect(a.sample).toBe(true);
+      expect(a.source).toBe("sample");
+    }
+  });
+});
