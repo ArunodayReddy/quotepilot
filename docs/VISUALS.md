@@ -128,3 +128,10 @@ Store under `docs/screenshots/`; reference from this section when captured.
   disabled under `prefers-reduced-motion`. Focus: visible `--focus-ring` on all interactive
   elements; wizard moves focus to the step heading per step; skip link in header.
   Contrast targets ≥ 4.5:1 for body text in both themes.
+
+## 2026-10-08 — v0.2.0 static snapshot
+- Added `docs/snapshots/v0.2.0-preview.html`: single-file static preview of the four key screens
+  (Home hero, Wizard step 3, ranked Quotes with live smoke-test data, Analytics dashboard),
+  rendered from the real design tokens (`apps/web/src/styles/tokens.css`), real hero/wizard copy,
+  and real quote figures (GEICO $1,274 → Amica $1,576). Built because headless screenshots are
+  blocked in this environment; labeled clearly as a static preview, dashboard numbers illustrative.

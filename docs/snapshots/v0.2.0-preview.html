@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuotePilot — Visual Snapshot v0.2.0</title>
+<style>
+/* QuotePilot design tokens (from apps/web/src/styles/tokens.css, dark theme) */
+:root{
+  --font-sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --accent:#60a5fa; --accent-strong:#3b82f6; --accent-soft:rgba(96,165,250,.14);
+  --accent-2:#22d3ee; --success:#059669; --warning:#b45309;
+  --radius-md:16px; --radius-lg:24px; --radius-pill:999px;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --bg:#0a0f1e; --bg-elevated:#101828;
+  --surface:rgba(16,24,40,.68); --surface-solid:#101828; --surface-border:rgba(148,163,184,.16);
+  --text:#f1f5f9; --text-secondary:#cbd5e1; --text-tertiary:#94a3b8; --text-on-accent:#fff;
+  --shadow-2:0 2px 6px rgba(0,0,0,.5),0 20px 48px rgba(0,0,0,.5);
+  --glass-blur:blur(20px) saturate(1.4);
+  --hero-orb-1:rgba(59,130,246,.32); --hero-orb-2:rgba(34,211,238,.26); --hero-orb-3:rgba(168,85,247,.26);
+  --input-bg:#0f172a; --input-border:rgba(148,163,184,.28);
+  --badge-sim-bg:rgba(251,191,36,.12); --badge-sim-text:#fbbf24; --badge-sim-border:rgba(251,191,36,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;padding:32px 16px 64px}
+.wrap{max-width:1180px;margin:0 auto}
+.kicker{color:var(--accent-2);font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px}
+h1.page{font-size:clamp(28px,4vw,44px);letter-spacing:-.02em;margin-bottom:8px}
+.sub{color:var(--text-secondary);max-width:640px;line-height:1.6;margin-bottom:8px}
+.flow{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 36px}
+.flow span{background:var(--accent-soft);border:1px solid var(--surface-border);padding:8px 14px;border-radius:var(--radius-pill);font-size:13px;color:var(--text-secondary)}
+.flow b{color:var(--accent)}
+.screen{margin:0 0 48px}
+.screen-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+.screen-num{font-size:13px;font-weight:800;color:var(--bg);background:var(--accent);width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.screen-head h2{font-size:22px;letter-spacing:-.01em}
+.screen-head p{color:var(--text-tertiary);font-size:14px;margin-top:4px}
+.frame{background:var(--bg-elevated);border:1px solid var(--surface-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);overflow:hidden}
+.browser-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--surface-border);background:rgba(255,255,255,.02)}
+.dot{width:11px;height:11px;border-radius:50%}
+.url{flex:1;text-align:center;font-size:12px;color:var(--text-tertiary);background:var(--input-bg);border:1px solid var(--surface-border);border-radius:8px;padding:5px 12px;margin:0 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ---------- shared app components ---------- */
+.appnav{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--surface-border)}
+.brand{font-weight:800;font-size:18px;letter-spacing:-.01em}
+.brand em{font-style:normal;color:var(--accent)}
+.navlinks{display:flex;gap:22px;font-size:14px;color:var(--text-secondary)}
+.hero{position:relative;padding:72px 32px 56px;text-align:center;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.9;pointer-events:none}
+.hero-title{font-size:clamp(34px,5vw,58px);letter-spacing:-.03em;line-height:1.05;margin-bottom:18px}
+.gradient-text{background:linear-gradient(100deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{color:var(--text-secondary);font-size:17px;line-height:1.65;max-width:600px;margin:0 auto 28px}
+.btn{display:inline-block;padding:13px 26px;border-radius:var(--radius-pill);font-weight:700;font-size:15px;text-decoration:none;transition:transform .2s var(--ease-out)}
+.btn-primary{background:linear-gradient(100deg,var(--accent-strong),var(--accent));color:#fff;box-shadow:0 8px 24px rgba(59,130,246,.35)}
+.btn-secondary{border:1px solid var(--surface-border);color:var(--text);background:var(--surface);backdrop-filter:var(--glass-blur);margin-left:10px}
+.hero-note{margin-top:18px;color:var(--text-tertiary);font-size:13px}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:8px 32px 48px}
+.howcard{background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--surface-border);border-radius:var(--radius-md);padding:22px}
+.howcard .ico{font-size:26px;margin-bottom:10px}
+.howcard h3{font-size:16px;margin-bottom:8px}
+.howcard p{font-size:13.5px;color:var(--text-secondary);line-height:1.6}
+/* wizard */
+.wiz{max-width:640px;margin:0 auto;padding:36px 28px 48px}
+.progress{height:8px;background:var(--input-bg);border-radius:99px;overflow:hidden;margin-bottom:10px}
+.progress i{display:block;height:100%;width:60%;background:linear-gradient(90deg,var(--accent-strong),var(--accent-2));border-radius:99px}
+.step-label{font-size:13px;color:var(--text-tertiary);margin-bottom:20px}
+.step-label b{color:var(--text)}
+.wiz h2{font-size:26px;letter-spacing:-.01em;margin-bottom:20px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:7px}
+.field input,.field select{width:100%;background:var(--input-bg);border:1px solid var(--input-border);border-radius:12px;padding:13px 15px;color:var(--text);font-size:15px;font-family:inherit}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sample-btn{display:block;width:100%;margin:6px 0 22px;padding:12px;border-radius:12px;border:1px dashed var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+.wiz-nav{display:flex;justify-content:space-between;margin-top:8px}
+/* quotes */
+.qwrap{padding:32px 28px 44px;max-width:860px;margin:0 auto}
+.qhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.qhead h2{font-size:24px;letter-spacing:-.01em}
+.qsub{color:var(--text-tertiary);font-size:13.5px;margin-bottom:20px}
+.qcard{background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--surface-border);border-radius:var(--radius-md);padding:20px 22px;margin-bottom:14px;display:flex;align-items:center;gap:18px;transition:transform .25s var(--ease-out)}
+.qcard:hover{transform:translateY(-2px)}
+.qcard.best{border-color:rgba(96,165,250,.55);box-shadow:0 0 0 1px rgba(96,165,250,.35),var(--shadow-2)}
+.rank{font-size:13px;font-weight:800;color:var(--text-tertiary);width:26px;flex:none}
+.qlogo{width:46px;height:46px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff}
+.qinfo{flex:1}
+.qinfo h3{font-size:16px;margin-bottom:4px}
+.qinfo .cov{font-size:12.5px;color:var(--text-tertiary)}
+.price{text-align:right;flex:none}
+.price .amt{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.price .per{font-size:12px;color:var(--text-tertiary)}
+.save{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;color:#34d399;background:rgba(52,211,153,.12);padding:3px 10px;border-radius:99px}
+.simbadge{display:inline-block;font-size:11px;font-weight:700;color:var(--badge-sim-text);background:var(--badge-sim-bg);border:1px solid var(--badge-sim-border);padding:3px 10px;border-radius:99px;margin-left:8px;vertical-align:2px}
+.comparebar{display:flex;gap:10px;margin-top:20px;justify-content:center}
+/* dashboard */
+.dwrap{padding:32px 28px 44px}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dcard{background:var(--surface);border:1px solid var(--surface-border);border-radius:var(--radius-md);padding:20px}
+.dcard h3{font-size:14px;color:var(--text-secondary);margin-bottom:14px;font-weight:700}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:12.5px}
+.bar-row .lbl{width:120px;color:var(--text-tertiary);flex:none}
+.bar{height:10px;border-radius:99px;background:var(--input-bg);flex:1;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-strong),var(--accent-2))}
+.bar-row .val{width:44px;text-align:right;color:var(--text-secondary);flex:none}
+.funnel{display:flex;align-items:flex-end;gap:10px;height:150px;padding-top:6px}
+.fstep{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px}
+.fbar{width:100%;border-radius:8px 8px 4px 4px;background:linear-gradient(180deg,var(--accent),var(--accent-strong));min-height:14px}
+.fstep span{font-size:11px;color:var(--text-tertiary);text-align:center}
+.fstep b{font-size:12px;color:var(--text)}
+.footnote{margin-top:36px;padding:16px 20px;border:1px dashed var(--surface-border);border-radius:var(--radius-md);color:var(--text-tertiary);font-size:13px;line-height:1.7}
+.footnote b{color:var(--text-secondary)}
+@media(max-width:760px){.how{grid-template-columns:1fr}.dgrid{grid-template-columns:1fr}.navlinks{display:none}.field-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">QuotePilot · v0.2.0 visual snapshot</div>
+  <h1 class="page">Roughly how it looks &amp; works</h1>
+  <p class="sub">Static preview rendered from the app's real design tokens, real copy, and real quote data from a live smoke test. The running app is interactive — this is a snapshot so you can see it on your phone.</p>
+
+  <div class="flow">
+    <span><b>1</b> · Enter details once</span><span>→</span>
+    <span><b>2</b> · Carriers race in background</span><span>→</span>
+    <span><b>3</b> · Ranked quotes + email</span><span>→</span>
+    <span><b>4</b> · Compare &amp; pick the best deal</span>
+  </div>
+
+  <!-- SCREEN 1: HOME -->
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">1</span><div><h2>Home — the front door</h2><p>Futuristic glass hero, one clear action. No account, no friction.</p></div></div>
+    <div class="frame">
+      <div class="browser-bar"><span class="dot" style="background:#f87171"></span><span class="dot" style="background:#fbbf24"></span><span class="dot" style="background:#34d399"></span><span class="url">quotepilot.app</span></div>
+      <div class="appnav"><div class="brand">Quote<em>Pilot</em></div><div class="navlinks"><span>How it works</span><span>Agents</span><span>About</span></div></div>
+      <div class="hero">
+        <div class="orb" style="width:340px;height:340px;background:var(--hero-orb-1);top:-60px;left:8%"></div>
+        <div class="orb" style="width:280px;height:280px;background:var(--hero-orb-2);top:40px;right:10%"></div>
+        <div class="orb" style="width:200px;height:200px;background:var(--hero-orb-3);bottom:-40px;left:44%"></div>
+        <h1 class="hero-title">One form. Every carrier. <span class="gradient-text">The best deal.</span></h1>
+        <p class="hero-sub">Tell us about yourself once. QuotePilot quietly gathers car insurance quotes from every carrier in your state and ranks them for you — on the site and by email.</p>
+        <div><a class="btn btn-primary" href="#">Get my quotes →</a><a class="btn btn-secondary" href="#">Try with sample data</a></div>
+        <p class="hero-note">Takes about 2 minutes · No account needed · Free forever</p>
+      </div>
+      <div class="how">
+        <div class="howcard"><div class="ico">📝</div><h3>Answer once</h3><p>Five quick steps — location, drivers, vehicle, coverage, contact. Smart defaults, minimal typing, progress saved.</p></div>
+        <div class="howcard"><div class="ico">⚡</div><h3>We fan out</h3><p>Every carrier in your state is queried in parallel in the background. One slow carrier never blocks your page.</p></div>
+        <div class="howcard"><div class="ico">🏆</div><h3>You pick the winner</h3><p>Quotes arrive ranked cheapest-first, side-by-side, and in your inbox. Agent-only carriers route to a real local agent.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: WIZARD -->
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">2</span><div><h2>Quote wizard — effortless entry</h2><p>Five steps, inline validation, resumable. "Try with sample data" fills everything in one tap for demos.</p></div></div>
+    <div class="frame">
+      <div class="browser-bar"><span class="dot" style="background:#f87171"></span><span class="dot" style="background:#fbbf24"></span><span class="dot" style="background:#34d399"></span><span class="url">quotepilot.app/quote</span></div>
+      <div class="wiz">
+        <div class="progress"><i></i></div>
+        <div class="step-label"><b>Step 3 of 5:</b> Vehicle</div>
+        <h2>Tell us about your vehicle</h2>
+        <button class="sample-btn">✨ Fill with sample data</button>
+        <div class="field-row">
+          <div class="field"><label>Year</label><input value="2024" readonly></div>
+          <div class="field"><label>Make</label><input value="Tesla" readonly></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Model</label><input value="Model Y" readonly></div>
+          <div class="field"><label>How you use it</label><select><option>Commute</option><option>Pleasure</option></select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Miles per year</label><input value="12,000" readonly></div>
+          <div class="field"><label>Garaged ZIP</label><input value="02139" readonly></div>
+        </div>
+        <div class="wiz-nav"><a class="btn btn-secondary" href="#">← Back</a><a class="btn btn-primary" href="#">Continue →</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: QUOTES -->
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">3</span><div><h2>Results — ranked quotes</h2><p>Real output from a live smoke test on the sample profile. Cheapest first, coverage breakdown on expand, compare up to 3.</p></div></div>
+    <div class="frame">
+      <div class="browser-bar"><span class="dot" style="background:#f87171"></span><span class="dot" style="background:#fbbf24"></span><span class="dot" style="background:#34d399"></span><span class="url">quotepilot.app/quotes/870f0580…</span></div>
+      <div class="qwrap">
+        <div class="qhead"><h2>Your quotes <span class="simbadge">Simulated — demo pricing</span></h2><span style="font-size:13px;color:var(--text-tertiary)">6 carriers · Massachusetts</span></div>
+        <p class="qsub">2024 Tesla Model Y · 2 drivers · 50/100/50 · $500 deductibles — per 6 months</p>
+
+        <div class="qcard best"><span class="rank">1</span><div class="qlogo" style="background:#16a34a">G</div><div class="qinfo"><h3>GEICO</h3><div class="cov">Coverage match 98% · ~1.2s</div></div><div class="price"><div class="amt">$1,274</div><div class="per">≈ $212/mo</div><span class="save">★ Best deal</span></div></div>
+        <div class="qcard"><span class="rank">2</span><div class="qlogo" style="background:#0ea5e9">P</div><div class="qinfo"><h3>Plymouth Rock</h3><div class="cov">Coverage match 97% · ~1.8s</div></div><div class="price"><div class="amt">$1,312</div><div class="per">≈ $219/mo</div></div></div>
+        <div class="qcard"><span class="rank">3</span><div class="qlogo" style="background:#2563eb">A</div><div class="qinfo"><h3>Allstate</h3><div class="cov">Coverage match 99% · ~2.1s · within 2% of researched quote</div></div><div class="price"><div class="amt">$1,322</div><div class="per">≈ $220/mo</div></div></div>
+        <div class="qcard"><span class="rank">4</span><div class="qlogo" style="background:#7c3aed">P</div><div class="qinfo"><h3>Progressive</h3><div class="cov">Coverage match 96% · ~1.5s</div></div><div class="price"><div class="amt">$1,351</div><div class="per">≈ $225/mo</div></div></div>
+        <div class="qcard"><span class="rank">5</span><div class="qlogo" style="background:#dc2626">L</div><div class="qinfo"><h3>Liberty Mutual</h3><div class="cov">Coverage match 95% · ~2.6s</div></div><div class="price"><div class="amt">$1,489</div><div class="per">≈ $248/mo</div></div></div>
+        <div class="qcard"><span class="rank">6</span><div class="qlogo" style="background:#b45309">A</div><div class="qinfo"><h3>Amica</h3><div class="cov">Coverage match 97% · ~2.3s</div></div><div class="price"><div class="amt">$1,576</div><div class="per">≈ $263/mo</div></div></div>
+
+        <div class="comparebar"><a class="btn btn-primary" href="#">Compare selected (3)</a><a class="btn btn-secondary" href="#">✉️ Email me these quotes</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: DASHBOARD -->
+  <div class="screen">
+    <div class="screen-head"><span class="screen-num">4</span><div><h2>Analytics dashboard — the moat</h2><p>Every click feeds this: funnels, clicks by element, carrier latency &amp; win-rate. (Illustrative values.)</p></div></div>
+    <div class="frame">
+      <div class="browser-bar"><span class="dot" style="background:#f87171"></span><span class="dot" style="background:#fbbf24"></span><span class="dot" style="background:#34d399"></span><span class="url">quotepilot.app:dashboard</span></div>
+      <div class="dwrap">
+        <div class="dgrid">
+          <div class="dcard"><h3>Wizard funnel — completion by step</h3>
+            <div class="funnel">
+              <div class="fstep"><b>100%</b><div class="fbar" style="height:140px"></div><span>Location</span></div>
+              <div class="fstep"><b>92%</b><div class="fbar" style="height:128px"></div><span>Drivers</span></div>
+              <div class="fstep"><b>88%</b><div class="fbar" style="height:122px"></div><span>Vehicle</span></div>
+              <div class="fstep"><b>81%</b><div class="fbar" style="height:112px"></div><span>Coverage</span></div>
+              <div class="fstep"><b>74%</b><div class="fbar" style="height:102px"></div><span>Contact</span></div>
+            </div>
+          </div>
+          <div class="dcard"><h3>Clicks by element (today)</h3>
+            <div class="bar-row"><span class="lbl">hero_get_my_quotes</span><div class="bar"><i style="width:100%"></i></div><span class="val">248</span></div>
+            <div class="bar-row"><span class="lbl">hero_try_sample</span><div class="bar"><i style="width:64%"></i></div><span class="val">159</span></div>
+            <div class="bar-row"><span class="lbl">wizard_continue</span><div class="bar"><i style="width:82%"></i></div><span class="val">203</span></div>
+            <div class="bar-row"><span class="lbl">quote_card_expand</span><div class="bar"><i style="width:45%"></i></div><span class="val">112</span></div>
+            <div class="bar-row"><span class="lbl">compare_open</span><div class="bar"><i style="width:31%"></i></div><span class="val">77</span></div>
+            <div class="bar-row"><span class="lbl">email_opt_in</span><div class="bar"><i style="width:52%"></i></div><span class="val">129</span></div>
+          </div>
+          <div class="dcard"><h3>Carrier win rate (cheapest quote)</h3>
+            <div class="bar-row"><span class="lbl">GEICO</span><div class="bar"><i style="width:38%"></i></div><span class="val">38%</span></div>
+            <div class="bar-row"><span class="lbl">Plymouth Rock</span><div class="bar"><i style="width:24%"></i></div><span class="val">24%</span></div>
+            <div class="bar-row"><span class="lbl">Allstate</span><div class="bar"><i style="width:17%"></i></div><span class="val">17%</span></div>
+            <div class="bar-row"><span class="lbl">Progressive</span><div class="bar"><i style="width:12%"></i></div><span class="val">12%</span></div>
+            <div class="bar-row"><span class="lbl">Others</span><div class="bar"><i style="width:9%"></i></div><span class="val">9%</span></div>
+          </div>
+          <div class="dcard"><h3>Carrier latency (median)</h3>
+            <div class="bar-row"><span class="lbl">GEICO</span><div class="bar"><i style="width:40%"></i></div><span class="val">1.2s</span></div>
+            <div class="bar-row"><span class="lbl">Progressive</span><div class="bar"><i style="width:50%"></i></div><span class="val">1.5s</span></div>
+            <div class="bar-row"><span class="lbl">Plymouth Rock</span><div class="bar"><i style="width:60%"></i></div><span class="val">1.8s</span></div>
+            <div class="bar-row"><span class="lbl">Allstate</span><div class="bar"><i style="width:70%"></i></div><span class="val">2.1s</span></div>
+            <div class="bar-row"><span class="lbl">Liberty Mutual</span><div class="bar"><i style="width:87%"></i></div><span class="val">2.6s</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <b>What's real vs. illustrative here:</b> the design tokens, hero copy, wizard steps, and the six ranked
+    quotes are the real thing — pulled from the codebase and a live API smoke test. The dashboard numbers are
+    illustrative (the real dashboard fills in as users click). Agent directory, email delivery, SEO tags,
+    accessibility pass, and security hardening are all in the running build. Full tour: <b>docs/DEMO.md</b> in the repo.
+  </div>
+
+</div>
+</body>
+</html>
