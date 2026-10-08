@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Seo } from "../components/Seo";
 import { SimBadge } from "../components/SimBadge";
+import { AgentMap } from "../components/AgentMap";
 import { TextField } from "../components/fields";
 import { api, ApiError } from "../lib/api";
 import { useAnalytics } from "../lib/analytics";
-import type { QuoteJob, QuoteResult } from "../lib/types";
+import { readQuoteLocation } from "../lib/wizard";
+import { SourceBadge } from "./Agents";
+import type { AgentEntry, CarrierEntry, QuoteJob, QuoteResult } from "../lib/types";
 
 const POLL_MS = 2000;
 
@@ -128,7 +131,7 @@ function CompareTable({ results }: { results: QuoteResult[] }) {
   );
 }
 
-function EmailOptIn({ jobId }: { jobId: string }) {
+function EmailOptIn({ jobId, mode, carrierCount }: { jobId: string; mode: "waiting" | "results"; carrierCount: number }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -147,6 +150,7 @@ function EmailOptIn({ jobId }: { jobId: string }) {
       await api.notifyEmail(jobId, email.trim());
       setDone(true);
       track("email_optin");
+      track("inline_email_capture", { metadata: { placement: mode } });
     } catch {
       setError("We couldn't save that email. Please try again.");
     } finally {
@@ -157,19 +161,23 @@ function EmailOptIn({ jobId }: { jobId: string }) {
   if (done) {
     return (
       <div className="glass email-box" role="status">
-        <h2>You're on the list ✓</h2>
-        <p>We'll email your quotes to you as soon as they're ready.</p>
+        <h2>You&apos;re on the list ✓</h2>
+        <p>We&apos;ll email your quotes to you as soon as they&apos;re ready.</p>
       </div>
     );
   }
 
   return (
     <div className="glass email-box">
-      <h2>Email me these quotes</h2>
-      <p>Get a copy in your inbox so you can compare later — no spam, ever.</p>
+      <h2>{mode === "waiting" ? "Don't want to wait?" : "Email me these quotes"}</h2>
+      <p>
+        {mode === "waiting"
+          ? `Leave your email and we'll send all ${carrierCount} ranked quotes the moment they land — no spam, ever.`
+          : "Get a copy in your inbox so you can compare later — no spam, ever."}
+      </p>
       <form className="email-form" onSubmit={submit} noValidate>
         <TextField
-          id="quotes-email"
+          id={mode === "waiting" ? "quotes-email-waiting" : "quotes-email"}
           label="Email address"
           type="email"
           autoComplete="email"
@@ -179,10 +187,308 @@ function EmailOptIn({ jobId }: { jobId: string }) {
           error={error ?? undefined}
         />
         <button type="submit" className="btn btn-primary" disabled={sending}>
-          {sending ? "Sending…" : "Send quotes"}
+          {sending ? "Sending…" : mode === "waiting" ? "Notify me" : "Send quotes"}
         </button>
       </form>
     </div>
+  );
+}
+
+
+/**
+ * Upgraded live progress: per-carrier status rows for finished carriers plus
+ * skeleton rows for carriers still being contacted. Fires quotes_progress_view once.
+ */
+function ProgressSection({ job }: { job: QuoteJob }) {
+  const track = useAnalytics("quotes");
+  const viewedRef = useRef(false);
+  useEffect(() => {
+    if (!viewedRef.current) {
+      viewedRef.current = true;
+      track("quotes_progress_view", { metadata: { total: job.progress.total } });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const done = useMemo(
+    () => [...job.results].sort((a, b) => (a.premium6Mo ?? Infinity) - (b.premium6Mo ?? Infinity)),
+    [job.results],
+  );
+  const pending = Math.max(0, job.progress.total - job.progress.completed);
+  return (
+    <div className="glass job-progress" role="status" aria-live="polite">
+      <div className="spinner" aria-hidden="true" />
+      <p>
+        Gathering quotes… {job.progress.completed} of {job.progress.total}
+      </p>
+      <div className="progress-bar" role="progressbar"
+        aria-valuenow={job.progress.completed}
+        aria-valuemin={0}
+        aria-valuemax={job.progress.total}
+        aria-label="Quote gathering progress">
+        <div
+          className="progress-fill"
+          style={{ width: `${job.progress.total ? (job.progress.completed / job.progress.total) * 100 : 0}%` }}
+        />
+      </div>
+      <ul className="carrier-status-list" aria-label="Carrier status">
+        {done.map((r) => (
+          <li key={r.carrierId} className="carrier-status done">
+            <span aria-hidden="true" className="status-check">✓</span>
+            <span className="status-name">{r.carrierName}</span>
+            <span className="status-value">
+              {typeof r.premium6Mo === "number" ? fmtPremium(r.premium6Mo) : "couldn't quote"}
+            </span>
+          </li>
+        ))}
+        {Array.from({ length: pending }).map((_, i) => (
+          <li key={`pending-${i}`} className="carrier-status pending" aria-hidden="true">
+            <span className="skeleton skeleton-dot" />
+            <span className="skeleton skeleton-text" style={{ width: `${38 - i * 4}%` }} />
+          </li>
+        ))}
+      </ul>
+      <p className="demo-note">Hang tight — carriers respond at their own pace. All prices are simulated.</p>
+    </div>
+  );
+}
+
+/** Truthful savings headline computed from the actual ranked results. */
+function SavingsHeadline({ results }: { results: QuoteResult[] }) {
+  const track = useAnalytics("quotes");
+  const { spread, count } = useMemo(() => {
+    const premiums = results
+      .filter((r) => typeof r.premium6Mo === "number")
+      .map((r) => r.premium6Mo as number);
+    if (premiums.length < 2) return { spread: 0, count: premiums.length };
+    return { spread: Math.max(...premiums) - Math.min(...premiums), count: premiums.length };
+  }, [results]);
+  const viewedRef = useRef(false);
+  useEffect(() => {
+    if (count >= 2 && !viewedRef.current) {
+      viewedRef.current = true;
+      track("savings_headline_view", { metadata: { spread } });
+    }
+  }, [count, spread, track]);
+  if (count < 2) return null;
+  return (
+    <div className="glass savings-headline" role="status">
+      <p>
+        <strong>Up to {fmtPremium(spread)} every 6 months</strong> between the cheapest and
+        priciest quote — that&apos;s why comparing pays.
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Honest degradation for registry carriers with no simulation adapter:
+ * no fake prices — direct carriers link out, agent-only carriers link to
+ * the local agent directory. Unavailable carriers (e.g. Lemonade in MA)
+ * are excluded upstream via `available !== false`.
+ */
+function MoreCarriers({ state }: { state: string }) {
+  const [carriers, setCarriers] = useState<CarrierEntry[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .getCarriers(state)
+      .then((r) => {
+        if (!cancelled) setCarriers(r.carriers);
+      })
+      .catch(() => {
+        if (!cancelled) setCarriers([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [state]);
+  const rest = useMemo(
+    () => (carriers ?? []).filter((c) => !c.quotable && c.available !== false),
+    [carriers],
+  );
+  if (!rest.length) return null;
+  return (
+    <section aria-labelledby="more-carriers-title" className="more-carriers">
+      <h2 id="more-carriers-title" className="section-heading-sm">
+        More carriers in {state} — not instant-quoted here
+      </h2>
+      <p className="section-sub">
+        These carriers don&apos;t plug into our instant engine yet. Go direct, or talk to a local
+        agent — no fake prices, ever.
+      </p>
+      <div className="more-carriers-grid">
+        {rest.map((c) => (
+          <div key={c.id} className="glass more-carrier-card">
+            <div className="more-carrier-top">
+              <span className="carrier-emoji" aria-hidden="true">
+                {c.logo}
+              </span>
+              <h3>{c.name}</h3>
+            </div>
+            <p className="field-hint">{c.channel === "agent" ? "Agent-only carrier" : "Direct carrier"}</p>
+            {c.website ? (
+              <a
+                href={`https://${c.website}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-secondary btn-sm"
+              >
+                Get a quote at {c.website} →
+              </a>
+            ) : (
+              c.channel === "agent" && (
+                <Link to={`/agents?state=${state}`} className="btn btn-secondary btn-sm">
+                  Find a local agent →
+                </Link>
+              )
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AgentMiniCard({ agent, index }: { agent: AgentEntry; index: number }) {
+  const track = useAnalytics("quotes");
+  const phoneDigits = agent.phone.replace(/\D/g, "");
+  return (
+    <article className="glass agent-mini" aria-label={`${agent.name}, ${agent.city}`}>
+      <div className="agent-mini-top">
+        <h3>
+          <span className="agent-rank" aria-hidden="true">
+            {index + 1}
+          </span>{" "}
+          {agent.name}
+        </h3>
+        <SourceBadge source={agent.source} />
+      </div>
+      {agent.distance_mi != null && (
+        <div className="agent-distance" aria-label={`${agent.distance_mi.toFixed(1)} miles away`}>
+          📍 {agent.distance_mi.toFixed(1)} mi away
+        </div>
+      )}
+      <address className="agent-address">
+        {agent.address}, {agent.city} {agent.zip}
+      </address>
+      {/^\d+$/.test(phoneDigits) && phoneDigits.length >= 7 ? (
+        <a
+          className="agent-phone"
+          href={`tel:${phoneDigits}`}
+          onClick={() => track("agent_phone_clicked", { element: "quotes_agent_card_phone" })}
+        >
+          📞 {agent.phone}
+        </a>
+      ) : (
+        <span className="agent-phone agent-phone-na">{agent.phone}</span>
+      )}
+      <div className="field-hint">Mon–Fri: {agent.hours.weekdays}</div>
+    </article>
+  );
+}
+
+/**
+ * Unified results: local agents below the online quotes, reusing the
+ * compact AgentMap + top-3 cards. Location comes from wizard localStorage;
+ * without it we degrade to a link instead of guessing.
+ */
+function AgentsSection() {
+  const track = useAnalytics("quotes");
+  const [loc] = useState(() => readQuoteLocation());
+  const [agents, setAgents] = useState<AgentEntry[] | null>(null);
+  const viewedRef = useRef(false);
+
+  useEffect(() => {
+    if (!loc) return;
+    let cancelled = false;
+    api
+      .getAgents(loc.state, loc.zip)
+      .then((res) => {
+        if (!cancelled) setAgents(res.agents);
+      })
+      .catch(() => {
+        if (!cancelled) setAgents([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [loc]);
+
+  useEffect(() => {
+    if (agents && agents.length > 0 && !viewedRef.current) {
+      viewedRef.current = true;
+      track("agents_section_view", { metadata: { count: agents.length } });
+    }
+  }, [agents, track]);
+
+  if (!loc) {
+    return (
+      <section aria-labelledby="agents-near-title" className="glass agents-teaser">
+        <h2 id="agents-near-title" className="section-heading-sm">
+          Local agents — humans who can help
+        </h2>
+        <p className="section-sub">
+          Some carriers only sell through independent agents.{" "}
+          <Link to="/agents">Find agents near you →</Link>
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section aria-labelledby="agents-near-title" className="agents-section">
+      <h2 id="agents-near-title" className="section-heading-sm">
+        Local agents near {loc.zip} — humans who can help
+      </h2>
+      <p className="section-sub">
+        Agent-only carriers don&apos;t do instant online quotes. These local agencies can.
+      </p>
+      {agents === null ? (
+        <div className="glass map-panel" aria-label="Loading agents">
+          <div className="skeleton" style={{ height: "240px", borderRadius: "12px" }} aria-hidden="true" />
+        </div>
+      ) : agents.length === 0 ? (
+        <div className="glass agents-teaser">
+          <p className="section-sub">
+            No agent listings near {loc.zip} yet.{" "}
+            <Link to={`/agents?zip=${loc.zip}&state=${loc.state}`}>Search the full directory →</Link>
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="glass map-panel map-panel-compact">
+            <AgentMap agents={agents} height={240} />
+          </div>
+          <div className="agent-mini-grid">
+            {agents.slice(0, 3).map((a, i) => (
+              <AgentMiniCard key={a.id} agent={a} index={i} />
+            ))}
+          </div>
+          <div style={{ textAlign: "center", marginTop: "1rem" }}>
+            <Link
+              to={`/agents?zip=${loc.zip}&state=${loc.state}`}
+              className="btn btn-secondary"
+              onClick={() => track("agents_see_all_click")}
+            >
+              See all {agents.length} agents near {loc.zip} →
+            </Link>
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+
+/** Location-aware extras below the results: local agents + non-instant carriers. */
+function QuoteExtras() {
+  const [loc] = useState(() => readQuoteLocation());
+  if (!loc) return <AgentsSection />;
+  return (
+    <>
+      <AgentsSection />
+      <MoreCarriers state={loc.state} />
+    </>
   );
 }
 
@@ -283,23 +589,10 @@ export function Quotes() {
         )}
 
         {inProgress && job && (
-          <div className="glass job-progress" role="status" aria-live="polite">
-            <div className="spinner" aria-hidden="true" />
-            <p>
-              Gathering quotes… {job.progress.completed} of {job.progress.total}
-            </p>
-            <div className="progress-bar" role="progressbar"
-              aria-valuenow={job.progress.completed}
-              aria-valuemin={0}
-              aria-valuemax={job.progress.total}
-              aria-label="Quote gathering progress">
-              <div
-                className="progress-fill"
-                style={{ width: `${job.progress.total ? (job.progress.completed / job.progress.total) * 100 : 0}%` }}
-              />
-            </div>
-            <p className="demo-note">Hang tight — carriers respond at their own pace. All prices are simulated.</p>
-          </div>
+          <>
+            <ProgressSection job={job} />
+            <EmailOptIn jobId={job.jobId} mode="waiting" carrierCount={job.progress.total} />
+          </>
         )}
 
         {job?.status === "failed" && (
@@ -329,6 +622,8 @@ export function Quotes() {
               </div>
             ) : (
               <>
+                <h2 className="section-heading-sm section-label">Online quotes — instant</h2>
+                <SavingsHeadline results={sorted} />
                 {compareResults.length >= 2 && <CompareTable results={compareResults} />}
                 <div className="quote-grid">
                   {sorted.map((r, i) => (
@@ -342,13 +637,14 @@ export function Quotes() {
                     />
                   ))}
                 </div>
-                <EmailOptIn jobId={job.jobId} />
+                <EmailOptIn jobId={job.jobId} mode="results" carrierCount={sorted.length} />
                 <p className="demo-note">
                   All prices on this page are <strong>simulated demo pricing</strong> — realistic bands anchored to
                   real Massachusetts quote research, not real carrier offers.
                 </p>
               </>
             )}
+            <QuoteExtras />
           </>
         )}
       </div>
