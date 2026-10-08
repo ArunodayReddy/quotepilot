@@ -754,3 +754,92 @@ input[type="range"].slider {
 .prose h2 { font-size: 1.5rem; margin: var(--space-6) 0 var(--space-3); }
 .prose p, .prose li { color: var(--text-secondary); }
 .prose ul { padding-left: var(--space-5); }
+
+/* ---------- Custom Select (Apple-grade dropdown) ---------- */
+.qp-select { position: relative; }
+.qp-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font: inherit;
+  color: var(--text);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.qp-select-trigger:hover { border-color: var(--accent); }
+.qp-select-trigger:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus-ring); }
+.qp-select-trigger:disabled { opacity: 0.55; cursor: not-allowed; }
+.qp-select-trigger.qp-select-error { border-color: var(--danger); }
+.qp-select-placeholder { color: var(--text-tertiary); }
+.qp-select-chevron { flex-shrink: 0; color: var(--text-tertiary); transition: transform var(--dur-fast) var(--ease-out); }
+.qp-select-chevron-open { transform: rotate(180deg); color: var(--accent); }
+.qp-select-popup {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface-solid);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-2);
+  padding: 6px;
+  animation: qp-pop 180ms var(--ease-out);
+  transform-origin: top center;
+}
+@keyframes qp-pop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.qp-select-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 264px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.qp-select-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.qp-select-option[data-active="true"] { background: var(--accent-soft); }
+.qp-select-option[aria-selected="true"] .qp-select-option-label { font-weight: 700; }
+.qp-select-option-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qp-check { flex-shrink: 0; color: var(--accent); }
+
+/* ---------- Date input (theme-aware) ---------- */
+input[type="date"].input { color-scheme: light; min-height: 3.25rem; }
+[data-theme="dark"] input[type="date"].input { color-scheme: dark; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) input[type="date"].input { color-scheme: dark; }
+}
+input[type="date"].input::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.65; }
+
+/* ---------- Skeleton shimmer (loading states) ---------- */
+.skeleton {
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--surface-border) 25%, var(--accent-soft) 50%, var(--surface-border) 75%);
+  background-size: 200% 100%;
+  animation: qp-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes qp-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* ---------- Driver card as fieldset ---------- */
+fieldset.driver-card { min-inline-size: 0; }
+fieldset.driver-card legend { padding: 0; }

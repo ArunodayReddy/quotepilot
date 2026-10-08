@@ -135,3 +135,22 @@ Store under `docs/screenshots/`; reference from this section when captured.
   rendered from the real design tokens (`apps/web/src/styles/tokens.css`), real hero/wizard copy,
   and real quote figures (GEICO $1,274 → Amica $1,576). Built because headless screenshots are
   blocked in this environment; labeled clearly as a static preview, dashboard numbers illustrative.
+
+## 2026-10-08 — v0.3.0 form overhaul: Select component + field standards
+- **New component: `Select` (`apps/web/src/components/Select.tsx`).** Custom accessible dropdown
+  replacing all native selects: glass trigger button with chevron (rotates on open), floating
+  listbox popup with pop-in animation, checkmark on the selected option, hover/keyboard active
+  states in `--accent-soft`, error state in `--danger`. Full keyboard map (ArrowUp/Down, Home/End,
+  Enter/Space, Escape, Tab, type-ahead with 600ms buffer). ARIA: `aria-haspopup="listbox"`,
+  `aria-expanded`, `aria-activedescendant`, `role="listbox"`/`role="option"` + `aria-selected`.
+  Animation disabled under `prefers-reduced-motion` (global reset covers it).
+- **Field standards (insurer-grade):** DOB uses native `input[type="date"]` with `max=today` and
+  theme-aware `color-scheme` (dark calendar picker in dark mode); proper `autocomplete` tokens
+  everywhere (`street-address`, `postal-code`, `given-name`, `family-name`, `bday`, `email`, `tel`);
+  driver cards are now `fieldset`/`legend`; state dropdown shows full names ("Massachusetts"),
+  stores codes ("MA"); make dropdown covers top 25 makes + Other with conditional free-text.
+- **Home dynamics:** carrier marquee renders registry logos+names from the API with skeleton
+  shimmer badges while loading and a graceful degraded message on failure; FAQ answer for
+  states/carriers is interpolated from the live registry (fallback copy when offline).
+- **Snapshot:** `docs/snapshots/v0.2.0-preview.html` wizard screen updated to the Drivers step
+  showing the DOB date field and custom dropdowns.

@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Seo } from "../components/Seo";
-import { Field, SelectField, TextField, US_STATES } from "../components/fields";
+import { Field, SelectField, TextField, STATE_OPTIONS } from "../components/fields";
 import { api, ApiError } from "../lib/api";
 import { useAnalytics } from "../lib/analytics";
-import type { CoverageInput, DriverInput, VehicleInput } from "../lib/types";
+import type { CoverageInput, VehicleInput } from "../lib/types";
 import {
   STEP_TITLES,
+  ageFromDob,
   blankDriver,
   clearWizardData,
   defaultWizardData,
@@ -16,7 +17,9 @@ import {
   toQuoteRequest,
   validateStep,
   type FieldErrors,
+  type MaritalStatus,
   type WizardData,
+  type WizardDriver,
 } from "../lib/wizard";
 
 /* ---------------- helpers ---------------- */
@@ -30,9 +33,56 @@ function parseIntSafe(v: string, fallback = 0): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
-const LIMIT_OPTIONS = [25000, 50000, 100000, 250000, 500000];
-const fmtLimit = (n: number) => `$${(n / 1000).toLocaleString()}k`;
+const fmtLimit = (n: number) => (n === 0 ? "None" : `$${(n / 1000).toLocaleString()}k`);
 const fmtMoney = (n: number) => `$${n.toLocaleString()}`;
+
+const todayISO = (() => {
+  const t = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${t.getFullYear()}-${p(t.getMonth() + 1)}-${p(t.getDate())}`;
+})();
+
+const GENDER_OPTIONS = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "nonbinary", label: "Nonbinary" },
+  { value: "other", label: "Other" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
+];
+
+const MARITAL_OPTIONS: { value: MaritalStatus; label: string }[] = [
+  { value: "single", label: "Single" },
+  { value: "married", label: "Married" },
+  { value: "divorced", label: "Divorced" },
+  { value: "widowed", label: "Widowed" },
+];
+
+const COUNT_OPTIONS = [
+  { value: "0", label: "0" },
+  { value: "1", label: "1" },
+  { value: "2", label: "2" },
+  { value: "3", label: "3" },
+  { value: "4", label: "4" },
+  { value: "5", label: "5 or more" },
+];
+
+const VEHICLE_MAKES = [
+  "Toyota", "Honda", "Ford", "Chevrolet", "Nissan", "Hyundai", "Kia", "Subaru",
+  "Mazda", "Volkswagen", "BMW", "Mercedes-Benz", "Audi", "Lexus", "Tesla", "Jeep",
+  "Ram", "GMC", "Dodge", "Chrysler", "Volvo", "Porsche", "Cadillac", "Acura",
+  "Infiniti", "Other",
+];
+
+const YEAR_OPTIONS = (() => {
+  const top = new Date().getFullYear() + 1;
+  const years: number[] = [];
+  for (let y = top; y >= 1995; y--) years.push(y);
+  return years;
+})();
+
+const LIMIT_OPTIONS = [25000, 50000, 100000, 250000, 500000];
+const MEDPAY_OPTIONS = [0, 1000, 2000, 5000, 10000, 25000];
+const DEDUCTIBLE_OPTIONS = [250, 500, 1000, 2500];
 
 /* ---------------- step 1: location ---------------- */
 
@@ -47,16 +97,27 @@ function StepLocation({
 }) {
   return (
     <>
+      <TextField
+        id="wz-street"
+        label="Street address"
+        required
+        autoComplete="street-address"
+        placeholder="123 Main St"
+        value={data.contact.streetAddress}
+        onChange={(e) => setContact({ streetAddress: e.target.value })}
+        error={errors["contact.streetAddress"]}
+        hint="Carriers use your garaging address to price the policy."
+      />
       <div className="field-row">
         <SelectField
           id="wz-state"
           label="State"
           required
           value={data.contact.state}
-          onChange={(e) => setContact({ state: e.target.value })}
+          onChange={(v) => setContact({ state: v })}
           error={errors["contact.state"]}
           hint="Carrier options and minimum coverage vary by state."
-          options={US_STATES.map((s) => ({ value: s, label: s }))}
+          options={STATE_OPTIONS}
         />
         <TextField
           id="wz-zip"
@@ -64,6 +125,8 @@ function StepLocation({
           required
           inputMode="numeric"
           autoComplete="postal-code"
+          pattern="\d{5}(-\d{4})?"
+          maxLength={10}
           placeholder="02139"
           value={data.contact.zip}
           onChange={(e) => setContact({ zip: e.target.value })}
@@ -86,17 +149,19 @@ function DriverCard({
   removable,
 }: {
   index: number;
-  driver: DriverInput;
-  onChange: (patch: Partial<DriverInput>) => void;
+  driver: WizardDriver;
+  onChange: (patch: Partial<WizardDriver>) => void;
   onRemove: () => void;
   errors: FieldErrors;
   removable: boolean;
 }) {
   const p = `drivers.${index}`;
+  const age = ageFromDob(driver.dob);
   return (
-    <section className="driver-card" aria-label={`Driver ${index + 1}`}>
+    <fieldset className="driver-card">
+      <legend className="sr-only">Driver {index + 1}</legend>
       <div className="driver-card-header">
-        <h3>Driver {index + 1}</h3>
+        <h3 aria-hidden="true">Driver {index + 1}</h3>
         {removable && (
           <button type="button" className="btn-danger-ghost" onClick={onRemove}>
             Remove driver
@@ -125,16 +190,38 @@ function DriverCard({
       </div>
       <div className="field-row">
         <TextField
-          id={`wz-d${index}-age`}
-          label="Age"
+          id={`wz-d${index}-dob`}
+          label="Date of birth"
           required
-          type="number"
-          min={16}
-          max={100}
-          inputMode="numeric"
-          value={driver.age}
-          onChange={(e) => onChange({ age: parseIntSafe(e.target.value, 0) })}
-          error={errors[`${p}.age`]}
+          type="date"
+          max={todayISO}
+          autoComplete="bday"
+          value={driver.dob}
+          onChange={(e) => onChange({ dob: e.target.value })}
+          error={errors[`${p}.dob`]}
+          hint={
+            Number.isNaN(age)
+              ? "We use this to compute your age for pricing."
+              : `Age ${age} — derived from your date of birth for pricing.`
+          }
+        />
+        <SelectField
+          id={`wz-d${index}-gender`}
+          label="Gender"
+          value={driver.gender}
+          onChange={(v) => onChange({ gender: v as WizardDriver["gender"] })}
+          options={GENDER_OPTIONS}
+          hint="As listed on your driver's license."
+        />
+      </div>
+      <div className="field-row">
+        <SelectField
+          id={`wz-d${index}-marital`}
+          label="Marital status"
+          value={driver.maritalStatus}
+          onChange={(v) => onChange({ maritalStatus: v as MaritalStatus })}
+          options={MARITAL_OPTIONS}
+          hint="Married drivers often qualify for lower rates."
         />
         <TextField
           id={`wz-d${index}-licensed`}
@@ -150,32 +237,26 @@ function DriverCard({
         />
       </div>
       <div className="field-row">
-        <TextField
+        <SelectField
           id={`wz-d${index}-accidents`}
           label="Accidents in the last 5 years"
-          type="number"
-          min={0}
-          max={20}
-          inputMode="numeric"
-          value={driver.accidentsLast5Years}
-          onChange={(e) => onChange({ accidentsLast5Years: parseIntSafe(e.target.value, 0) })}
-          error={errors[`${p}.accidentsLast5Years`]}
+          value={String(Math.min(driver.accidentsLast5Years, 5))}
+          onChange={(v) => onChange({ accidentsLast5Years: parseIntSafe(v, 0) })}
+          options={COUNT_OPTIONS}
           hint="Any accident, at-fault or not."
+          error={errors[`${p}.accidentsLast5Years`]}
         />
-        <TextField
+        <SelectField
           id={`wz-d${index}-violations`}
           label="Moving violations in the last 3 years"
-          type="number"
-          min={0}
-          max={20}
-          inputMode="numeric"
-          value={driver.violationsLast3Years}
-          onChange={(e) => onChange({ violationsLast3Years: parseIntSafe(e.target.value, 0) })}
-          error={errors[`${p}.violationsLast3Years`]}
+          value={String(Math.min(driver.violationsLast3Years, 5))}
+          onChange={(v) => onChange({ violationsLast3Years: parseIntSafe(v, 0) })}
+          options={COUNT_OPTIONS}
           hint="Speeding tickets, red-light runs, etc."
+          error={errors[`${p}.violationsLast3Years`]}
         />
       </div>
-    </section>
+    </fieldset>
   );
 }
 
@@ -185,7 +266,7 @@ function StepDrivers({
   errors,
 }: {
   data: WizardData;
-  setDrivers: (d: DriverInput[]) => void;
+  setDrivers: (d: WizardDriver[]) => void;
   errors: FieldErrors;
 }) {
   return (
@@ -225,32 +306,50 @@ function StepVehicle({
 }) {
   const v = data.vehicles[0];
   const p = "vehicles.0";
-  const thisYear = new Date().getFullYear();
+  const makeIsCustom = v.make !== "" && !VEHICLE_MAKES.includes(v.make);
+  const makeSelectValue = v.make === "" ? "" : makeIsCustom ? "Other" : v.make;
   return (
     <>
       <div className="field-row">
-        <TextField
+        <SelectField
           id="wz-year"
           label="Year"
           required
-          type="number"
-          min={1980}
-          max={thisYear + 1}
-          inputMode="numeric"
-          value={v.year}
-          onChange={(e) => setVehicles(updateAt(data.vehicles, 0, { year: parseIntSafe(e.target.value, 0) }))}
+          value={String(v.year)}
+          onChange={(val) => setVehicles(updateAt(data.vehicles, 0, { year: parseIntSafe(val, 0) }))}
+          options={YEAR_OPTIONS.map((y) => ({ value: String(y), label: String(y) }))}
           error={errors[`${p}.year`]}
         />
-        <TextField
-          id="wz-make"
-          label="Make"
-          required
-          placeholder="Tesla"
-          autoComplete="off"
-          value={v.make}
-          onChange={(e) => setVehicles(updateAt(data.vehicles, 0, { make: e.target.value }))}
-          error={errors[`${p}.make`]}
-        />
+        <div>
+          <SelectField
+            id="wz-make"
+            label="Make"
+            required
+            placeholder="Select make"
+            value={makeSelectValue}
+            onChange={(val) => {
+              if (val === "Other") {
+                if (!makeIsCustom) setVehicles(updateAt(data.vehicles, 0, { make: "" }));
+              } else {
+                setVehicles(updateAt(data.vehicles, 0, { make: val }));
+              }
+            }}
+            options={VEHICLE_MAKES.map((m) => ({ value: m, label: m }))}
+            error={errors[`${p}.make`]}
+          />
+          {makeSelectValue === "Other" && (
+            <TextField
+              id="wz-make-other"
+              label="Specify make"
+              required
+              placeholder="e.g. Saab"
+              autoComplete="off"
+              value={makeIsCustom ? v.make : ""}
+              onChange={(e) => setVehicles(updateAt(data.vehicles, 0, { make: e.target.value }))}
+              error={errors[`${p}.make`]}
+            />
+          )}
+        </div>
       </div>
       <div className="field-row">
         <TextField
@@ -278,8 +377,8 @@ function StepVehicle({
           label="Ownership"
           required
           value={v.ownership}
-          onChange={(e) =>
-            setVehicles(updateAt(data.vehicles, 0, { ownership: e.target.value as VehicleInput["ownership"] }))
+          onChange={(val) =>
+            setVehicles(updateAt(data.vehicles, 0, { ownership: val as VehicleInput["ownership"] }))
           }
           options={[
             { value: "owned", label: "Owned outright" },
@@ -292,8 +391,8 @@ function StepVehicle({
           label="Primary use"
           required
           value={v.usage}
-          onChange={(e) =>
-            setVehicles(updateAt(data.vehicles, 0, { usage: e.target.value as VehicleInput["usage"] }))
+          onChange={(val) =>
+            setVehicles(updateAt(data.vehicles, 0, { usage: val as VehicleInput["usage"] }))
           }
           options={[
             { value: "commute", label: "Commute" },
@@ -303,27 +402,46 @@ function StepVehicle({
         />
       </div>
       <div className="field-row">
-        <TextField
-          id="wz-mileage"
-          label="Annual mileage"
-          required
-          type="number"
-          min={0}
-          max={100000}
-          step={500}
-          inputMode="numeric"
-          value={v.annualMileage}
-          onChange={(e) =>
-            setVehicles(updateAt(data.vehicles, 0, { annualMileage: parseIntSafe(e.target.value, 0) }))
-          }
-          error={errors[`${p}.annualMileage`]}
-          hint="Your best estimate for the next 12 months."
-        />
+        <div>
+          <TextField
+            id="wz-mileage"
+            label="Annual mileage"
+            required
+            type="number"
+            min={0}
+            max={100000}
+            step={500}
+            inputMode="numeric"
+            value={v.annualMileage}
+            onChange={(e) =>
+              setVehicles(updateAt(data.vehicles, 0, { annualMileage: parseIntSafe(e.target.value, 0) }))
+            }
+            error={errors[`${p}.annualMileage`]}
+            hint="Your best estimate for the next 12 months."
+          />
+          <Field id="wz-mileage-slider" label="Adjust with slider">
+            <input
+              id="wz-mileage-slider"
+              type="range"
+              className="slider"
+              min={0}
+              max={60000}
+              step={1000}
+              value={Math.min(v.annualMileage, 60000)}
+              onChange={(e) =>
+                setVehicles(updateAt(data.vehicles, 0, { annualMileage: parseIntSafe(e.target.value, 0) }))
+              }
+              aria-valuetext={`${fmtMoney(v.annualMileage)} miles per year`}
+              aria-label="Annual mileage slider"
+            />
+          </Field>
+        </div>
         <TextField
           id="wz-garaged"
           label="Garaging ZIP"
           required
           inputMode="numeric"
+          autoComplete="postal-code"
           placeholder="02139"
           value={v.garagedZip}
           onChange={(e) => setVehicles(updateAt(data.vehicles, 0, { garagedZip: e.target.value }))}
@@ -369,14 +487,14 @@ function LimitSelect({
       id={id}
       label={label}
       value={String(value)}
-      onChange={(e) => onChange(parseInt(e.target.value, 10))}
+      onChange={(v) => onChange(parseInt(v, 10))}
       hint={hint}
       options={options.map((n) => ({ value: String(n), label: fmtLimit(n) }))}
     />
   );
 }
 
-function DeductibleSlider({
+function DeductibleSelect({
   id,
   label,
   value,
@@ -389,24 +507,15 @@ function DeductibleSlider({
   onChange: (n: number) => void;
   hint?: string;
 }) {
-  const steps = [100, 250, 500, 1000, 2000, 2500];
   return (
-    <Field id={id} label={label} hint={hint}>
-      <input
-        id={id}
-        type="range"
-        className="slider"
-        min={0}
-        max={steps.length - 1}
-        step={1}
-        value={steps.indexOf(value)}
-        onChange={(e) => onChange(steps[parseInt(e.target.value, 10)])}
-        aria-valuetext={fmtMoney(value)}
-      />
-      <div aria-hidden="true" style={{ fontWeight: 700, marginTop: "0.25rem" }}>
-        {fmtMoney(value)}
-      </div>
-    </Field>
+    <SelectField
+      id={id}
+      label={label}
+      value={String(value)}
+      onChange={(v) => onChange(parseInt(v, 10))}
+      hint={hint}
+      options={DEDUCTIBLE_OPTIONS.map((n) => ({ value: String(n), label: fmtMoney(n) }))}
+    />
   );
 }
 
@@ -493,7 +602,7 @@ function StepCoverage({
           label="Medical payments"
           value={c.medicalPayments}
           onChange={(n) => setCoverage({ medicalPayments: n })}
-          options={[0, 1000, 2000, 5000, 10000, 25000]}
+          options={MEDPAY_OPTIONS}
           hint="Covers medical bills for you and passengers, regardless of fault."
         />
       </div>
@@ -519,14 +628,14 @@ function StepCoverage({
         </div>
       )}
       <div className="field-row">
-        <DeductibleSlider
+        <DeductibleSelect
           id="wz-coll-ded"
           label="Collision deductible"
           value={c.collisionDeductible}
           onChange={(n) => setCoverage({ collisionDeductible: n })}
           hint="What you pay out of pocket before collision coverage kicks in."
         />
-        <DeductibleSlider
+        <DeductibleSelect
           id="wz-comp-ded"
           label="Comprehensive deductible"
           value={c.comprehensiveDeductible}
@@ -585,6 +694,7 @@ function StepContact({
         required
         type="tel"
         autoComplete="tel"
+        inputMode="tel"
         placeholder="(555) 010-0199"
         value={data.contact.phone}
         onChange={(e) => setContact({ phone: e.target.value })}
@@ -658,7 +768,7 @@ export function Wizard() {
 
   const setContact = (patch: Partial<WizardData["contact"]>) =>
     setData((d) => ({ ...d, contact: { ...d.contact, ...patch } }));
-  const setDrivers = (drivers: DriverInput[]) => setData((d) => ({ ...d, drivers }));
+  const setDrivers = (drivers: WizardDriver[]) => setData((d) => ({ ...d, drivers }));
   const setVehicles = (vehicles: VehicleInput[]) => setData((d) => ({ ...d, vehicles }));
   const setCoverage = (patch: Partial<CoverageInput>) =>
     setData((d) => ({ ...d, coverage: { ...d.coverage, ...patch } }));
