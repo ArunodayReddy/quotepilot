@@ -1,0 +1,1 @@
+{"description":"QuotePilot — one form, quotes from every car-insurance carrier in your state","name":"quotepilot","private":true,"scripts":{"build":"bash scripts/build.sh","dev":"bash scripts/dev.sh","test":"npm test --workspace=apps/api"},"version":"0.1.0","workspaces":["apps/*","packages/*","analytics/*"]}
