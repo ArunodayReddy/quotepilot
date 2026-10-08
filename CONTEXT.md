@@ -120,6 +120,17 @@ change must be recorded there with a date.
 
 ## 8. Rule log (append-only; newest at bottom)
 
+- 2026-10-08 (v0.5.0 "hooked"): ZIP is the front door — hero ZIP field validates 5 digits,
+  stashes into wizard localStorage, routes to /quote; analytics carries only the 3-digit
+  prefix, never the full ZIP. Results page is unified: "Online quotes — instant" above
+  "Local agents near {ZIP}"; location comes from wizard localStorage, never guessed.
+  Carriers with no adapter degrade honestly (direct → external site link, agent → agent
+  directory; `available:false` excluded) — NEVER invent pricing. Engagement mechanics must be
+  truthful: savings headline computed from real results, progress shows real per-carrier
+  states, no dark patterns. Registry entries may carry `website` (domain only, no protocol).
+  TX is fully seeded (11 carriers / 13 ZIPs / 3 Denton sample agents); simulation pricing
+  bands are MA-anchored — TX bands are approximate (noted in registry).
+
 - 2026-10-08 (v0.4.0 agents+map): provider chain is the law for agent data — Google Places
   (GOOGLE_PLACES_API_KEY) primary, sample seed fallback; `source` on every agent, "Live data"/
   "Sample data" badges non-negotiable. Never invent real businesses or real phone numbers;

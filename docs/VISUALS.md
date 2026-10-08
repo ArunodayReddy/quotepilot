@@ -167,3 +167,18 @@ Store under `docs/screenshots/`; reference from this section when captured.
   languages (live Places data) hide their rows.
 - New CSS: `.agent-map`, `.qp-pin`, `.qp-popup*`, `.live-badge`, `.agent-distance`,
   `.agent-address`, `.agent-hours`, `.map-panel`, `.notice`, `.search-actions`.
+
+## 2026-10-08 — v0.5.0 "hooked" release
+- ZIP-first hero: glass pill form (`.zip-hero-form`) — labeled ZIP input (letterspaced,
+  numeric) + primary "Get my quotes →" button; secondary quiet links ("Start without a ZIP",
+  "Try with sample data"). Error appears inline with `role=alert`.
+- Results page sections: `.section-heading-sm` labels ("Online quotes — instant" /
+  "Local agents near {ZIP} — humans who can help"); `.savings-headline` (accent left border);
+  `.carrier-status-list` rows (✓ name + premium for done, shimmer skeletons for pending);
+  `.more-carriers-grid` cards (emoji logo, channel label, honest CTA).
+- Agent mini-cards (`.agent-mini`): rank + name + source badge → distance → address →
+  tap-to-call → weekday hours. Compact map (`.map-panel-compact`, 240px) above the grid.
+- New CSS: `.zip-hero-form`, `.link-quiet`, `.carrier-status*`, `.savings-headline`,
+  `.more-carriers*`, `.agent-mini*`, `.map-panel-compact`, `.btn-sm`, `.field-error`.
+- Analytics events added: `zip_search_submitted`, `quotes_progress_view`,
+  `savings_headline_view`, `inline_email_capture`, `agents_section_view`, `agents_see_all_click`.
