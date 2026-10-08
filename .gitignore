@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+build/
+
+# databases (analytics + jobs) — never commit data
+*.db
+*.db-journal
+*.sqlite
+*.sqlite-journal
+
+# environment / secrets — never commit
+.env
+.env.local
+.env.*.local
+
+# logs
+*.log
+logs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# test artifacts
+coverage/
+.nyc_output/
