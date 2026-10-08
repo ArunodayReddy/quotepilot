@@ -117,6 +117,14 @@ h1.page{font-size:clamp(28px,4vw,44px);letter-spacing:-.02em;margin-bottom:8px}
 .mpop .ck{color:var(--accent);font-weight:800}
 .footnote b{color:var(--text-secondary)}
 @media(max-width:760px){.how{grid-template-columns:1fr}.dgrid{grid-template-columns:1fr}.navlinks{display:none}.field-row{grid-template-columns:1fr}}
+  .zipdemo{max-width:34rem;margin:0 auto 1rem;background:var(--surface);backdrop-filter:var(--glass-blur);border:1px solid var(--surface-border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem 1rem;text-align:left}
+  .zipdemo label{display:block;font-size:.8rem;font-weight:700;color:var(--text-secondary);margin-bottom:.4rem}
+  .zipdemo-row{display:flex;gap:.75rem}
+  .zipdemo-row input{flex:1;background:var(--input-bg);border:1px solid var(--input-border);border-radius:12px;padding:.85rem 1rem;color:var(--text);font-size:1.05rem;letter-spacing:.08em;font-family:inherit}
+  .zipdemo-hint{font-size:.82rem;color:var(--text-tertiary);margin-top:.6rem}
+  .zipdemo-alt{margin-top:1.1rem;font-size:.92rem}
+  .zipdemo-alt a{color:var(--text-secondary)}
+  @media(max-width:640px){.zipdemo-row{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -135,7 +143,7 @@ h1.page{font-size:clamp(28px,4vw,44px);letter-spacing:-.02em;margin-bottom:8px}
 
   <!-- SCREEN 1: HOME -->
   <div class="screen">
-    <div class="screen-head"><span class="screen-num">1</span><div><h2>Home — the front door</h2><p>Futuristic glass hero, one clear action. No account, no friction.</p></div></div>
+    <div class="screen-head"><span class="screen-num">1</span><div><h2>Home — ZIP is the front door (v0.5.0)</h2><p>ZIP-first hero: type 76201, get routed to a prefilled wizard. No account, no friction.</p></div></div>
     <div class="frame">
       <div class="browser-bar"><span class="dot" style="background:#f87171"></span><span class="dot" style="background:#fbbf24"></span><span class="dot" style="background:#34d399"></span><span class="url">quotepilot.app</span></div>
       <div class="appnav"><div class="brand">Quote<em>Pilot</em></div><div class="navlinks"><span>How it works</span><span>Agents</span><span>About</span></div></div>
@@ -145,7 +153,15 @@ h1.page{font-size:clamp(28px,4vw,44px);letter-spacing:-.02em;margin-bottom:8px}
         <div class="orb" style="width:200px;height:200px;background:var(--hero-orb-3);bottom:-40px;left:44%"></div>
         <h1 class="hero-title">One form. Every carrier. <span class="gradient-text">The best deal.</span></h1>
         <p class="hero-sub">Tell us about yourself once. QuotePilot quietly gathers car insurance quotes from every carrier in your state and ranks them for you — on the site and by email.</p>
-        <div><a class="btn btn-primary" href="#">Get my quotes →</a><a class="btn btn-secondary" href="#">Try with sample data</a></div>
+        <div class="zipdemo">
+          <label for="zipdemo-input">Enter your ZIP code</label>
+          <div class="zipdemo-row">
+            <input id="zipdemo-input" value="76201" readonly aria-label="ZIP code demo">
+            <a class="btn btn-primary" href="#">Get my quotes →</a>
+          </div>
+          <p class="zipdemo-hint">We check every carrier licensed in your state — online quotes plus local agents.</p>
+        </div>
+        <div class="zipdemo-alt"><a href="#">Start without a ZIP</a><span> · </span><a href="#">Try with sample data</a></div>
         <p class="hero-note">Takes about 2 minutes · No account needed · Free forever</p>
       </div>
       <div class="how">
