@@ -1,0 +1,129 @@
+/* QuotePilot design tokens — the visual law for apps/web.
+   Apple-grade: generous whitespace, glassy surfaces, fluid motion.
+   Dark/light adaptive via [data-theme] on <html> + prefers-color-scheme fallback. */
+
+:root {
+  color-scheme: light dark;
+
+  /* Type */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter",
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Accent */
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-soft: rgba(37, 99, 235, 0.12);
+  --accent-2: #06b6d4;
+  --success: #059669;
+  --warning: #b45309;
+  --danger: #dc2626;
+
+  /* Shape */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+  --space-12: 4.5rem;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 160ms;
+  --dur-med: 320ms;
+  --dur-slow: 640ms;
+
+  /* Light theme */
+  --bg: #f6f8fc;
+  --bg-elevated: #ffffff;
+  --bg-gradient-1: #e8f0fe;
+  --bg-gradient-2: #e0f7fa;
+  --bg-gradient-3: #f3e8ff;
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-solid: #ffffff;
+  --surface-border: rgba(15, 23, 42, 0.08);
+  --text: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-on-accent: #ffffff;
+  --shadow-1: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 16px rgba(15, 23, 42, 0.06);
+  --shadow-2: 0 2px 6px rgba(15, 23, 42, 0.08), 0 16px 40px rgba(15, 23, 42, 0.12);
+  --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.45);
+  --glass-blur: blur(20px) saturate(1.4);
+  --hero-orb-1: rgba(37, 99, 235, 0.28);
+  --hero-orb-2: rgba(6, 182, 212, 0.24);
+  --hero-orb-3: rgba(168, 85, 247, 0.2);
+  --input-bg: #ffffff;
+  --input-border: rgba(15, 23, 42, 0.16);
+  --badge-sim-bg: rgba(180, 83, 9, 0.12);
+  --badge-sim-text: #92400e;
+  --badge-sim-border: rgba(180, 83, 9, 0.35);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0a0f1e;
+  --bg-elevated: #101828;
+  --bg-gradient-1: #0d1b3d;
+  --bg-gradient-2: #062a33;
+  --bg-gradient-3: #1d1038;
+  --surface: rgba(16, 24, 40, 0.68);
+  --surface-solid: #101828;
+  --surface-border: rgba(148, 163, 184, 0.16);
+  --text: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-on-accent: #ffffff;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.5), 0 20px 48px rgba(0, 0, 0, 0.5);
+  --focus-ring: 0 0 0 3px rgba(96, 165, 250, 0.55);
+  --accent: #60a5fa;
+  --accent-strong: #3b82f6;
+  --accent-soft: rgba(96, 165, 250, 0.14);
+  --hero-orb-1: rgba(59, 130, 246, 0.32);
+  --hero-orb-2: rgba(34, 211, 238, 0.26);
+  --hero-orb-3: rgba(168, 85, 247, 0.26);
+  --input-bg: #0f172a;
+  --input-border: rgba(148, 163, 184, 0.28);
+  --badge-sim-bg: rgba(251, 191, 36, 0.12);
+  --badge-sim-text: #fbbf24;
+  --badge-sim-border: rgba(251, 191, 36, 0.4);
+}
+
+/* No-JS / unstyled default: if data-theme unset, let prefers-color-scheme pick. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #0a0f1e;
+    --bg-elevated: #101828;
+    --surface: rgba(16, 24, 40, 0.68);
+    --surface-solid: #101828;
+    --surface-border: rgba(148, 163, 184, 0.16);
+    --text: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.35);
+    --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.5), 0 20px 48px rgba(0, 0, 0, 0.5);
+    --focus-ring: 0 0 0 3px rgba(96, 165, 250, 0.55);
+    --accent: #60a5fa;
+    --accent-strong: #3b82f6;
+    --accent-soft: rgba(96, 165, 250, 0.14);
+    --hero-orb-1: rgba(59, 130, 246, 0.32);
+    --hero-orb-2: rgba(34, 211, 238, 0.26);
+    --hero-orb-3: rgba(168, 85, 247, 0.26);
+    --input-bg: #0f172a;
+    --input-border: rgba(148, 163, 184, 0.28);
+    --badge-sim-bg: rgba(251, 191, 36, 0.12);
+    --badge-sim-text: #fbbf24;
+    --badge-sim-border: rgba(251, 191, 36, 0.4);
+  }
+}
