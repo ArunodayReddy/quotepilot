@@ -120,6 +120,16 @@ change must be recorded there with a date.
 
 ## 8. Rule log (append-only; newest at bottom)
 
+- 2026-10-08 (v0.5.1 validation+delight): client/server validation parity is the law —
+  `apps/web/src/lib/validation.ts` is the single source of truth for client rules and must
+  mirror `apps/api/src/lib/schemas.ts` regex-for-regex, limit-for-limit (ZIP exactly 5 digits,
+  year 1981–2027, yearsLicensed ≤ 84, phone raw 7–20 + digits 7–15). Drift = 400-class bug.
+  Error-message voice guide: human, specific, actionable; never "Invalid input"; every field
+  gets its own message naming the fix. Validate on blur + submit; clear errors the moment a
+  field becomes valid. Loading states must delight honestly: witty lines describe what's
+  actually happening, never fake outcomes; `prefers-reduced-motion` gets a static line;
+  one `loading_view` analytics event per session, context only.
+
 - 2026-10-08 (v0.5.0 "hooked"): ZIP is the front door — hero ZIP field validates 5 digits,
   stashes into wizard localStorage, routes to /quote; analytics carries only the 3-digit
   prefix, never the full ZIP. Results page is unified: "Online quotes — instant" above

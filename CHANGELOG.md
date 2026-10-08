@@ -3,6 +3,37 @@
 All notable changes to this project are documented here. Newest at the top.
 Format: `## [version] — date` with Added / Changed / Fixed / Security sections.
 
+## [0.5.1] — 2026-10-08 — Validation hardening + delightful loading
+
+### Added
+- **Delightful loading states**: new `LoadingMessages` component — brand-styled CSS orb loader
+  (three pulsing gradient dots, no emoji spinners) paired with rotating witty-but-honest status
+  lines every 3s ("Knocking on GEICO's door…", "Finding humans near you…"). Wired into quote
+  progress, the results-page agents section, and the agents directory search. Respects
+  `prefers-reduced-motion` (static first line, no animation). Fires `loading_view` analytics
+  (context only, no PII) once per loading session.
+- **Live character counters** on free-text fields (names, street address, model, trim, email)
+  showing `x/max`, matching server limits.
+- **Blur validation**: every field validates on blur with instant, specific feedback; errors
+  clear the moment the field becomes valid (no waiting for Continue).
+
+### Fixed
+- **Client/server validation drift** (all would-have-400'd): ZIP now strictly 5 digits
+  (was accepting ZIP+4 the API rejects); vehicle year min 1981 (was 1980); years-licensed
+  capped at 84 (server max); phone validates both raw length (7–20, server rule) and digit
+  count (7–15). New `apps/web/src/lib/validation.ts` is the single source of truth for
+  client rules, mirroring `apps/api/src/lib/schemas.ts` — 50/50 edge-case checks pass.
+- Names now accept Unicode letters (José, François) instead of ASCII-only.
+- DOB gets an explicit "that date can't be in the future" message (was folded into the
+  age-range message).
+- `maxLength` attributes on every bounded field (street 100, names 50, email 254, phone 20,
+  make/model/trim 60, ZIPs 5); Home hero ZIP now imports the shared `ZIP_RE`.
+
+### Changed
+- Error-message voice guide enforced everywhere: human, specific, actionable — never
+  "Invalid input". Error ring on focus for invalid fields.
+- Custom `Select` trigger now supports `onBlur` for blur validation.
+
 ## [0.5.0] — 2026-10-08 — "Hooked" release: ZIP-first, Texas, unified results
 
 ### Added

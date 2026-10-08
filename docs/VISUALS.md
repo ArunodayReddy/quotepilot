@@ -182,3 +182,14 @@ Store under `docs/screenshots/`; reference from this section when captured.
   `.more-carriers*`, `.agent-mini*`, `.map-panel-compact`, `.btn-sm`, `.field-error`.
 - Analytics events added: `zip_search_submitted`, `quotes_progress_view`,
   `savings_headline_view`, `inline_email_capture`, `agents_section_view`, `agents_see_all_click`.
+
+## 2026-10-08 — v0.5.1 validation + loading inventory
+- New component: `LoadingMessages` (orb-loader: 3 pulsing gradient dots; rotating lines;
+  reduced-motion static). Lines — quotes: "Knocking on GEICO's door…", "Haggling with
+  Progressive…", "Asking Allstate for their best number…", "Checking what Liberty Mutual
+  will do…", "Comparing carriers so you don't have to…", "Double-checking the fine print…",
+  "Polishing your quotes…"; agents: "Finding humans near you…", "Checking who's open right
+  now…", "Measuring miles, not minutes…", "Polishing the map pins…", "Reading the office hours…".
+- Error states: `.field-error` text + `.input[aria-invalid]` border + focus-visible error ring
+  (red 3px glow); live `char-count` counters under bounded text fields.
+- Validation matrix lives in `apps/web/src/lib/validation.ts` (single source of truth).
