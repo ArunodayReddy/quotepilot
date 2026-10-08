@@ -21,6 +21,16 @@ import {
   type WizardData,
   type WizardDriver,
 } from "../lib/wizard";
+import {
+  EMAIL_MAX,
+  MAKE_MAX,
+  MODEL_MAX,
+  NAME_MAX,
+  STREET_MAX,
+  TRIM_MAX,
+  ZIP_LEN,
+  validateField,
+} from "../lib/validation";
 
 /* ---------------- helpers ---------------- */
 
@@ -90,10 +100,12 @@ function StepLocation({
   data,
   setContact,
   errors,
+  onBlurField,
 }: {
   data: WizardData;
   setContact: (patch: Partial<WizardData["contact"]>) => void;
   errors: FieldErrors;
+  onBlurField: (key: string) => void;
 }) {
   return (
     <>
@@ -103,8 +115,11 @@ function StepLocation({
         required
         autoComplete="street-address"
         placeholder="123 Main St"
+        maxLength={STREET_MAX}
+        showCount
         value={data.contact.streetAddress}
         onChange={(e) => setContact({ streetAddress: e.target.value })}
+        onBlur={() => onBlurField("contact.streetAddress")}
         error={errors["contact.streetAddress"]}
         hint="Carriers use your garaging address to price the policy."
       />
@@ -115,6 +130,7 @@ function StepLocation({
           required
           value={data.contact.state}
           onChange={(v) => setContact({ state: v })}
+          onBlur={() => onBlurField("contact.state")}
           error={errors["contact.state"]}
           hint="Carrier options and minimum coverage vary by state."
           options={STATE_OPTIONS}
@@ -125,11 +141,12 @@ function StepLocation({
           required
           inputMode="numeric"
           autoComplete="postal-code"
-          pattern="\d{5}(-\d{4})?"
-          maxLength={10}
+          pattern="\d{5}"
+          maxLength={ZIP_LEN}
           placeholder="02139"
           value={data.contact.zip}
           onChange={(e) => setContact({ zip: e.target.value })}
+          onBlur={() => onBlurField("contact.zip")}
           error={errors["contact.zip"]}
           hint="Used to match carriers and local agents in your area."
         />
@@ -147,6 +164,7 @@ function DriverCard({
   onRemove,
   errors,
   removable,
+  onBlurField,
 }: {
   index: number;
   driver: WizardDriver;
@@ -154,6 +172,7 @@ function DriverCard({
   onRemove: () => void;
   errors: FieldErrors;
   removable: boolean;
+  onBlurField: (key: string) => void;
 }) {
   const p = `drivers.${index}`;
   const age = ageFromDob(driver.dob);
@@ -174,8 +193,11 @@ function DriverCard({
           label="First name"
           required
           autoComplete="given-name"
+          maxLength={NAME_MAX}
+          showCount
           value={driver.firstName}
           onChange={(e) => onChange({ firstName: e.target.value })}
+          onBlur={() => onBlurField(`${p}.firstName`)}
           error={errors[`${p}.firstName`]}
         />
         <TextField
@@ -183,8 +205,11 @@ function DriverCard({
           label="Last name"
           required
           autoComplete="family-name"
+          maxLength={NAME_MAX}
+          showCount
           value={driver.lastName}
           onChange={(e) => onChange({ lastName: e.target.value })}
+          onBlur={() => onBlurField(`${p}.lastName`)}
           error={errors[`${p}.lastName`]}
         />
       </div>
@@ -198,6 +223,7 @@ function DriverCard({
           autoComplete="bday"
           value={driver.dob}
           onChange={(e) => onChange({ dob: e.target.value })}
+          onBlur={() => onBlurField(`${p}.dob`)}
           error={errors[`${p}.dob`]}
           hint={
             Number.isNaN(age)
@@ -210,6 +236,7 @@ function DriverCard({
           label="Gender"
           value={driver.gender}
           onChange={(v) => onChange({ gender: v as WizardDriver["gender"] })}
+          onBlur={() => onBlurField(`${p}.gender`)}
           options={GENDER_OPTIONS}
           hint="As listed on your driver's license."
         />
@@ -220,6 +247,7 @@ function DriverCard({
           label="Marital status"
           value={driver.maritalStatus}
           onChange={(v) => onChange({ maritalStatus: v as MaritalStatus })}
+          onBlur={() => onBlurField(`${p}.marital`)}
           options={MARITAL_OPTIONS}
           hint="Married drivers often qualify for lower rates."
         />
@@ -233,6 +261,7 @@ function DriverCard({
           inputMode="numeric"
           value={driver.yearsLicensed}
           onChange={(e) => onChange({ yearsLicensed: parseIntSafe(e.target.value, 0) })}
+          onBlur={() => onBlurField(`${p}.yearsLicensed`)}
           error={errors[`${p}.yearsLicensed`]}
         />
       </div>
@@ -242,6 +271,7 @@ function DriverCard({
           label="Accidents in the last 5 years"
           value={String(Math.min(driver.accidentsLast5Years, 5))}
           onChange={(v) => onChange({ accidentsLast5Years: parseIntSafe(v, 0) })}
+          onBlur={() => onBlurField(`${p}.accidentsLast5Years`)}
           options={COUNT_OPTIONS}
           hint="Any accident, at-fault or not."
           error={errors[`${p}.accidentsLast5Years`]}
@@ -251,6 +281,7 @@ function DriverCard({
           label="Moving violations in the last 3 years"
           value={String(Math.min(driver.violationsLast3Years, 5))}
           onChange={(v) => onChange({ violationsLast3Years: parseIntSafe(v, 0) })}
+          onBlur={() => onBlurField(`${p}.violationsLast3Years`)}
           options={COUNT_OPTIONS}
           hint="Speeding tickets, red-light runs, etc."
           error={errors[`${p}.violationsLast3Years`]}
@@ -264,10 +295,12 @@ function StepDrivers({
   data,
   setDrivers,
   errors,
+  onBlurField,
 }: {
   data: WizardData;
   setDrivers: (d: WizardDriver[]) => void;
   errors: FieldErrors;
+  onBlurField: (key: string) => void;
 }) {
   return (
     <>
@@ -280,6 +313,7 @@ function StepDrivers({
           onRemove={() => setDrivers(data.drivers.filter((_, idx) => idx !== i))}
           errors={errors}
           removable={data.drivers.length > 1}
+          onBlurField={onBlurField}
         />
       ))}
       <button
@@ -299,10 +333,12 @@ function StepVehicle({
   data,
   setVehicles,
   errors,
+  onBlurField,
 }: {
   data: WizardData;
   setVehicles: (v: VehicleInput[]) => void;
   errors: FieldErrors;
+  onBlurField: (key: string) => void;
 }) {
   const v = data.vehicles[0];
   const p = "vehicles.0";
@@ -344,8 +380,11 @@ function StepVehicle({
               required
               placeholder="e.g. Saab"
               autoComplete="off"
+              maxLength={MAKE_MAX}
+              showCount
               value={makeIsCustom ? v.make : ""}
               onChange={(e) => setVehicles(updateAt(data.vehicles, 0, { make: e.target.value }))}
+              onBlur={() => onBlurField(`${p}.make`)}
               error={errors[`${p}.make`]}
             />
           )}
@@ -358,8 +397,11 @@ function StepVehicle({
           required
           placeholder="Model Y"
           autoComplete="off"
+          maxLength={MODEL_MAX}
+          showCount
           value={v.model}
           onChange={(e) => setVehicles(updateAt(data.vehicles, 0, { model: e.target.value }))}
+          onBlur={() => onBlurField(`${p}.model`)}
           error={errors[`${p}.model`]}
         />
         <TextField
@@ -367,8 +409,11 @@ function StepVehicle({
           label="Trim (optional)"
           placeholder="Long Range"
           autoComplete="off"
+          maxLength={TRIM_MAX}
+          showCount
           value={v.trim}
           onChange={(e) => setVehicles(updateAt(data.vehicles, 0, { trim: e.target.value }))}
+          onBlur={() => onBlurField(`${p}.trim`)}
         />
       </div>
       <div className="field-row">
@@ -416,6 +461,7 @@ function StepVehicle({
             onChange={(e) =>
               setVehicles(updateAt(data.vehicles, 0, { annualMileage: parseIntSafe(e.target.value, 0) }))
             }
+            onBlur={() => onBlurField(`${p}.annualMileage`)}
             error={errors[`${p}.annualMileage`]}
             hint="Your best estimate for the next 12 months."
           />
@@ -442,9 +488,12 @@ function StepVehicle({
           required
           inputMode="numeric"
           autoComplete="postal-code"
+          pattern="\d{5}"
+          maxLength={ZIP_LEN}
           placeholder="02139"
           value={v.garagedZip}
           onChange={(e) => setVehicles(updateAt(data.vehicles, 0, { garagedZip: e.target.value }))}
+          onBlur={() => onBlurField(`${p}.garagedZip`)}
           error={errors[`${p}.garagedZip`]}
           hint="Where the car sleeps at night."
         />
@@ -458,6 +507,7 @@ function StepVehicle({
         placeholder="••••"
         value={v.vinLast4 ?? ""}
         onChange={(e) => setVehicles(updateAt(data.vehicles, 0, { vinLast4: e.target.value }))}
+        onBlur={() => onBlurField(`${p}.vinLast4`)}
         error={errors[`${p}.vinLast4`]}
         hint="Helps carriers match the exact vehicle. Never the full VIN."
       />
@@ -668,11 +718,13 @@ function StepContact({
   setContact,
   setConsent,
   errors,
+  onBlurField,
 }: {
   data: WizardData;
   setContact: (patch: Partial<WizardData["contact"]>) => void;
   setConsent: (b: boolean) => void;
   errors: FieldErrors;
+  onBlurField: (key: string) => void;
 }) {
   return (
     <>
@@ -683,8 +735,11 @@ function StepContact({
         type="email"
         autoComplete="email"
         placeholder="you@example.com"
+        maxLength={EMAIL_MAX}
+        showCount
         value={data.contact.email}
         onChange={(e) => setContact({ email: e.target.value })}
+        onBlur={() => onBlurField("contact.email")}
         error={errors["contact.email"]}
         hint="Quotes are delivered here when they're ready."
       />
@@ -695,9 +750,11 @@ function StepContact({
         type="tel"
         autoComplete="tel"
         inputMode="tel"
+        maxLength={20}
         placeholder="(555) 010-0199"
         value={data.contact.phone}
         onChange={(e) => setContact({ phone: e.target.value })}
+        onBlur={() => onBlurField("contact.phone")}
         error={errors["contact.phone"]}
         hint="Only used if a carrier needs to reach you about your quote."
       />
@@ -767,11 +824,52 @@ export function Wizard() {
   }, [step]);
 
   const setContact = (patch: Partial<WizardData["contact"]>) =>
-    setData((d) => ({ ...d, contact: { ...d.contact, ...patch } }));
-  const setDrivers = (drivers: WizardDriver[]) => setData((d) => ({ ...d, drivers }));
-  const setVehicles = (vehicles: VehicleInput[]) => setData((d) => ({ ...d, vehicles }));
+    applyData({ ...data, contact: { ...data.contact, ...patch } });
+  const setDrivers = (drivers: WizardDriver[]) => applyData({ ...data, drivers });
+  const setVehicles = (vehicles: VehicleInput[]) => applyData({ ...data, vehicles });
   const setCoverage = (patch: Partial<CoverageInput>) =>
-    setData((d) => ({ ...d, coverage: { ...d.coverage, ...patch } }));
+    applyData({ ...data, coverage: { ...data.coverage, ...patch } });
+
+  /**
+   * Re-validate any fields currently showing errors whenever data changes,
+   * so an error clears the moment the field becomes valid — no waiting for
+   * the next Continue click.
+   */
+  function applyData(next: WizardData) {
+    setData(next);
+    setErrors((prev) => {
+      const keys = Object.keys(prev);
+      if (keys.length === 0) return prev;
+      const nextErrs: FieldErrors = { ...prev };
+      let changed = false;
+      for (const k of keys) {
+        const msg = validateField(k, next);
+        if (!msg && nextErrs[k]) {
+          delete nextErrs[k];
+          changed = true;
+        } else if (msg && nextErrs[k] !== msg) {
+          nextErrs[k] = msg;
+          changed = true;
+        }
+      }
+      return changed ? nextErrs : prev;
+    });
+  }
+
+  /** Validate a single field on blur — instant, specific feedback. */
+  const handleBlur = (key: string) => {
+    const msg = validateField(key, data);
+    setErrors((prev) => {
+      if (!msg) {
+        if (!prev[key]) return prev;
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      }
+      if (prev[key] === msg) return prev;
+      return { ...prev, [key]: msg };
+    });
+  };
 
   const announceErrors = (errs: FieldErrors) => {
     const count = Object.keys(errs).length;
@@ -896,16 +994,17 @@ export function Wizard() {
           </h1>
           <p className="wizard-step-sub">{STEP_SUBS[step]}</p>
 
-          {step === 0 && <StepLocation data={data} setContact={setContact} errors={errors} />}
-          {step === 1 && <StepDrivers data={data} setDrivers={setDrivers} errors={errors} />}
-          {step === 2 && <StepVehicle data={data} setVehicles={setVehicles} errors={errors} />}
+          {step === 0 && <StepLocation data={data} setContact={setContact} errors={errors} onBlurField={handleBlur} />}
+          {step === 1 && <StepDrivers data={data} setDrivers={setDrivers} errors={errors} onBlurField={handleBlur} />}
+          {step === 2 && <StepVehicle data={data} setVehicles={setVehicles} errors={errors} onBlurField={handleBlur} />}
           {step === 3 && <StepCoverage data={data} setCoverage={setCoverage} errors={errors} />}
           {step === 4 && (
             <StepContact
               data={data}
               setContact={setContact}
-              setConsent={(b) => setData((d) => ({ ...d, consentEmail: b }))}
+              setConsent={(b) => applyData({ ...data, consentEmail: b })}
               errors={errors}
+              onBlurField={handleBlur}
             />
           )}
 
