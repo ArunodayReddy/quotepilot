@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Seo } from "../components/Seo";
 import { SimBadge } from "../components/SimBadge";
 import { Reveal } from "../components/Reveal";
 import { useAnalytics } from "../lib/analytics";
 import { api } from "../lib/api";
+import { defaultWizardData, loadWizardData, saveWizardData } from "../lib/wizard";
 import type { CarrierEntry } from "../lib/types";
 
 const FAQ_DEFS = [
@@ -48,7 +49,9 @@ function formatList(names: string[]): string {
  */
 function carriersAnswer(quotable: string[] | null): string {
   const base =
-    "Starter lists exist for NH, CA, and TX. Unknown states degrade gracefully — you'll get a clean empty state, not an error.";
+    "Texas is fully seeded too — online carriers plus a Denton-area agent directory. " +
+    "Starter lists exist for NH and CA. Unknown states degrade gracefully — you'll get a " +
+    "clean empty state, not an error.";
   if (!quotable || quotable.length === 0) {
     return `Massachusetts is fully seeded with direct and agent-only carriers, plus a local agent directory. ${base}`;
   }
@@ -92,6 +95,75 @@ function useMaCarriers(): { carriers: CarrierEntry[] | null; failed: boolean } {
   return { carriers, failed };
 }
 
+const ZIP_RE = /^\d{5}$/;
+
+/**
+ * ZIP-first hero entry: the primary CTA. Validates a 5-digit ZIP, stashes it
+ * into the wizard's localStorage (so the location step is prefilled), tracks
+ * the event, and routes to the wizard. Unknown-state ZIPs still work — the
+ * carriers endpoint degrades gracefully downstream.
+ */
+function ZipHeroForm() {
+  const track = useAnalytics("home");
+  const navigate = useNavigate();
+  const [zip, setZip] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const z = zip.trim();
+    if (!ZIP_RE.test(z)) {
+      setError("Enter a valid 5-digit ZIP code.");
+      return;
+    }
+    setError(null);
+    try {
+      const saved = loadWizardData() ?? defaultWizardData();
+      saveWizardData({ ...saved, contact: { ...saved.contact, zip: z } });
+    } catch {
+      /* storage unavailable — the wizard still works, just without prefill */
+    }
+    track("zip_search_submitted", { metadata: { zipPrefix: z.slice(0, 3) } });
+    navigate("/quote");
+  };
+
+  const describedBy = error ? "zip-hero-error zip-hero-hint" : "zip-hero-hint";
+
+  return (
+    <form className="zip-hero-form glass" onSubmit={submit} noValidate aria-label="Start with your ZIP code">
+      <div className="zip-hero-field">
+        <label htmlFor="zip-hero-input">Enter your ZIP code</label>
+        <input
+          id="zip-hero-input"
+          type="text"
+          inputMode="numeric"
+          autoComplete="postal-code"
+          placeholder="76201"
+          maxLength={5}
+          value={zip}
+          onChange={(e) => {
+            setZip(e.target.value.replace(/\D/g, "").slice(0, 5));
+            if (error) setError(null);
+          }}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
+        />
+      </div>
+      <button type="submit" className="btn btn-primary btn-lg">
+        Get my quotes →
+      </button>
+      <p id="zip-hero-hint" className="field-hint">
+        We check every carrier licensed in your state — online quotes plus local agents.
+      </p>
+      {error && (
+        <p id="zip-hero-error" className="field-error" role="alert">
+          {error}
+        </p>
+      )}
+    </form>
+  );
+}
+
 function Hero() {
   const track = useAnalytics("home");
   return (
@@ -119,17 +191,21 @@ function Hero() {
           </p>
         </Reveal>
         <Reveal>
-          <div className="hero-ctas">
+          <ZipHeroForm />
+        </Reveal>
+        <Reveal>
+          <div className="hero-ctas hero-ctas-secondary">
             <Link
               to="/quote"
-              className="btn btn-primary btn-lg"
+              className="link-quiet"
               onClick={() => track("cta_clicked", { element: "hero_get_my_quotes" })}
             >
-              Get my quotes →
+              Start without a ZIP
             </Link>
+            <span aria-hidden="true" className="cta-sep">·</span>
             <Link
               to="/quote"
-              className="btn btn-secondary btn-lg"
+              className="link-quiet"
               onClick={() => track("cta_clicked", { element: "hero_try_sample" })}
             >
               Try with sample data

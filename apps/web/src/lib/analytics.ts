@@ -28,7 +28,13 @@ export type AnalyticsEventName =
   | "carrier_card_expanded"
   | "compare_opened"
   | "email_optin"
-  | "agent_phone_clicked";
+  | "agent_phone_clicked"
+  | "zip_search_submitted"
+  | "quotes_progress_view"
+  | "savings_headline_view"
+  | "inline_email_capture"
+  | "agents_section_view"
+  | "agents_see_all_click";
 
 interface FireOptions {
   page: string;

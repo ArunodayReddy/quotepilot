@@ -13,6 +13,8 @@ import type { AgentEntry } from "../lib/types";
 interface AgentMapProps {
   agents: AgentEntry[];
   onPinClick?: (agentId: string) => void;
+  /** Override the map height (CSS default 380px / 300px mobile). */
+  height?: number;
 }
 
 const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -47,7 +49,7 @@ function popupHtml(a: AgentEntry): string {
   );
 }
 
-export function AgentMap({ agents, onPinClick }: AgentMapProps) {
+export function AgentMap({ agents, onPinClick, height }: AgentMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
@@ -103,6 +105,7 @@ export function AgentMap({ agents, onPinClick }: AgentMapProps) {
     <div
       ref={containerRef}
       className="agent-map"
+      style={height ? { height } : undefined}
       role="region"
       aria-label={`Map of ${agents.length} insurance agent locations. The list below the map contains the same agents in text form.`}
     />

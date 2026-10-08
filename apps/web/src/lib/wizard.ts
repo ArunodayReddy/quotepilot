@@ -161,6 +161,23 @@ export function loadWizardData(): WizardData | null {
   }
 }
 
+/**
+ * Shared helper: read the quote's { state, zip } from wizard localStorage.
+ * Used by the results page ("agents near {ZIP}") and the agents page
+ * ("use my quote ZIP"). Returns null when nothing usable is stored.
+ */
+export function readQuoteLocation(): { state: string; zip: string } | null {
+  try {
+    const data = loadWizardData();
+    const state = data?.contact?.state?.trim().toUpperCase() ?? "";
+    const zip = data?.contact?.zip?.trim() ?? "";
+    if (!/^[A-Z]{2}$/.test(state) || !/^\d{5}$/.test(zip)) return null;
+    return { state, zip };
+  } catch {
+    return null;
+  }
+}
+
 export function saveWizardData(data: WizardData): void {
   try {
     window.localStorage.setItem(WIZARD_STORAGE_KEY, JSON.stringify(data));
