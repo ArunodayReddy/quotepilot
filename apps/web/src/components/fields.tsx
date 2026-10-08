@@ -62,9 +62,12 @@ type TextFieldProps = {
   error?: string;
   hint?: string;
   required?: boolean;
+  /** When true and maxLength is set, show a live "x / max" character counter. */
+  showCount?: boolean;
 } & InputHTMLAttributes<HTMLInputElement>;
 
-export function TextField({ id, label, error, hint, required, ...input }: TextFieldProps) {
+export function TextField({ id, label, error, hint, required, showCount, maxLength, value, ...input }: TextFieldProps) {
+  const len = typeof value === "string" ? value.length : 0;
   return (
     <Field id={id} label={label} error={error} hint={hint} required={required}>
       <input
@@ -73,8 +76,15 @@ export function TextField({ id, label, error, hint, required, ...input }: TextFi
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
         required={required}
+        maxLength={maxLength}
+        value={value}
         {...input}
       />
+      {showCount && typeof maxLength === "number" && (
+        <div className="char-count" aria-hidden="true">
+          {len}/{maxLength}
+        </div>
+      )}
     </Field>
   );
 }
@@ -89,6 +99,7 @@ type SelectFieldProps = {
   disabled?: boolean;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   options: { value: string; label: string }[];
 };
 
@@ -106,6 +117,7 @@ export function SelectField({
   disabled,
   value,
   onChange,
+  onBlur,
   options,
 }: SelectFieldProps) {
   return (
@@ -114,6 +126,7 @@ export function SelectField({
       label={label}
       value={value}
       onChange={onChange}
+      onBlur={onBlur}
       options={options}
       required={required}
       error={error}

@@ -16,6 +16,8 @@ interface SelectProps {
   hint?: string;
   placeholder?: string;
   disabled?: boolean;
+  /** Fired when the trigger loses focus — used for blur validation. */
+  onBlur?: () => void;
 }
 
 /**
@@ -41,6 +43,7 @@ export function Select({
   hint,
   placeholder = "Select…",
   disabled,
+  onBlur,
 }: SelectProps) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(() =>
@@ -196,6 +199,13 @@ export function Select({
           disabled={disabled}
           onClick={() => (open ? close(false) : openMenu())}
           onKeyDown={onTriggerKeyDown}
+          onBlur={(e) => {
+            // Only fire when focus truly leaves the whole select widget
+            // (not when moving into the open listbox).
+            if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) {
+              onBlur?.();
+            }
+          }}
         >
           <span id={`${id}-value`} className={selected ? "" : "qp-select-placeholder"}>
             {selected ? selected.label : placeholder}
