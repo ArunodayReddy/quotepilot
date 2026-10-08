@@ -6,6 +6,7 @@ import { Reveal } from "../components/Reveal";
 import { useAnalytics } from "../lib/analytics";
 import { api } from "../lib/api";
 import { defaultWizardData, loadWizardData, saveWizardData } from "../lib/wizard";
+import { ZIP_RE } from "../lib/validation";
 import type { CarrierEntry } from "../lib/types";
 
 const FAQ_DEFS = [
@@ -94,8 +95,6 @@ function useMaCarriers(): { carriers: CarrierEntry[] | null; failed: boolean } {
   }, []);
   return { carriers, failed };
 }
-
-const ZIP_RE = /^\d{5}$/;
 
 /**
  * ZIP-first hero entry: the primary CTA. Validates a 5-digit ZIP, stashes it

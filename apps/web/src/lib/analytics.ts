@@ -34,7 +34,8 @@ export type AnalyticsEventName =
   | "savings_headline_view"
   | "inline_email_capture"
   | "agents_section_view"
-  | "agents_see_all_click";
+  | "agents_see_all_click"
+  | "loading_view";
 
 interface FireOptions {
   page: string;
