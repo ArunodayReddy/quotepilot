@@ -4,7 +4,7 @@
 > architecture, and data. Every agent working on QuotePilot must read this file first, build toward it, and
 > append new rules here (under "Rule log") as decisions are made — never edit the project against rules that
 > contradict this file without updating it first.
-> Last updated: 2026-10-09 · Status: v0.11.0 real quotes via agents
+> Last updated: 2026-10-09 · Status: v0.12.0 CMS-driven content
 
 ---
 
@@ -263,3 +263,11 @@ change must be recorded there with a date.
   push_files `ok:true` — verify every batch via get_file_contents blob-SHA
   read-back before proceeding; keep push batches in `~/workspace/quote-pilot-push/`
   (persistent), never `/tmp` (wiped on VM replacement).
+
+- 2026-10-09 (v0.12.0 CMS): **CMS content law** — user-facing copy lives in
+  `apps/web/data/content/*.json` (site/home/about), never hardcoded in
+  components. Server pages load content via `lib/cms.ts` on page load and pass
+  it as props; the loader deep-validates every field and throws a loud
+  path-precise error on malformed content (never silent fallbacks). Dynamic
+  slots (registry-driven FAQ answers) compose live data into CMS-owned
+  sentence templates. `lib/cms.ts` is the seam for a future real CMS backend.

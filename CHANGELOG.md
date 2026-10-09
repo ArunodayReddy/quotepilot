@@ -3,6 +3,48 @@
 All notable changes to this project are documented here. Newest at the top.
 Format: `## [version] — date` with Added / Changed / Fixed / Security sections.
 
+## [0.12.0] — 2026-10-09 — CMS-driven content
+
+Page copy moves out of components into versioned JSON content files (the CMS).
+When a page loads, the server fetches its content via the typed CMS loader and
+passes it to presentational components as props — zero hardcoded user-facing
+copy remains in the home page, about page, header, or footer.
+
+### Added
+- `apps/web/data/content/site.json`: brand, site-wide SEO meta, header (nav,
+  CTA, theme-toggle labels), footer (brand blurb, link columns, honesty
+  bullets, legal disclaimer, bottom bar).
+- `apps/web/data/content/home.json`: SEO, hero (eyebrow, title + accent,
+  subtitle, ZIP form copy, secondary CTAs, note), how-it-works steps,
+  carriers section copy, FAQ items (the carriers item carries
+  `dynamic: "carriers"` plus a full static fallback and the sentence template
+  for the live registry answer), final CTA, JSON-LD description.
+- `apps/web/data/content/about.json`: SEO, title, lead, sections as
+  structured rich text (paragraphs = arrays of `text`/`bold`/`link` segments;
+  bullet lists; optional CTA).
+- `apps/web/src/lib/cms.ts` (server-only): `getSiteContent()`,
+  `getHomeContent()`, `getAboutContent()` — deep validation of every field;
+  malformed content throws a loud path-precise error, never a silent fallback.
+  In-memory cache in production, re-read in dev. The loader is the seam for a
+  future real CMS backend.
+
+### Changed
+- `app/page.tsx`, `app/about/page.tsx`, `app/layout.tsx`: async server
+  components that load CMS content on page load; `generateMetadata` reads
+  titles/descriptions from the CMS; FAQ JSON-LD built from CMS items.
+- `views/Home.tsx`, `views/About.tsx`, `components/Header.tsx`,
+  `components/Footer.tsx`: pure presentational — all copy from props. The
+  carrier marquee and carriers FAQ answer still compose live registry data;
+  the FAQ sentence template is CMS-owned now.
+- `lib/homeContent.ts`: FAQ_DEFS deleted (now in `home.json`); keeps only
+  dynamic composition (`carriersAnswer`, `buildJsonLd`, `staticFaqs`).
+
+### Verification
+- `tsc` clean; `next build` green (10/10 pages; `/` and `/about` prerendered
+  with CMS content — the prerender is the build-time content gate).
+- Prerendered HTML spot-checked for CMS copy; loader validation smoke-tested
+  (malformed JSON throws a precise error).
+
 ## [0.11.0] — 2026-10-09 — "Real quotes via agents"
 
 The first real (non-simulated) product path: instead of fake carrier prices,
