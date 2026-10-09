@@ -66,7 +66,7 @@ function buildJsonLd(faqs: { q: string; a: string }[]) {
     name: "QuotePilot",
     url: "https://quotepilot.example.com",
     description:
-      "One form. Every carrier. The best deal. QuotePilot gathers car insurance quotes from every relevant carrier in your state.",
+      "One form. Every carrier. Compare side by side. QuotePilot gathers car insurance quotes from every relevant carrier in your state.",
     mainEntity: faqs.map((f) => ({
       "@type": "Question",
       name: f.q,
@@ -180,7 +180,7 @@ function Hero() {
         </Reveal>
         <Reveal>
           <h1 id="hero-title" className="hero-title">
-            One form. Every carrier. <span className="gradient-text">The best deal.</span>
+            One form. Every carrier. <span className="gradient-text">Compare side by side.</span>
           </h1>
         </Reveal>
         <Reveal>
@@ -233,7 +233,7 @@ function HowItWorks() {
     },
     {
       n: "3",
-      title: "Pick the best deal",
+      title: "Compare and pick",
       text: "Quotes arrive ranked by price with coverage-match scores, expandable details, a side-by-side compare view, and an emailed copy.",
     },
   ];
@@ -384,7 +384,7 @@ export function Home() {
   return (
     <div className="page" style={{ paddingTop: 0 }}>
       <Seo
-        title="QuotePilot — One form. Every carrier. The best deal."
+        title="QuotePilot — One form. Every carrier. Compare side by side."
         description="QuotePilot gathers car insurance quotes from every relevant carrier in your state with one short form. Compare ranked quotes on the site and by email. Demo build with simulated pricing."
         path="/"
         jsonLd={jsonLd}
