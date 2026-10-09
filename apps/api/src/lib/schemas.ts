@@ -68,6 +68,12 @@ export const quoteRequestSchema = z.object({
   coverage: coverageSchema,
   currentPolicy: currentPolicySchema,
   emailOptIn: z.boolean().optional().default(true),
+  /**
+   * TCPA express-written-consent flag for marketing calls/texts to the phone
+   * number above. Client must leave this unchecked by default; only an
+   * explicit user click records consent. Persisted with the job for audit.
+   */
+  phoneOptIn: z.boolean().optional().default(false),
 });
 
 export type QuoteRequestInput = z.infer<typeof quoteRequestSchema>;
