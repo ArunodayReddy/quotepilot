@@ -1,0 +1,99 @@
+{
+  "$schema": "cms/v1",
+  "brand": {
+    "homeAriaLabel": "QuotePilot home",
+    "homeHref": "/",
+    "mark": "Q",
+    "name": "QuotePilot"
+  },
+  "footer": {
+    "bottom": {
+      "cookieSettings": "Cookie settings",
+      "copyright": "© 2026 QuotePilot. Demo build — all prices simulated.",
+      "sampleNote": "Sample data only. No real PII."
+    },
+    "brandBlurb": "One form. Compare carriers side by side. Demo experience with simulated pricing.",
+    "columns": [
+      {
+        "heading": "Explore",
+        "links": [
+          {
+            "href": "/",
+            "label": "Home"
+          },
+          {
+            "href": "/quote",
+            "label": "Get quotes"
+          },
+          {
+            "href": "/agents",
+            "label": "Local agents"
+          },
+          {
+            "href": "/about",
+            "label": "About"
+          }
+        ]
+      },
+      {
+        "heading": "Legal",
+        "links": [
+          {
+            "href": "/terms",
+            "label": "Terms of Service"
+          },
+          {
+            "href": "/privacy",
+            "label": "Privacy Policy"
+          },
+          {
+            "href": "/disclosures",
+            "label": "Important Disclosures"
+          }
+        ]
+      },
+      {
+        "bullets": [
+          "All quotes shown are simulated demo pricing",
+          "No personal data is sold or shared"
+        ],
+        "heading": "Honest pricing"
+      }
+    ],
+    "disclaimer": "QuotePilot is not an insurance company or licensed insurance producer. All prices are simulated estimates, not offers of insurance — your final premium is determined by the carrier's underwriting. Carrier availability varies by state."
+  },
+  "header": {
+    "cta": {
+      "href": "/quote",
+      "label": "Get my quotes"
+    },
+    "nav": [
+      {
+        "exact": true,
+        "href": "/",
+        "label": "Home"
+      },
+      {
+        "href": "/quote",
+        "label": "Get quotes"
+      },
+      {
+        "href": "/agents",
+        "label": "Agents"
+      },
+      {
+        "href": "/about",
+        "label": "About"
+      }
+    ],
+    "themeToggle": {
+      "toDark": "Switch to dark mode",
+      "toLight": "Switch to light mode"
+    }
+  },
+  "meta": {
+    "defaultTitle": "QuotePilot — One form. Every carrier. Compare side by side.",
+    "titleTemplate": "%s",
+    "description": "QuotePilot gathers car insurance quotes from every relevant carrier in your state with one short form. Compare ranked quotes on the site and by email. Demo build with simulated pricing."
+  }
+}

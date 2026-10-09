@@ -1,0 +1,101 @@
+{
+  "$schema": "cms/v1",
+  "seo": {
+    "title": "QuotePilot — One form. Every carrier. Compare side by side.",
+    "description": "QuotePilot gathers car insurance quotes from every relevant carrier in your state with one short form. Compare ranked quotes on the site and by email. Demo build with simulated pricing."
+  },
+  "hero": {
+    "eyebrow": "✨ Demo build — simulated pricing",
+    "title": "One form. Every carrier.",
+    "titleAccent": "Compare side by side.",
+    "subtitle": "Tell us about yourself once. QuotePilot quietly gathers car insurance quotes from every carrier in your state and ranks them for you — on the site and by email.",
+    "zipLabel": "Enter your ZIP code",
+    "zipPlaceholder": "76201",
+    "zipCta": "Get my quotes →",
+    "zipHint": "We check every carrier licensed in your state — online quotes plus local agents.",
+    "zipError": "Enter a valid 5-digit ZIP code.",
+    "secondaryCtas": [
+      {
+        "label": "Start without a ZIP",
+        "href": "/quote",
+        "element": "hero_get_my_quotes"
+      },
+      {
+        "label": "Try with sample data",
+        "href": "/quote",
+        "element": "hero_try_sample"
+      }
+    ],
+    "note": "Takes about 2 minutes · No account needed · Free forever"
+  },
+  "howItWorks": {
+    "heading": "How it works",
+    "sub": "Three steps. Zero phone calls. Zero repeated forms.",
+    "steps": [
+      {
+        "n": "1",
+        "title": "Answer once",
+        "text": "A five-step wizard — location, drivers, vehicle, coverage, contact — with smart defaults and inline help. Your progress saves automatically."
+      },
+      {
+        "n": "2",
+        "title": "We ask everyone",
+        "text": "QuotePilot pings every relevant carrier for your state in the background while you watch live progress. Nobody is left out."
+      },
+      {
+        "n": "3",
+        "title": "Compare and pick",
+        "text": "Quotes arrive ranked by price with coverage-match scores, expandable details, a side-by-side compare view, and an emailed copy."
+      }
+    ]
+  },
+  "carriers": {
+    "heading": "Carriers we check",
+    "sub": "Direct and agent-only carriers for your state.",
+    "loadingAriaLabel": "Loading carriers",
+    "unavailableNote": "The carrier list is unavailable right now — the demo still works, and carriers load on the results page.",
+    "marqueeAriaLabel": "Example carriers (simulated)"
+  },
+  "faq": {
+    "heading": "Questions, answered",
+    "sub": "The honest version — including what's simulated and what isn't.",
+    "items": [
+      {
+        "id": "how",
+        "q": "How does QuotePilot work?",
+        "a": "You fill out one short form — location, drivers, vehicle, coverage, and contact. QuotePilot then asks every relevant carrier for your state to price that exact profile, and shows the results ranked side by side. When everything is in, we email you a copy too."
+      },
+      {
+        "id": "real",
+        "q": "Are these real insurance quotes?",
+        "a": "No. This demo build shows simulated pricing in realistic bands anchored to real Massachusetts quote research (for example, Allstate quoted $1,347 / 6 months for our sample profile in October 2026). Every quote card carries a 'Simulated — demo pricing' badge so it's always clear."
+      },
+      {
+        "id": "carriers",
+        "q": "Which states and carriers are supported?",
+        "dynamic": "carriers",
+        "fallback": "Massachusetts is fully seeded with direct and agent-only carriers, plus a local agent directory. Texas is fully seeded too — online carriers plus a Denton-area agent directory. Starter lists exist for NH and CA. Unknown states degrade gracefully — you'll get a clean empty state, not an error.",
+        "dynamicPrefix": "Massachusetts is fully seeded with ",
+        "dynamicSuffix": ", plus agent-only carriers through the local agent directory. Texas is fully seeded too — online carriers plus a Denton-area agent directory. Starter lists exist for NH and CA. Unknown states degrade gracefully — you'll get a clean empty state, not an error."
+      },
+      {
+        "id": "privacy",
+        "q": "What happens to my personal information?",
+        "a": "Nothing leaves the demo. Your wizard answers are saved only in your browser (localStorage) so you can resume where you left off. We never log PII, never sell data, and analytics events carry only anonymous metadata — no names, emails, or addresses."
+      },
+      {
+        "id": "timing",
+        "q": "How long does it take?",
+        "a": "Carriers respond at their own pace, so quoting runs as a background job. You'll see live progress ('4 of 6 carriers'), and most demo runs complete in under a minute. You can leave and come back — the job link keeps working."
+      }
+    ]
+  },
+  "finalCta": {
+    "heading": "Ready to see your number?",
+    "sub": "Two minutes now could save you hundreds on your next six months.",
+    "cta": "Get my quotes →"
+  },
+  "jsonLd": {
+    "description": "One form. Every carrier. Compare side by side. QuotePilot gathers car insurance quotes from every relevant carrier in your state."
+  }
+}
