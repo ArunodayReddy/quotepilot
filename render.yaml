@@ -1,0 +1,37 @@
+# Render blueprint for the QuotePilot API.
+# Deploy: Render dashboard → New → Blueprint → connect ArunodayReddy/quotepilot.
+# Free tier is fine for demo/hackathon traffic. See docs/DEPLOY.md.
+services:
+  - type: web
+    name: quotepilot-api
+    runtime: node
+    plan: free
+    # Repo root has the npm workspaces; install everything, then build the API
+    # workspace (its build script builds packages/shared first).
+    buildCommand: npm install && npm run build --workspace apps/api
+    startCommand: npm start --workspace apps/api
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render injects PORT automatically; the API reads process.env.PORT.
+      - key: CORS_ORIGIN
+        sync: false # set to your Vercel URL, e.g. https://quotepilot.vercel.app
+      - key: GOOGLE_PLACES_API_KEY
+        sync: false # live agent directory; empty = labeled sample fallback
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        value: quotes@quotepilot.app
+        sync: false
+      - key: ANALYTICS_SALT
+        generateValue: true # REQUIRED in production: salts analytics session hashes
+      - key: APP_BASE_URL
+        sync: false # public web URL, used in quote emails
