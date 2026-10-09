@@ -3,6 +3,72 @@
 All notable changes to this project are documented here. Newest at the top.
 Format: `## [version] — date` with Added / Changed / Fixed / Security sections.
 
+## [0.11.0] — 2026-10-09 — "Real quotes via agents"
+
+The first real (non-simulated) product path: instead of fake carrier prices,
+the user submits once and licensed local agents receive a professional quote
+request — real quotes from real agents. The adapter-based carrier results stay
+honestly labeled simulations; real-time carrier APIs need producer licensing
+and carrier appointments that code alone can't provide.
+
+### Added
+- `POST /api/quote-requests` → 201: Zod-validated
+  `{ jobId, agentIds[1..3], contact: { name, email, phone }, consent }`.
+  `jobId` must reference a **completed** quote job (404/422 otherwise);
+  `agentIds` re-validated server-side against the agent directory (422 on
+  unknown ids); `consent` must be literally `true` (TCPA — anything else 400).
+  Returns `QP-XXXXXX` reference codes (unambiguous alphabet, no 0/O/1/I/L).
+- Delivery chain per agent: verified agent email → professional request email
+  (subject `New quote request QP-XXXXXX — N driver(s), M vehicle(s), ZIP`;
+  body: structured profile with **age bands, never exact ages**; QuotePilot
+  identified as a comparison service, not a producer) → `emailed`. No email on
+  file → honest **`handoff`** card (tap-to-call/website) — never a fake send.
+- User receipt email (dev-log until SMTP configured): ref code, per-agent
+  status, honest expectations ("real quotes from licensed agents — not
+  estimates").
+- `quote_requests` persistence in the analytics SQLite store (gitignored;
+  `:memory:` in tests; Postgres migration is future work). Contact is stored
+  for its consented purpose but **never logged** — logs carry ref code +
+  truncated phone hash only.
+- Results-page "Get real quotes" flow: agent checkbox cards (max 3, accessible
+  fieldset/legend) → review panel (contact prefilled **read-only** from the
+  wizard's localStorage draft with "Edit in wizard →" link; manual-entry
+  fallback so it's never a dead end) → confirmation with big ref code,
+  per-agent status ("Request emailed to X" / "Call X at {phone} — mention ref
+  {code}"), tap-to-call, honest expectations copy, and a **"Copy my details"**
+  button. TCPA checkbox **unchecked by default** with not-a-condition language.
+- `JobQueue.getJobRequest`: the profile summary is built server-side from the
+  stored job — the client is never trusted to describe the profile.
+- 5/hour-per-IP rate limit on quote requests (`quoteRequestLimiter`).
+- Analytics: `quote_request_submitted` with delivery mix only — no PII.
+- `services/agentDirectory.ts`: agent-directory provider chain extracted for
+  reuse (`routes/agents.ts` refactored onto it, same behavior/logs).
+- `emailService` refactored around a shared `sendMail` core (SMTP/dev-log,
+  domain-only logging); `sendQuotesReady` behavior unchanged.
+- Shared types: `QuoteRequestContact/Delivery/HandoffCard`,
+  `CreateQuoteRequestInput/Response`, `QuoteRequestRecord`,
+  `QuoteRequestDeliveryMethod`.
+
+### Fixed
+- Three broken `Link to=` react-router leftovers in Quotes.tsx.
+
+### Verification
+- API suite: **148/148 pass** (138 before + 10 new `quoteRequests.test.ts`:
+  consent=false/missing rejected, >3/0 agents rejected, unknown job 404,
+  unknown agent 422, handoff delivery + user receipt, emailed path with mocked
+  directory/transport asserting age bands and no exact ages, no raw
+  phone/email/name in any log line, 5/hour limit → 429 on the 6th).
+- Live smoke (dev server, sample MA profile): job → complete → agents →
+  `POST /api/quote-requests` → **201**, ref `QP-E4SN54`, 2 handoff cards with
+  phones/addresses; PII-leak scan of the log: **0 hits**.
+
+### Known limitation
+- Today every delivery is `handoff`: neither Google Places nor the sample
+  seeds carry agent email addresses, so the `emailed` path is wired, tested,
+  and waiting — but not live. The unlock is an agent claim/portal flow where
+  agencies verify and register a contact email (future work). Until then the
+  tap-to-call handoff IS the real product.
+
 ## [0.10.1] — 2026-10-08 — Docs sync (v0.9.0 + v0.10.0)
 
 Narrative docs re-synced with the two releases that landed after v0.8.0 wrote

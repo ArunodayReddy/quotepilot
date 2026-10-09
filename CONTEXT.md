@@ -4,7 +4,7 @@
 > architecture, and data. Every agent working on QuotePilot must read this file first, build toward it, and
 > append new rules here (under "Rule log") as decisions are made — never edit the project against rules that
 > contradict this file without updating it first.
-> Last updated: 2026-10-08 · Status: v0.1.0 kickoff
+> Last updated: 2026-10-09 · Status: v0.11.0 real quotes via agents
 
 ---
 
@@ -249,3 +249,17 @@ change must be recorded there with a date.
   **Fail-open analytics** — a Postgres outage warns loudly and falls back to
   SQLite; analytics never breaks quoting. `/api/health` reports live backend
   selection (queue/analytics/cache/rateLimitStore).
+
+- 2026-10-09 (v0.11.0 real quotes): **agent-mediated real-quote law** — the real
+  product path is licensed-agent mediation, not simulated carrier prices:
+  `POST /api/quote-requests` requires a completed job, 1–3 directory-validated
+  agents, and consent literally `true` (TCPA); ref codes `QP-XXXXXX`. Delivery
+  chain: verified agent email → professional request email (age bands, never
+  exact ages; QuotePilot named as a comparison service, not a producer) →
+  `emailed`; otherwise an honest `handoff` card (tap-to-call/website) — never
+  fake an email send. Contact is stored for its consented purpose and never
+  logged (ref code + truncated phone hash only). Copy rule: the agents quote,
+  never QuotePilot. No new env vars. **Phantom-commit guard**: never trust
+  push_files `ok:true` — verify every batch via get_file_contents blob-SHA
+  read-back before proceeding; keep push batches in `~/workspace/quote-pilot-push/`
+  (persistent), never `/tmp` (wiped on VM replacement).
