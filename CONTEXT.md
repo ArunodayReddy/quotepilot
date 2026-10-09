@@ -188,3 +188,16 @@ change must be recorded there with a date.
   address stay form-local until real adapters consume them. localStorage schema bumps get a
   new key version (v1 → v2), never a silent migration. Web gender enum must match the API
   zod enum exactly (`prefer_not_to_say`); web/API enum drift is a 400-class bug.
+
+- 2026-10-08 (v0.7.0 compliance): compliance is law — QuotePilot is a comparison/
+  lead-gen site, never an insurer or licensed producer (footer disclaimer on every
+  page); estimates-not-offers doctrine enforced via QuoteDisclaimer + SimBadge on
+  quote surfaces; docs/COMPLIANCE.md is the sourced compliance model (every
+  regulatory claim carries a source). TCPA: phone consent checkbox unchecked by
+  default, names the caller class, not-a-condition language, persists as
+  `phoneOptIn` with the quote request (booleans-only logging). Per-state notes in
+  data/disclosures/<STATE>.json via GET /api/disclosures/:state, rendered as
+  "Good to know in {state}" (404 → no panel, graceful). CAN-SPAM email footer
+  needs SENDER_POSTAL_ADDRESS before any production send — never invent business
+  data. Claims audit: no "best deal"/guaranteed-savings language; savings only
+  from real computed results. compliance.test.ts guards all surfaces; 123/123 green.

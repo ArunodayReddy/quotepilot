@@ -1,6 +1,6 @@
 # QuotePilot
 
-**One form. Every carrier. The best deal.** QuotePilot collects your car-insurance details once, pulls quotes
+**One form. Every carrier. Compare side by side.** QuotePilot collects your car-insurance details once, pulls quotes
 from every relevant insurance company for your state in the background, and delivers them ranked
 side-by-side — on the site and by email when they're ready. Plus a local-agent directory for your area and a
 usage-analytics dashboard.

@@ -3,6 +3,46 @@
 All notable changes to this project are documented here. Newest at the top.
 Format: `## [version] — date` with Added / Changed / Fixed / Security sections.
 
+## [0.7.0] — 2026-10-08 — Compliance build
+
+### Added
+- **Legal pages**: `/terms`, `/privacy`, `/disclosures` — plain-language, Apple-grade
+  prose pages with per-page SEO (title/meta/OG/canonical). Footer links to all three
+  from **every page**; footer also carries "QuotePilot is not an insurance company or
+  licensed insurance producer…" + estimates-not-offers + state-availability note.
+- **`docs/COMPLIANCE.md`**: the compliance model — what QuotePilot is (comparison/
+  lead-gen, not insurer/producer) and isn't; sourced per-state notes (MA SDIP + $8k
+  PIP + banned rating factors; CA Prop 103 + 20% Good Driver Discount; TX file-and-use;
+  NH 25/50/25); TCPA posture (unchecked-by-default, named callers, not-a-condition
+  language, one-to-one rule vacated Jan 2025); CAN-SPAM posture; CCPA/CPRA-informed
+  privacy posture. Every regulatory claim carries a source; production launch
+  checklist included.
+- **TCPA express-written-consent checkbox** in the wizard contact step: optional,
+  **unchecked by default** (even in sample fill), names QuotePilot + carriers/agents
+  as callers, states consent is not a condition of getting quotes or purchasing
+  insurance. Separate required email-consent checkbox retained for quote delivery.
+  Consent choices persist with the quote request (`emailOptIn`, `phoneOptIn` on the
+  API contract; booleans only logged, no PII).
+- **Per-state disclosures**: `data/disclosures/{MA,TX,CA,NH}.json` served by new
+  `GET /api/disclosures/:state` (404 for unknown states); results page renders a
+  "Good to know in {state}" panel (graceful degradation — no panel when missing).
+- **Quote disclaimer component** (shared track): `QuoteDisclaimer` with "Estimates,
+  not offers" heading + SimBadge pairing, rendered on quote results; "Simulated —
+  demo pricing" badge unchanged and mandatory everywhere.
+- CAN-SPAM footer on quote-ready emails (postal address from `SENDER_POSTAL_ADDRESS`
+  env; clearly-marked placeholder in dev — never invented business data) + unsubscribe
+  line; `.env.example` documents the requirement.
+- `apps/api/tests/compliance.test.ts` — 15 assertions: disclosure registry, consent
+  schema defaults, non-PII public job view, and static web-surface checks (disclosure
+  presence, consent defaults, footer links, claims-audit sweep). Suite 123/123 green.
+
+### Changed
+- Claims audit: "best deal" / "best price" guarantee language scrubbed from marketing
+  surfaces (hero → "Compare side by side", cheapest-card ribbon → "Lowest estimate");
+  savings figures remain computed-from-real-results only.
+- Public job view now carries the 2-letter `state` (non-PII) to drive disclosures.
+- localStorage wizard key bumped v2 → v3 (new `consentPhone` field per schema rule).
+
 ## [0.6.0] — 2026-10-08 — Nationwide + deploy prep
 
 ### Added
