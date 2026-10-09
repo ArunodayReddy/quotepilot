@@ -22,8 +22,15 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * API base URL. In dev this is empty so requests hit the Vite "/api" proxy.
+ * In production (Vercel) set VITE_API_URL to the deployed API origin, e.g.
+ * https://quotepilot-api.onrender.com — requests then go direct (CORS).
+ */
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ?? "";
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, {
+  const res = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json" },
     ...init,
   });
