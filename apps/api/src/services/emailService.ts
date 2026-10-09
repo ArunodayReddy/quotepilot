@@ -43,12 +43,21 @@ export async function sendQuotesReady(
 ): Promise<{ sent: boolean; mode: "smtp" | "dev" }> {
   const resultsUrl = `${config.appBaseUrl}/quotes/${summary.jobId}`;
   const subject = "Your QuotePilot quotes are ready";
+  // CAN-SPAM posture: accurate headers (from config), non-deceptive subject,
+  // postal address + opt-out in every send. Quote emails are user-requested,
+  // but the checklist is enforced anyway (see docs/COMPLIANCE.md §4).
+  const postal = config.senderPostalAddress || "[configure SENDER_POSTAL_ADDRESS]";
+  const footer =
+    `\n\n— QuotePilot\n` +
+    `${postal}\n` +
+    `This email was requested by you. Reply STOP to stop these emails.`;
   const text =
     `Your ${summary.carrierCount} car-insurance quotes are ready.\n` +
     (summary.cheapestPremium6Mo !== undefined
       ? `Lowest 6-month premium: $${summary.cheapestPremium6Mo} (${summary.cheapestCarrierName}).\n`
       : "") +
-    `Compare them here: ${resultsUrl}\n\n— QuotePilot`;
+    `Compare them here: ${resultsUrl}` +
+    footer;
 
   const t = getTransporter();
   if (!t) {

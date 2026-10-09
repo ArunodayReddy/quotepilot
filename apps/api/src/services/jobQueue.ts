@@ -59,6 +59,8 @@ interface JobInternal {
   request: QuoteRequest;
   email: string;
   emailOptIn: boolean;
+  /** TCPA marketing-call/text consent flag, persisted for audit (boolean only). */
+  phoneOptIn: boolean;
   pendingNotifyEmails: Set<string>;
 }
 
@@ -129,6 +131,8 @@ function publicJob(internal: JobInternal): QuoteJob {
     estimatedSeconds: job.estimatedSeconds,
     createdAt: job.createdAt,
     completedAt: job.completedAt,
+    // 2-letter state code only — safe for the public view, drives disclosures.
+    state: job.state,
   };
 }
 
@@ -145,16 +149,27 @@ export function createQuoteJob(request: QuoteRequest): QuoteJob {
       // Ceiling of the slowest simulated adapter latency (2500ms) → 3s.
       estimatedSeconds: 3,
       createdAt: new Date().toISOString(),
+      // 2-letter state code (non-PII) — drives the state disclosure panel.
+      state: request.contact.state,
     },
     request,
     email: request.contact.email,
     emailOptIn: request.emailOptIn ?? true,
+    phoneOptIn: request.phoneOptIn ?? false,
     pendingNotifyEmails: new Set(),
   };
   jobs.set(jobId, internal);
 
   track({ event: "quote_requested", page: "/quote", sessionId: jobId, metadata: { carrierCount: adapters.length } });
-  logger.info({ msg: "quote_job_created", jobId, carrierCount: adapters.length, state: request.contact.state });
+  // Consent booleans only — never PII (CONTEXT.md rule 5).
+  logger.info({
+    msg: "quote_job_created",
+    jobId,
+    carrierCount: adapters.length,
+    state: request.contact.state,
+    emailOptIn: internal.emailOptIn,
+    phoneOptIn: internal.phoneOptIn,
+  });
 
   // Snapshot the "queued" response BEFORE kicking off background processing.
   const response = publicJob(internal);
