@@ -20,6 +20,13 @@ export interface JobQueue {
   enqueue(request: QuoteRequest): Promise<QuoteJob>;
   /** Public job view, or undefined for unknown ids. */
   getJob(jobId: string): Promise<QuoteJob | undefined>;
+  /**
+   * The original validated quote request for a job, or undefined for unknown
+   * ids. Used by the agent-mediated quote-request flow to build the profile
+   * summary server-side (never trust the client to describe the profile).
+   * Contains PII — handle with care, never log it.
+   */
+  getJobRequest(jobId: string): Promise<QuoteRequest | undefined>;
   /** Register a one-shot callback fired when this job completes. */
   onComplete(jobId: string, cb: (job: QuoteJob) => void): void;
   /**

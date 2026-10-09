@@ -37,6 +37,35 @@ function getTransporter(): nodemailer.Transporter | null {
   return transporter;
 }
 
+export interface SendMailInput {
+  to: string;
+  subject: string;
+  text: string;
+  /** Extra PII-free fields merged into the structured log line. */
+  logContext?: Record<string, unknown>;
+}
+
+/**
+ * Shared send core: SMTP when configured, dev-log otherwise.
+ * Logs carry the recipient DOMAIN only — never the full address or body.
+ * A send failure never throws: it logs and reports { sent: false }.
+ */
+export async function sendMail(input: SendMailInput): Promise<{ sent: boolean; mode: "smtp" | "dev" }> {
+  const t = getTransporter();
+  if (!t) {
+    logger.info({ msg: "email_would_be_sent", recipientDomain: domainOf(input.to), ...input.logContext });
+    return { sent: false, mode: "dev" };
+  }
+  try {
+    await t.sendMail({ from: config.smtp.from, to: input.to, subject: input.subject, text: input.text });
+    logger.info({ msg: "email_sent", recipientDomain: domainOf(input.to), ...input.logContext });
+    return { sent: true, mode: "smtp" };
+  } catch (err) {
+    logger.error({ msg: "email_send_failed", reason: (err as Error).message, ...input.logContext });
+    return { sent: false, mode: "smtp" };
+  }
+}
+
 export async function sendQuotesReady(
   email: string,
   summary: QuotesReadySummary,
@@ -59,25 +88,11 @@ export async function sendQuotesReady(
     `Compare them here: ${resultsUrl}` +
     footer;
 
-  const t = getTransporter();
-  if (!t) {
-    // Dev mode: structured log with domain + jobId only. No address, no quotes.
-    logger.info({
-      msg: "email_would_be_sent",
-      jobId: summary.jobId,
-      recipientDomain: domainOf(email),
-      carrierCount: summary.carrierCount,
-    });
-    return { sent: false, mode: "dev" };
-  }
-
-  try {
-    await t.sendMail({ from: config.smtp.from, to: email, subject, text });
-    logger.info({ msg: "email_sent", jobId: summary.jobId, recipientDomain: domainOf(email) });
-    return { sent: true, mode: "smtp" };
-  } catch (err) {
-    // Email failure must never break the quote job — log and move on.
-    logger.error({ msg: "email_send_failed", jobId: summary.jobId, err: (err as Error).message });
-    return { sent: false, mode: "smtp" };
-  }
+  // A send failure must never break the quote job — sendMail logs and reports.
+  return sendMail({
+    to: email,
+    subject,
+    text,
+    logContext: { kind: "quotes_ready", jobId: summary.jobId, carrierCount: summary.carrierCount },
+  });
 }

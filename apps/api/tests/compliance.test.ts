@@ -139,7 +139,7 @@ describe("consent flags on the quote contract", () => {
 
 describe("web compliance surfaces (static)", () => {
   it("quote results carry the estimates-not-offers disclosure + simulated badge", () => {
-    const q = webFile("pages/Quotes.tsx");
+    const q = webFile("views/Quotes.tsx");
     // Doctrine may live on the page or in the shared QuoteDisclaimer component.
     const disc = webFile("components/QuoteDisclaimer.tsx");
     expect(q).toContain("QuoteDisclaimer");
@@ -152,7 +152,7 @@ describe("web compliance surfaces (static)", () => {
   });
 
   it("TCPA phone consent is unchecked by default, never pre-checked", () => {
-    const wz = webFile("pages/Wizard.tsx");
+    const wz = webFile("views/Wizard.tsx");
     expect(wz).toContain('id="wz-consent-phone"');
     expect(wz).toMatch(/consent is not a condition/i);
     expect(wz).toMatch(/express written consent/i);
@@ -163,22 +163,23 @@ describe("web compliance surfaces (static)", () => {
   });
 
   it("footer carries the producer disclaimer + legal links on every page", () => {
-    const layout = webFile("components/Layout.tsx");
+    const layout = webFile("components/Footer.tsx");
     expect(layout).toMatch(/not an insurance company or licensed insurance producer/i);
-    expect(layout).toContain('to="/terms"');
-    expect(layout).toContain('to="/privacy"');
-    expect(layout).toContain('to="/disclosures"');
+    expect(layout).toContain('href="/terms"');
+    expect(layout).toContain('href="/privacy"');
+    expect(layout).toContain('href="/disclosures"');
   });
 
   it("legal routes are registered", () => {
-    const app = webFile("App.tsx");
-    expect(app).toContain('path="terms"');
-    expect(app).toContain('path="privacy"');
-    expect(app).toContain('path="disclosures"');
+    // Next.js App Router: each legal page is a route file under src/app/.
+    for (const r of ["terms", "privacy", "disclosures"]) {
+      const src = webFile(`app/${r}/page.tsx`);
+      expect(src.length).toBeGreaterThan(0);
+    }
   });
 
   it("no guaranteed-savings / best-deal language remains on marketing surfaces", () => {
-    for (const p of ["pages/Home.tsx", "pages/About.tsx", "pages/Quotes.tsx", "components/Layout.tsx"]) {
+    for (const p of ["views/Home.tsx", "views/About.tsx", "views/Quotes.tsx", "components/Footer.tsx"]) {
       const src = webFile(p).toLowerCase();
       expect(src).not.toContain("best deal");
       expect(src).not.toContain("best price");

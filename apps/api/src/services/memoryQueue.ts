@@ -115,6 +115,10 @@ export class MemoryQueue implements JobQueue {
     return internal ? publicJobView(internal.job) : undefined;
   }
 
+  async getJobRequest(jobId: string): Promise<QuoteRequest | undefined> {
+    return this.jobs.get(jobId)?.request;
+  }
+
   onComplete(jobId: string, cb: (job: QuoteJob) => void): void {
     const internal = this.jobs.get(jobId);
     if (!internal) return;

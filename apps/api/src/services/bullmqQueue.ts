@@ -154,6 +154,17 @@ export class BullMQQueue implements JobQueue {
     });
   }
 
+  async getJobRequest(jobId: string): Promise<QuoteRequest | undefined> {
+    const { connection } = await this.init();
+    const requestJson = await connection.hget(this.jobKey(jobId), "requestJson");
+    if (!requestJson) return undefined;
+    try {
+      return JSON.parse(requestJson) as QuoteRequest;
+    } catch {
+      return undefined;
+    }
+  }
+
   onComplete(jobId: string, cb: (job: QuoteJob) => void): void {
     void (async () => {
       const already = await this.getJob(jobId);
