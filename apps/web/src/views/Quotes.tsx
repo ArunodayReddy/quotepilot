@@ -10,6 +10,7 @@ import { useAnalytics } from "../lib/analytics";
 import { readQuoteLocation } from "../lib/wizard";
 import { StateDisclosurePanel } from "../components/StateDisclosurePanel";
 import { QuoteDisclaimer } from "../components/QuoteDisclaimer";
+import { RealQuoteRequest } from "../components/RealQuoteRequest";
 import { SourceBadge } from "./Agents";
 import type { AgentEntry, CarrierEntry, QuoteJob, QuoteResult } from "../lib/types";
 
@@ -346,7 +347,7 @@ function MoreCarriers({ state }: { state: string }) {
               </a>
             ) : (
               c.channel === "agent" && (
-                <Link to={`/agents?state=${state}`} className="btn btn-secondary btn-sm">
+                <Link href={`/agents?state=${state}`} className="btn btn-secondary btn-sm">
                   Find a local agent →
                 </Link>
               )
@@ -401,7 +402,7 @@ function AgentMiniCard({ agent, index }: { agent: AgentEntry; index: number }) {
  * compact AgentMap + top-3 cards. Location comes from wizard localStorage;
  * without it we degrade to a link instead of guessing.
  */
-function AgentsSection() {
+function AgentsSection({ jobId }: { jobId: string }) {
   const track = useAnalytics("quotes");
   const [loc] = useState(() => readQuoteLocation());
   const [agents, setAgents] = useState<AgentEntry[] | null>(null);
@@ -460,7 +461,7 @@ function AgentsSection() {
         <div className="glass agents-teaser">
           <p className="section-sub">
             No agent listings near {loc.zip} yet.{" "}
-            <Link to={`/agents?zip=${loc.zip}&state=${loc.state}`}>Search the full directory →</Link>
+            <Link href={`/agents?zip=${loc.zip}&state=${loc.state}`}>Search the full directory →</Link>
           </p>
         </div>
       ) : (
@@ -475,13 +476,14 @@ function AgentsSection() {
           </div>
           <div style={{ textAlign: "center", marginTop: "1rem" }}>
             <Link
-              to={`/agents?zip=${loc.zip}&state=${loc.state}`}
+              href={`/agents?zip=${loc.zip}&state=${loc.state}`}
               className="btn btn-secondary"
               onClick={() => track("agents_see_all_click")}
             >
               See all {agents.length} agents near {loc.zip} →
             </Link>
           </div>
+          <RealQuoteRequest jobId={jobId} agents={agents} />
         </>
       )}
     </section>
@@ -490,12 +492,12 @@ function AgentsSection() {
 
 
 /** Location-aware extras below the results: local agents + non-instant carriers. */
-function QuoteExtras() {
+function QuoteExtras({ jobId }: { jobId: string }) {
   const [loc] = useState(() => readQuoteLocation());
-  if (!loc) return <AgentsSection />;
+  if (!loc) return <AgentsSection jobId={jobId} />;
   return (
     <>
-      <AgentsSection />
+      <AgentsSection jobId={jobId} />
       <MoreCarriers state={loc.state} />
     </>
   );
@@ -645,7 +647,7 @@ export function Quotes({ jobId }: { jobId: string }) {
                 <QuoteDisclaimer />
               </>
             )}
-            <QuoteExtras />
+            <QuoteExtras jobId={job.jobId} />
           </>
         )}
       </div>

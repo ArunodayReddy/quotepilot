@@ -188,3 +188,66 @@ export interface QuoteJob {
    */
   cached?: boolean;
 }
+
+// ---------------------------------------------------------------------------
+// Agent-mediated quote requests (v0.11.0 "Real quotes").
+// The real working model while carrier APIs don't exist: the user submits
+// once; licensed local agents receive a professional quote request and reply
+// with REAL quotes. This is lead-gen infrastructure, not simulation.
+// ---------------------------------------------------------------------------
+
+/** How a quote request reached an agent. */
+export type QuoteRequestDeliveryMethod = "emailed" | "handoff";
+
+/** Contact the user consented to share with the selected agencies (TCPA). */
+export interface QuoteRequestContact {
+  name: string;
+  email: string;
+  phone: string;
+}
+
+/** What the user sees when an agent has no verified email to receive one. */
+export interface QuoteRequestHandoffCard {
+  phone: string;
+  address: string;
+  city: string;
+  zip: string;
+}
+
+export interface QuoteRequestDelivery {
+  agentId: string;
+  agentName: string;
+  method: QuoteRequestDeliveryMethod;
+  /** Present only for "handoff" deliveries. */
+  handoffCard?: QuoteRequestHandoffCard;
+}
+
+/** Client → POST /api/quote-requests. */
+export interface CreateQuoteRequestInput {
+  jobId: string;
+  /** 1–3 agent ids, selected by the user on the results page. */
+  agentIds: string[];
+  contact: QuoteRequestContact;
+  /** Must be literally true — TCPA express written consent. */
+  consent: boolean;
+}
+
+/** Server → client after a successful submission. */
+export interface CreateQuoteRequestResponse {
+  /** e.g. "QP-7KQ2XA" — the user quotes this when an agent calls back. */
+  refCode: string;
+  deliveries: QuoteRequestDelivery[];
+  message: string;
+}
+
+/** Persisted lead record (server-side only, never in logs or analytics). */
+export interface QuoteRequestRecord {
+  id: string;
+  refCode: string;
+  jobId: string;
+  agentIds: string[];
+  contact: QuoteRequestContact;
+  deliveries: QuoteRequestDelivery[];
+  consentAt: string; // ISO-8601
+  createdAt: string; // ISO-8601
+}
