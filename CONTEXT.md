@@ -120,6 +120,13 @@ change must be recorded there with a date.
 
 ## 8. Rule log (append-only; newest at bottom)
 
+- 2026-10-08 (v0.10.1 docs sync): narrative docs must be re-synced after
+  platform migrations — docs/PRODUCT.md, docs/DECISIONS.md,
+  docs/AI_ARCHITECTURE.md, docs/ARCHITECTURE.md, docs/SEO.md, and
+  docs/DEPLOY.md were updated for the Next.js 14.2 migration and the v0.9.0
+  scaling release; DECISIONS.md #23 moved from "pending" to decided with the
+  outcome and Stencil rejection recorded.
+
 - 2026-10-08 (v0.8.0 documentation): narrative docs are deliverables —
   docs/PRODUCT.md (case study), docs/DECISIONS.md (append-only ADR log), and
   docs/AI_ARCHITECTURE.md (processes, components, flows, contracts, honest ML
@@ -226,3 +233,19 @@ change must be recorded there with a date.
   events are only sent after explicit accept (declined/undecided → dropped in
   fireAnalytics). Cookie settings link re-opens the banner. Suite 122/122 green
   after test consolidation.
+- 2026-10-08 (v0.10.0 Next.js migration): **SSR split rule** — server components for
+  static/crawlable content (About, legal pages, SEO shells); client components only
+  where the browser is required (localStorage, polling, Leaflet). Nothing indexable
+  lives behind a form or job id, so SSR there is complexity without SEO gain.
+  **Env rename rule** — `VITE_API_URL` → `NEXT_PUBLIC_API_URL` (old name dead);
+  dev proxy override `API_PROXY_TARGET`. `src/pages/` is reserved by Next.js —
+  views live in `src/views/`. push_files cannot delete: removed files land as empty
+  placeholders on GitHub.
+- 2026-10-08 (v0.9.0 scale): **infrastructure-optional law** — every new infra
+  piece (Redis/BullMQ queue, Redis rate-limit store, Postgres analytics sink) is
+  optional with a graceful in-memory fallback; `scripts/dev.sh` works from a clean
+  checkout with zero new config. **Cache-key PII rule** — quote cache keys are
+  SHA-256 of rating factors only; email/phone/names never touch the key.
+  **Fail-open analytics** — a Postgres outage warns loudly and falls back to
+  SQLite; analytics never breaks quoting. `/api/health` reports live backend
+  selection (queue/analytics/cache/rateLimitStore).

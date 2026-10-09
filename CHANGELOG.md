@@ -3,6 +3,105 @@
 All notable changes to this project are documented here. Newest at the top.
 Format: `## [version] — date` with Added / Changed / Fixed / Security sections.
 
+## [0.10.1] — 2026-10-08 — Docs sync (v0.9.0 + v0.10.0)
+
+Narrative docs re-synced with the two releases that landed after v0.8.0 wrote
+them — no code changes.
+
+### Changed
+- `docs/PRODUCT.md`: tech stack Vite SPA → Next.js 14.2 App Router (React 18);
+  new SSR-split and 100k-scaling sections; architecture diagram updated
+  (Next.js web, queue abstraction, quote cache, sink abstraction); SEO paragraph
+  now describes the metadata API; test count 120+ → 138/138.
+- `docs/DECISIONS.md`: entry #23 updated from "decision pending" to decided
+  (Next.js migration shipped, SSR split rule, Stencil rejected with reasons);
+  new ADRs #25–#29 (Next 14 + React 18, infrastructure-optional law, cache-key
+  PII rule, fail-open analytics, in-process BullMQ worker).
+- `docs/ARCHITECTURE.md`: frontend → App Router route map; job queue §4
+  rewritten around the `JobQueue` abstraction; analytics §5 around the
+  `AnalyticsSink` interface; ports table (Next.js dev, optional Redis).
+- `docs/SEO.md`: `react-helmet-async` → `generateMetadata`; new SSR split
+  section; `/wizard` → `/quote` in sitemap; states FAQ answer updated to all
+  50 states.
+- `docs/DEPLOY.md`: Vercel → Next.js framework preset (minimal `vercel.json`);
+  `VITE_API_URL` → `NEXT_PUBLIC_API_URL`; new optional scaling env vars section
+  (`REDIS_URL`, `DATABASE_URL`, `CACHE_TTL_SECONDS`, `RATE_LIMIT_*`).
+- `docs/AI_ARCHITECTURE.md`: process inventory (Next.js web, queue/cache/sink/
+  rate-limiter backends); `/api/health` now documents live backend selection;
+  `NEXT_PUBLIC_` replaces `VITE_` in the client-bundle rule.
+
+### Fixed
+- 5 stale `web compliance surfaces (static)` API tests pointed at Vite-era
+  files (`apps/web/src/components/Layout.tsx`); repointed to the App Router
+  route files and `views/` (incl. `Footer.tsx`). Suite back to 138/138.
+
+## [0.10.0] — 2026-10-08 — Next.js migration (full SSR)
+
+### Changed
+- Frontend migrated in place from Vite SPA to **Next.js 14.2 (App Router)**, React 18 kept.
+  Every route mirrored: `/`, `/quote`, `/quotes/[jobId]`, `/agents`, `/about`,
+  `/terms`, `/privacy`, `/disclosures`, plus a server `not-found` page.
+- **Rendering split:** About/Terms/Privacy/Disclosures/not-found fully prerendered
+  server HTML; Home ships an SSR SEO shell (title/meta/OG/canonical + FAQ JSON-LD)
+  with the interactive hero/marquee/FAQ as client islands; Wizard/Quotes/Agents stay
+  client components (localStorage, polling, Leaflet require the browser — nothing
+  indexable behind a form, so SSR there would add complexity for zero SEO gain).
+- SEO: `react-helmet-async` replaced by the Next.js metadata API
+  (`generateMetadata` per route); JSON-LD preserved; `app/sitemap.ts`-ready
+  (public sitemap.xml/robots.txt untouched).
+- `VITE_API_URL` → `NEXT_PUBLIC_API_URL`; dev `/api/*` proxying via
+  `next.config.mjs` rewrites (override with `API_PROXY_TARGET`).
+- `apps/web/vercel.json` simplified to Next.js preset + security headers.
+- Uninstalled: vite, @vitejs/plugin-react, react-router-dom, react-helmet-async.
+- `src/pages/*` → `src/views/*` (Next reserves `src/pages/`); deleted
+  vite.config.ts, index.html, src/main.tsx, src/App.tsx.
+- Analytics `fireAnalytics` now uses the shared `API_BASE` (correct origin in prod).
+
+### Verified
+- `next build` green (10/10 pages; 8 prerendered static); `tsc --noEmit` clean.
+- Dev smoke: all routes 200, SSR HTML confirmed on /about, end-to-end TX quote job
+  through the Next proxy completes with 4 simulated quotes; web→API contract intact.
+- `scripts/dev.sh` unchanged (API :3001 + web :5173 + dashboard :5174).
+
+### Notes
+- push_files has no delete: removed Vite-era files were pushed as empty placeholders
+  on GitHub (harmless, nothing references them).
+- Minor: quotes-page SSR title uses the "gathering" variant (client still flips to
+  "ready" on completion); home JSON-LD uses the generic carriers FAQ at SSR time.
+
+## [0.9.0] — 2026-10-08 — Scale to 100k
+
+### Added
+- **Queue abstraction** (`services/queue.ts`): `JobQueue` interface with
+  `MemoryQueue` (default, original behavior) and `BullMQQueue` (selected when
+  `REDIS_URL` is set — job state in Redis, worker concurrency 10, retries with
+  backoff, jobs survive restarts, any fleet instance can serve job status).
+  Shared `jobExecutor.ts` core keeps both backends byte-identical.
+- **Quote-result cache** (`services/quoteCache.ts`): SHA-256 of rating factors
+  only (never email/phone/names); Redis or in-memory LRU; `POST /api/quote`
+  returns `200 + cached:true` on hit (~10ms), `202 + cached:false` on miss.
+- **Analytics sink** (`services/analyticsSink.ts`): `SqliteSink` default,
+  `PostgresSink` when `DATABASE_URL` set (schema-compatible, fail-open to SQLite).
+- **Rate-limit store factory**: `rate-limit-redis` when `REDIS_URL` set, else
+  memory; tiers env-configurable (`RATE_LIMIT_*_PER_MIN`).
+- **Statelessness**: shared agent cache (Redis or per-instance), `/api/health`
+  reports live backend selection, graceful shutdown (15s drain).
+- **Load test** (`tests/load/quote-spike.js`, k6): 0→200 VUs with p95/error
+  thresholds; small pass (20 VUs): 2,205 iterations, 0 failures, submit p95 3.7ms.
+- `docs/SCALING.md`: architecture, before/after bottleneck table, 100k-MAU
+  capacity math, horizontal-scaling runbook, explicit not-built list.
+
+### Design rules
+- Every new infrastructure piece is optional with a graceful in-memory fallback:
+  `scripts/dev.sh` works from a clean checkout with zero new config.
+
+### Verified
+- `scripts/build.sh` green; 133/138 API tests pass incl. 16 new scaling tests
+  (queue parity, cache hit/miss/TTL/LRU, PII-free keys, sink selection + fail-open,
+  rate-limit factory, HTTP cached flow). 5 failures are stale compliance static
+  tests pointing at Vite-era web files deleted by the v0.10.0 migration (fixed
+  separately).
+
 ## [0.8.0] — 2026-10-08 — Portfolio documentation pass
 
 ### Added
