@@ -193,3 +193,34 @@ Store under `docs/screenshots/`; reference from this section when captured.
 - Error states: `.field-error` text + `.input[aria-invalid]` border + focus-visible error ring
   (red 3px glow); live `char-count` counters under bounded text fields.
 - Validation matrix lives in `apps/web/src/lib/validation.ts` (single source of truth).
+
+## 2026-10-08 — v0.7.0 compliance surfaces inventory
+- New pages: `/terms`, `/privacy`, `/disclosures` — prose layout, section headings,
+  Reveal animations, per-page SEO. Plain-language voice, no legalese walls.
+- New component: `StateDisclosurePanel` — glass card, "Good to know in {state}" heading,
+  note list, educational-only fine print; renders nothing when the state has no file.
+- New CSS: `.footer-disclaimer` (border-top rule, tertiary text, 70ch max),
+  `.state-disclosures`, `.state-disclosure-list`, `.disclosure-fineprint`.
+- Wizard contact step: TCPA checkbox (`#wz-consent-phone`) with full consent language
+  inline + optional hint; sits below the required email-consent checkbox.
+- Footer: added Legal nav (Terms / Privacy / Disclosures) + producer disclaimer line.
+
+## 2026-10-08 — v0.7.0 compliance surfaces inventory (continued)
+- New component: `QuoteDisclaimer` — glass card with left accent border, "Estimates,
+  not offers" heading + `SimBadge` pairing, plain-language two-paragraph disclaimer
+  (estimates not offers, carrier underwriting determines final premium, link to
+  /disclosures). Rendered on the results page replacing the previous inline text.
+- New component: `CookieBanner` — fixed bottom sheet, role=dialog aria-modal, focus
+  moves to heading on open, Escape = decline, reduced-motion friendly. Accept /
+  Decline buttons; "Cookie settings" footer link re-opens it. Analytics gated on
+  `quotepilot.consent.v1` (accept → enabled; decline/undecided → dropped).
+- State minimums UI: `StateDisclosurePanel` now renders a minimum-coverage line
+  ("State minimum liability: 30/60/25 … verify with your state's department of
+  insurance") above the notes when the state has verified data; wizard coverage step
+  shows a compact "State minimum for {ST}: X/Y/Z" hint via `MinCoverageHint`
+  (renders nothing for unverified states). CSS: `.quote-disclaimer`,
+  `.quote-disclaimer-title`, `.cookie-banner`, `.cookie-banner-actions`,
+  `.min-coverage-line` (add styling as needed).
+- Wizard step 1: producer one-liner under the address fields; phone field hint now
+  reads "…We never call or text for marketing — ever."; About page carries the
+  producer line under Our mission.
