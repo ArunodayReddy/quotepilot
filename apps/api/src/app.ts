@@ -19,6 +19,7 @@ import { agentsRouter } from "./routes/agents.js";
 import { carriersRouter } from "./routes/carriers.js";
 import { analyticsRouter } from "./routes/analytics.js";
 import { emailRouter } from "./routes/email.js";
+import { disclosuresRouter } from "./routes/disclosures.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -61,6 +62,7 @@ export function createApp(): express.Express {
   app.use("/api", carriersRouter);
   app.use("/api", analyticsRouter);
   app.use("/api", emailRouter);
+  app.use("/api", disclosuresRouter);
 
   app.use(notFound);
   app.use(errorHandler);

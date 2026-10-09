@@ -41,6 +41,9 @@ export const config = {
     from: process.env.SMTP_FROM ?? "quotes@quotepilot.local",
   },
   appBaseUrl: process.env.APP_BASE_URL ?? "http://localhost:5173",
+  // CAN-SPAM physical postal address for email footers. REQUIRED in production
+  // before any real send; never invent business data — leave unset in dev.
+  senderPostalAddress: process.env.SENDER_POSTAL_ADDRESS ?? "",
 } as const;
 
 export type AppConfig = typeof config;
