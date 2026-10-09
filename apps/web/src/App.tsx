@@ -6,6 +6,9 @@ import { Wizard } from "./pages/Wizard";
 import { Quotes } from "./pages/Quotes";
 import { Agents } from "./pages/Agents";
 import { About } from "./pages/About";
+import { Terms } from "./pages/Terms";
+import { Privacy } from "./pages/Privacy";
+import { Disclosures } from "./pages/Disclosures";
 import { Seo } from "./components/Seo";
 import { Link } from "react-router-dom";
 import { fireAnalytics } from "./lib/analytics";
@@ -49,6 +52,9 @@ export function App() {
         <Route path="quotes/:jobId" element={<Quotes />} />
         <Route path="agents" element={<Agents />} />
         <Route path="about" element={<About />} />
+        <Route path="terms" element={<Terms />} />
+        <Route path="privacy" element={<Privacy />} />
+        <Route path="disclosures" element={<Disclosures />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
