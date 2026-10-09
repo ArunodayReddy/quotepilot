@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { SimBadge } from "./SimBadge";
 
 /**
@@ -28,7 +28,7 @@ export function QuoteDisclaimer() {
         determined solely by the carrier&apos;s own underwriting when you apply with
         them directly. Always confirm the price and terms with the carrier before
         purchasing. Coverage requirements and availability vary by state;{" "}
-        <Link to="/disclosures">read our insurance disclosures</Link>.
+        <Link href="/disclosures">read our insurance disclosures</Link>.
       </p>
     </section>
   );

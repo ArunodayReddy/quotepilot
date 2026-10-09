@@ -4,10 +4,14 @@
  * Accessibility: the map is a visual enhancement. The agent list rendered
  * below the map is the accessible equivalent — every pin has a list card.
  * The map region carries an aria-label; zoom controls are keyboard reachable.
+ *
+ * Next.js note: the Leaflet stylesheet is imported once in the root layout
+ * (global CSS can only be imported there); this component is always loaded
+ * client-only via next/dynamic (Leaflet touches `window` at import time).
  */
+"use client";
 import { useEffect, useRef } from "react";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import type { AgentEntry } from "../lib/types";
 
 interface AgentMapProps {

@@ -1,5 +1,6 @@
+"use client";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import {
   fireAnalytics,
   getConsentDecision,
@@ -57,7 +58,7 @@ export function CookieBanner() {
         We remember your quote progress on your device, and — only if you allow
         it — collect anonymous analytics (clicks and page views, never personal
         data) to improve QuotePilot. Read our{" "}
-        <Link to="/privacy">Privacy Policy</Link>.
+        <Link href="/privacy">Privacy Policy</Link>.
       </p>
       <div className="cookie-banner-actions">
         <button type="button" className="btn btn-primary" onClick={() => decide(true)}>
