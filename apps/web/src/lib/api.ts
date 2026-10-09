@@ -3,6 +3,8 @@ import type {
   AgentsResponse,
   ApiErrorBody,
   CarriersResponse,
+  CreateQuoteRequestInput,
+  CreateQuoteRequestResponse,
   QuoteJob,
   QuoteJobCreated,
   QuoteRequest,
@@ -78,5 +80,12 @@ export const api = {
   },
   getDisclosures(state: string): Promise<StateDisclosures> {
     return request(`/api/disclosures/${encodeURIComponent(state.toUpperCase())}`);
+  },
+  /** Agent-mediated real-quote request. TCPA consent must be explicitly true. */
+  submitQuoteRequest(payload: CreateQuoteRequestInput): Promise<CreateQuoteRequestResponse> {
+    return request("/api/quote-requests", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
   },
 };

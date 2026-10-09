@@ -177,3 +177,42 @@ export interface StateDisclosures {
   educationalOnly: boolean;
   minCoverage?: StateMinCoverage;
 }
+
+/* Agent-mediated quote requests (v0.11.0 "Real quotes"). Mirrors
+ * packages/shared — the user picks licensed agents; the agents reply with
+ * REAL quotes. QuotePilot never claims to generate these itself. */
+
+export type QuoteRequestDeliveryMethod = "emailed" | "handoff";
+
+export interface QuoteRequestHandoffCard {
+  phone: string;
+  address: string;
+  city: string;
+  zip: string;
+}
+
+export interface QuoteRequestDelivery {
+  agentId: string;
+  agentName: string;
+  method: QuoteRequestDeliveryMethod;
+  handoffCard?: QuoteRequestHandoffCard;
+}
+
+export interface QuoteRequestContact {
+  name: string;
+  email: string;
+  phone: string;
+}
+
+export interface CreateQuoteRequestInput {
+  jobId: string;
+  agentIds: string[];
+  contact: QuoteRequestContact;
+  consent: boolean;
+}
+
+export interface CreateQuoteRequestResponse {
+  refCode: string;
+  deliveries: QuoteRequestDelivery[];
+  message: string;
+}

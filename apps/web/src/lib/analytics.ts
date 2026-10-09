@@ -69,6 +69,10 @@ export type AnalyticsEventName =
   | "agents_section_view"
   | "agents_see_all_click"
   | "loading_view"
+  | "real_quotes_view"
+  | "real_quotes_agent_selected"
+  | "real_quotes_submitted"
+  | "real_quotes_copy_details"
   | "consent_given";
 
 interface FireOptions {
