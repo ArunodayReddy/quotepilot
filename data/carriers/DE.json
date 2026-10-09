@@ -4,7 +4,7 @@
   "name": "GEICO",
   "channel": "direct",
   "statesServed": [
-   "CA"
+   "DE"
   ],
   "logo": "🦎",
   "quotable": true,
@@ -16,7 +16,7 @@
   "name": "Progressive",
   "channel": "direct",
   "statesServed": [
-   "CA"
+   "DE"
   ],
   "logo": "🛡️",
   "quotable": true,
@@ -28,7 +28,7 @@
   "name": "Allstate",
   "channel": "direct",
   "statesServed": [
-   "CA"
+   "DE"
   ],
   "logo": "🏠",
   "quotable": true,
@@ -40,7 +40,7 @@
   "name": "Liberty Mutual",
   "channel": "direct",
   "statesServed": [
-   "CA"
+   "DE"
   ],
   "logo": "🗽",
   "quotable": true,
@@ -52,7 +52,7 @@
   "name": "State Farm",
   "channel": "agent",
   "statesServed": [
-   "CA"
+   "DE"
   ],
   "logo": "🚜",
   "quotable": false,
@@ -64,7 +64,7 @@
   "name": "Farmers",
   "channel": "agent",
   "statesServed": [
-   "CA"
+   "DE"
   ],
   "logo": "🌾",
   "quotable": false,
@@ -76,7 +76,7 @@
   "name": "Nationwide",
   "channel": "agent",
   "statesServed": [
-   "CA"
+   "DE"
   ],
   "logo": "🏛️",
   "quotable": false,
@@ -88,7 +88,7 @@
   "name": "Travelers",
   "channel": "agent",
   "statesServed": [
-   "CA"
+   "DE"
   ],
   "logo": "🧳",
   "quotable": false,
@@ -100,7 +100,7 @@
   "name": "USAA",
   "channel": "direct",
   "statesServed": [
-   "CA"
+   "DE"
   ],
   "logo": "🎖️",
   "quotable": false,
@@ -112,50 +112,11 @@
   "name": "Amica",
   "channel": "direct",
   "statesServed": [
-   "CA"
+   "DE"
   ],
   "logo": "⭐",
   "quotable": true,
   "notes": "Direct writer; simulation adapter active (pricing bands anchored to MA research — approximate outside MA).",
   "website": "amica.com"
- },
- {
-  "id": "mercury",
-  "name": "Mercury",
-  "channel": "agent",
-  "statesServed": [
-   "CA"
-  ],
-  "logo": "☿",
-  "quotable": false,
-  "notes": "Regional carrier; agent channel; agent directory only.",
-  "website": "mercuryinsurance.com",
-  "confidence": "medium"
- },
- {
-  "id": "wawanesa",
-  "name": "Wawanesa",
-  "channel": "direct",
-  "statesServed": [
-   "CA"
-  ],
-  "logo": "🌊",
-  "quotable": false,
-  "notes": "Direct writer; no simulation adapter yet.",
-  "website": "wawanesa.com",
-  "confidence": "medium"
- },
- {
-  "id": "aaa",
-  "name": "AAA (Auto Club)",
-  "channel": "agent",
-  "statesServed": [
-   "CA"
-  ],
-  "logo": "🚗",
-  "quotable": false,
-  "notes": "Agent/member channel; agent directory only.",
-  "website": "aaa.com",
-  "confidence": "medium"
  }
 ]
