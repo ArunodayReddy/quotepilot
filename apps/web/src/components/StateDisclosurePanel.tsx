@@ -1,5 +1,6 @@
+"use client";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { api, ApiError } from "../lib/api";
 import type { StateDisclosures, StateMinCoverage } from "../lib/types";
 
@@ -65,7 +66,7 @@ export function StateDisclosurePanel({ state }: { state: string }) {
       </ul>
       <p className="disclosure-fineprint">
         Educational notes only — not insurance or legal advice.{" "}
-        <Link to="/disclosures">Read all disclosures</Link>
+        <Link href="/disclosures">Read all disclosures</Link>
       </p>
     </section>
   );

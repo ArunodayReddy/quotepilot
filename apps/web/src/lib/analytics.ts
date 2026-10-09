@@ -1,6 +1,7 @@
 /* Analytics: every user interaction fires an event to /api/analytics/event.
    Contract: { event, page, element?, sessionId, metadata? } — metadata must NEVER contain PII. */
 import { useCallback } from "react";
+import { API_BASE } from "./api";
 
 const SESSION_KEY = "quotepilot.session";
 const CONSENT_KEY = "quotepilot.consent.v1";
@@ -92,7 +93,7 @@ export function fireAnalytics(event: AnalyticsEventName, opts: FireOptions): voi
     ts: new Date().toISOString(),
   };
   try {
-    void fetch("/api/analytics/event", {
+    void fetch(`${API_BASE}/api/analytics/event`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
