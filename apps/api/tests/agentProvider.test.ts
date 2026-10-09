@@ -33,9 +33,9 @@ const sampleAgents: Agent[] = [
   },
 ];
 
-afterEach(() => {
+afterEach(async () => {
   vi.unstubAllGlobals();
-  _resetAgentCache();
+  await _resetAgentCache();
 });
 
 describe("mapOpeningHours", () => {

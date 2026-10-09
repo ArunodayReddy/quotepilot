@@ -26,12 +26,12 @@ const { expectedQuoteBand6Mo: _drop, _note: _note2, ...quoteBody } = sampleProfi
 
 const app = createApp();
 
-beforeEach(() => {
-  _resetJobs();
+beforeEach(async () => {
+  await _resetJobs();
 });
 
-afterEach(() => {
-  _resetJobs();
+afterEach(async () => {
+  await _resetJobs();
 });
 
 function webFile(p: string): string {

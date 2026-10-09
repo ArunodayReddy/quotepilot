@@ -22,13 +22,13 @@ const { expectedQuoteBand6Mo: _drop, _note: _note2, ...quoteBody } = sampleProfi
 
 const app = createApp();
 
-beforeEach(() => {
-  _resetJobs();
+beforeEach(async () => {
+  await _resetJobs();
   _resetDb();
 });
 
-afterEach(() => {
-  _resetJobs();
+afterEach(async () => {
+  await _resetJobs();
   _resetDb();
 });
 
@@ -53,10 +53,16 @@ async function waitForComplete(jobId: string, timeoutMs = 15000): Promise<unknow
 }
 
 describe("quote routes", () => {
-  it("GET /api/health returns ok + version", async () => {
+  it("GET /api/health returns ok + version + backend selection", async () => {
     const res = await request(app).get("/api/health");
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ status: "ok", version: "0.2.0" });
+    expect(res.body.status).toBe("ok");
+    expect(res.body.version).toBe("0.2.0");
+    // v0.9.0: backend selection is observable (memory defaults in test env).
+    expect(res.body.queue).toBe("memory");
+    expect(res.body.analytics).toBe("sqlite");
+    expect(res.body.cache).toBe("memory");
+    expect(res.body.rateLimitStore).toBe("memory");
   });
 
   it("POST /api/quote → 202, then GET /api/quotes/:jobId completes with 6 results", async () => {

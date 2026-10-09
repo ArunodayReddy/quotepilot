@@ -80,7 +80,7 @@ describe("nationwide carrier registry", () => {
 
 describe("nationwide quote jobs", () => {
   const app = createApp();
-  beforeEach(() => _resetJobs());
+  beforeEach(async () => { await _resetJobs(); });
 
   function caPayload(state: string, zip: string) {
     return {
