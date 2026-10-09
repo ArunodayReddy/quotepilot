@@ -8,6 +8,8 @@ import { TextField } from "../components/fields";
 import { api, ApiError } from "../lib/api";
 import { useAnalytics } from "../lib/analytics";
 import { readQuoteLocation } from "../lib/wizard";
+import { StateDisclosurePanel } from "../components/StateDisclosurePanel";
+import { QuoteDisclaimer } from "../components/QuoteDisclaimer";
 import { SourceBadge } from "./Agents";
 import type { AgentEntry, CarrierEntry, QuoteJob, QuoteResult } from "../lib/types";
 
@@ -34,7 +36,7 @@ function QuoteCard({
 
   return (
     <article className={`glass quote-card${isBest ? " best" : ""}`} aria-label={`${result.carrierName} quote`}>
-      {isBest && <span className="best-ribbon">Best deal</span>}
+      {isBest && <span className="best-ribbon">Lowest estimate</span>}
       <div className="quote-card-top">
         <h2 className="carrier-name">{result.carrierName}</h2>
         <SimBadge />
@@ -575,7 +577,7 @@ export function Quotes() {
           <h1>{inProgress ? "Gathering your quotes…" : job?.status === "failed" ? "Something went wrong" : "Your quotes"}</h1>
           {inProgress && job && (
             <p className="results-summary">
-              Checking {job.progress.total} carriers for your best price.
+              Checking {job.progress.total} carriers so you can compare prices.
             </p>
           )}
         </div>
@@ -639,10 +641,8 @@ export function Quotes() {
                   ))}
                 </div>
                 <EmailOptIn jobId={job.jobId} mode="results" carrierCount={sorted.length} />
-                <p className="demo-note">
-                  All prices on this page are <strong>simulated demo pricing</strong> — realistic bands anchored to
-                  real Massachusetts quote research, not real carrier offers.
-                </p>
+                <StateDisclosurePanel state={job.state} />
+                <QuoteDisclaimer />
               </>
             )}
             <QuoteExtras />
