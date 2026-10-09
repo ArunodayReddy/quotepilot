@@ -7,7 +7,7 @@ import type {
   VehicleInput,
 } from "../lib/types";
 
-export const WIZARD_STORAGE_KEY = "quotepilot.wizard.v2";
+export const WIZARD_STORAGE_KEY = "quotepilot.wizard.v3";
 
 import { ageFromDob, isFutureDob, validateField, validateStep, stepFieldKeys } from "./validation";
 export { ageFromDob, isFutureDob, validateField, validateStep, stepFieldKeys };
@@ -42,7 +42,13 @@ export interface WizardData {
   drivers: WizardDriver[];
   vehicles: VehicleInput[];
   coverage: CoverageInput;
+  /** Quote-ready email consent (required to deliver quotes by email). */
   consentEmail: boolean;
+  /**
+   * TCPA express-written consent for marketing calls/texts. MUST default to
+   * false and stay unchecked until the user clicks it (see COMPLIANCE.md §3).
+   */
+  consentPhone: boolean;
 }
 
 export function blankDriver(): WizardDriver {
@@ -90,6 +96,7 @@ export function defaultWizardData(): WizardData {
       roadsideAssistance: true,
     },
     consentEmail: false,
+    consentPhone: false,
   };
 }
 
@@ -134,6 +141,8 @@ export function sampleWizardData(): WizardData {
       roadsideAssistance: true,
     },
     consentEmail: true,
+    // Sample stays TCPA-clean: phone consent must never be pre-checked.
+    consentPhone: false,
   };
 }
 
@@ -215,5 +224,8 @@ export function toQuoteRequest(data: WizardData): QuoteRequest {
       ...(v.vinLast4?.trim() ? { vinLast4: v.vinLast4.trim() } : {}),
     })),
     coverage: { ...data.coverage },
+    // Consent choices persist with the quote request (COMPLIANCE.md §3).
+    emailOptIn: data.consentEmail,
+    phoneOptIn: data.consentPhone,
   };
 }
