@@ -1188,3 +1188,62 @@ fieldset.driver-card legend { padding: 0; }
 .min-coverage-line strong {
   color: var(--text);
 }
+
+/* v0.11.0 "Real quotes" — agent-mediated request flow */
+.real-quotes { margin-top: var(--space-8, 2rem); }
+.agent-select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: var(--space-4);
+  border: 0;
+  padding: 0;
+  margin: 0 0 var(--space-4);
+}
+.agent-select-card {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.agent-select-card:hover { transform: translateY(-1px); }
+.agent-select-card.selected { border-color: var(--accent); }
+.agent-select-card input { margin-top: 0.25rem; accent-color: var(--accent); }
+.agent-select-body { display: flex; flex-direction: column; gap: var(--space-2); }
+.agent-select-name { font-weight: 600; color: var(--text); }
+.real-quotes-panel { padding: var(--space-6, 1.5rem); margin-top: var(--space-4); }
+.contact-summary dl { display: grid; gap: var(--space-2); margin: 0 0 var(--space-4); }
+.contact-summary dl > div { display: flex; gap: var(--space-3); }
+.contact-summary dt { color: var(--text-secondary); min-width: 4.5rem; }
+.contact-summary dd { margin: 0; color: var(--text); font-weight: 500; }
+.contact-manual { display: grid; gap: var(--space-3); margin-bottom: var(--space-4); max-width: 28rem; }
+.contact-manual .field { display: grid; gap: var(--space-1); margin-bottom: 0; }
+.contact-manual .field > span { font-size: 0.875rem; color: var(--text-secondary); }
+.contact-manual input {
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius, 0.75rem);
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+  background: var(--glass, rgba(255,255,255,0.045));
+  color: var(--text);
+  font: inherit;
+}
+.consent-row { align-items: flex-start; margin: var(--space-4) 0; max-width: 40rem; }
+.consent-row input { margin-top: 0.25rem; accent-color: var(--accent); flex-shrink: 0; }
+.consent-row span { font-size: 0.95rem; line-height: 1.5; }
+.real-quotes-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+.ref-code {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin: var(--space-2) 0 var(--space-4);
+}
+.delivery-list { list-style: none; padding: 0; margin: 0 0 var(--space-4); display: grid; gap: var(--space-3); }
+.delivery-item { line-height: 1.6; }
+.delivery-item a { color: var(--accent); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) {
+  .agent-select-card { transition: none; }
+  .agent-select-card:hover { transform: none; }
+}
