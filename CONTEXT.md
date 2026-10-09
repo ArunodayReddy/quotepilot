@@ -201,3 +201,21 @@ change must be recorded there with a date.
   needs SENDER_POSTAL_ADDRESS before any production send — never invent business
   data. Claims audit: no "best deal"/guaranteed-savings language; savings only
   from real computed results. compliance.test.ts guards all surfaces; 123/123 green.
+- 2026-10-08 (v0.7.0 compliance, continued): **attorney-review-required law** —
+  nothing in the legal surfaces (Terms/Privacy/Disclosures, COMPLIANCE.md) is legal
+  advice; every legal page carries a not-legal-advice note and
+  docs/COMPLIANCE.md §7 documents exactly what remains for counsel (producer
+  licensing per state, TCPA review, terms enforceability) plus a pre-launch legal
+  checklist. Commercial operation is blocked until licensed counsel reviews.
+- 2026-10-08 (v0.7.0 compliance, continued): **never-guess-minimums law** — state
+  minimum-coverage data ships ONLY where verified (24 states in
+  data/disclosures/<STATE>.json as of 2026-10-08); unverified states carry no
+  `minCoverage` field and the UI degrades silently. Law changes happen: MA
+  25/50/30 + $8k PIP (Act H.5111, 2026), VA 50/100/25 (Jan 2025), TN 25/50/25
+  (PD Jan 2023) — stale numbers from older guides were corrected via fresh
+  research. Every hint carries "verify with your state's DOI" microcopy.
+- 2026-10-08 (v0.7.0 compliance, continued): **consent-gated analytics law** —
+  cookie banner on first visit (Accept/Decline, `quotepilot.consent.v1`); analytics
+  events are only sent after explicit accept (declined/undecided → dropped in
+  fireAnalytics). Cookie settings link re-opens the banner. Suite 122/122 green
+  after test consolidation.

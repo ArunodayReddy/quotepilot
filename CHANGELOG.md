@@ -34,7 +34,26 @@ Format: `## [version] — date` with Added / Changed / Fixed / Security sections
   line; `.env.example` documents the requirement.
 - `apps/api/tests/compliance.test.ts` — 15 assertions: disclosure registry, consent
   schema defaults, non-PII public job view, and static web-surface checks (disclosure
-  presence, consent defaults, footer links, claims-audit sweep). Suite 123/123 green.
+  presence, consent defaults, footer links, claims-audit sweep) + minCoverage shape
+  validation across all 24 states (incl. MA 2026, VA 2025, TN 2023 law-change
+  spot-checks). Suite 122/122 green.
+- **State minimum coverage data**: `minCoverage` (`biPerPerson`, `biPerAccident`,
+  `propertyDamage`, `pip`, `notes`, `verified`) added to `data/disclosures/*.json`
+  for **24 states** — TX 30/60/25, CA 15/30/5, MA 25/50/30 + $8k PIP (2026 law
+  change), FL 10/20/10 + $10k PIP, NY 25/50/10 + $50k PIP, IL 25/50/20, OH 25/50/25,
+  PA 15/30/5 + $5k medical, GA 25/50/25, NC 30/60/25, VA 50/100/25 (2025 law
+  change), NJ 15/30/5 + $15k PIP, CT 25/50/25, WA 25/50/10, AZ 25/50/15, CO 25/50/15,
+  MI 50/100/10, MN 30/60/10 + $40k PIP, NV 25/50/20, OR 25/50/20 + $15k PIP,
+  TN 25/50/25 (2023 PD change), WI 25/50/10, MD 30/60/15, NH (not mandatory;
+  financial-responsibility minimums). Verified 2026-10-08; unverified states carry
+  NO field (never guessed). Results page shows the minimum line in the state
+  disclosure panel; the wizard coverage step shows a "State minimum: X" hint with
+  "verify with your state's DOI" microcopy.
+- **Cookie consent banner**: first-visit, all pages — Accept/Decline, persists in
+  `quotepilot.consent.v1`; declining (or not yet deciding) disables analytics event
+  sending (gated in `lib/analytics.ts`); `consent_given` event fires on accept;
+  footer "Cookie settings" re-opens it. Accessible (role=dialog, focus to heading,
+  Escape declines, reduced-motion friendly).
 
 ### Changed
 - Claims audit: "best deal" / "best price" guarantee language scrubbed from marketing
