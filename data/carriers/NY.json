@@ -4,7 +4,7 @@
   "name": "GEICO",
   "channel": "direct",
   "statesServed": [
-   "NH"
+   "NY"
   ],
   "logo": "🦎",
   "quotable": true,
@@ -16,7 +16,7 @@
   "name": "Progressive",
   "channel": "direct",
   "statesServed": [
-   "NH"
+   "NY"
   ],
   "logo": "🛡️",
   "quotable": true,
@@ -28,7 +28,7 @@
   "name": "Allstate",
   "channel": "direct",
   "statesServed": [
-   "NH"
+   "NY"
   ],
   "logo": "🏠",
   "quotable": true,
@@ -40,7 +40,7 @@
   "name": "Liberty Mutual",
   "channel": "direct",
   "statesServed": [
-   "NH"
+   "NY"
   ],
   "logo": "🗽",
   "quotable": true,
@@ -52,7 +52,7 @@
   "name": "State Farm",
   "channel": "agent",
   "statesServed": [
-   "NH"
+   "NY"
   ],
   "logo": "🚜",
   "quotable": false,
@@ -64,7 +64,7 @@
   "name": "Farmers",
   "channel": "agent",
   "statesServed": [
-   "NH"
+   "NY"
   ],
   "logo": "🌾",
   "quotable": false,
@@ -76,7 +76,7 @@
   "name": "Nationwide",
   "channel": "agent",
   "statesServed": [
-   "NH"
+   "NY"
   ],
   "logo": "🏛️",
   "quotable": false,
@@ -88,7 +88,7 @@
   "name": "Travelers",
   "channel": "agent",
   "statesServed": [
-   "NH"
+   "NY"
   ],
   "logo": "🧳",
   "quotable": false,
@@ -100,7 +100,7 @@
   "name": "USAA",
   "channel": "direct",
   "statesServed": [
-   "NH"
+   "NY"
   ],
   "logo": "🎖️",
   "quotable": false,
@@ -112,7 +112,7 @@
   "name": "Amica",
   "channel": "direct",
   "statesServed": [
-   "NH"
+   "NY"
   ],
   "logo": "⭐",
   "quotable": true,
@@ -124,12 +124,24 @@
   "name": "Plymouth Rock",
   "channel": "agent",
   "statesServed": [
-   "NH"
+   "NY"
   ],
   "logo": "🪨",
   "quotable": false,
   "notes": "Agent channel in this state; agent directory only.",
   "website": "plymouthrock.com",
+  "confidence": "medium"
+ },
+ {
+  "id": "nycm",
+  "name": "NYCM",
+  "channel": "agent",
+  "statesServed": [
+   "NY"
+  ],
+  "logo": "🏙️",
+  "quotable": false,
+  "notes": "NY regional carrier; agent channel; agent directory only.",
   "confidence": "medium"
  }
 ]
