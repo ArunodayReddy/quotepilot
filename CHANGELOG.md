@@ -3,6 +3,33 @@
 All notable changes to this project are documented here. Newest at the top.
 Format: `## [version] — date` with Added / Changed / Fixed / Security sections.
 
+## [0.6.0] — 2026-10-08 — Nationwide + deploy prep
+
+### Added
+- **All 50 states**: `data/carriers/<STATE>.json` for every state. National core
+  everywhere (GEICO, Progressive, Allstate, Liberty Mutual quotable via simulation
+  adapters; State Farm, Farmers, Nationwide, Travelers agent-channel; USAA
+  military-only) plus regionals only where confident (Erie, Auto-Owners, American
+  Family, Mercury, Wawanesa, AAA, Plymouth Rock, NJM, Farm Bureaus, NYCM, Concord,
+  Arbella), each tagged `"confidence": "medium"`. Amica quotable in 48 states
+  (not licensed in AK/HI — flagged honestly). `data/carriers/README.md` documents
+  per-state data grades (MA/TX full, CA/NH good, rest starter).
+- **223 ZIP centroids** in `data/geocode/zip_centroids.json` (major metros per state;
+  documented demo-grade approximations).
+- **Deploy prep**: `apps/web/vercel.json` (Vite SPA rewrites + security headers),
+  `render.yaml` (Render blueprint: free tier, health check, env vars), `docs/DEPLOY.md`
+  (click-by-click Vercel + Render guide, smoke checklist, troubleshooting),
+  `VITE_API_URL` support in the web API client (dev proxy unchanged), env-driven CORS
+  allow-list, `trust proxy` for correct rate limiting behind Render.
+- Tests: `apps/api/tests/registry.test.ts` — 57 assertions covering all 50 states
+  (well-formed entries, >=3 carriers, quotable ⟺ wired adapter, Amica AK/HI rule) +
+  CA/FL/NY quote-job smokes. Suite now 105/105 green.
+
+### Changed
+- `.env.example`: added `CORS_ORIGIN`, `APP_BASE_URL`, `VITE_API_URL` (web) with docs.
+- Simulation pricing bands remain MA-anchored; non-MA quotable entries carry an explicit
+  approximation note (honest-degradation law upheld — no fake pricing anywhere).
+
 ## [0.5.1] — 2026-10-08 — Validation hardening + delightful loading
 
 ### Added

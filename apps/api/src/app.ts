@@ -23,6 +23,10 @@ import { emailRouter } from "./routes/email.js";
 export function createApp(): express.Express {
   const app = express();
 
+  // Behind Render/Railway proxies the client IP arrives via X-Forwarded-For.
+  // Trust one proxy hop so express-rate-limit sees real client IPs.
+  app.set("trust proxy", 1);
+
   // Helmet with a strict CSP (API serves JSON only — no inline resources needed).
   app.use(
     helmet({

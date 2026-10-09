@@ -120,6 +120,14 @@ change must be recorded there with a date.
 
 ## 8. Rule log (append-only; newest at bottom)
 
+- 2026-10-08 (v0.6.0 nationwide+deploy): 50-state data-grade rule — every state file must
+  be valid with >=3 carriers; `quotable:true` ONLY with a wired adapter (test-enforced in
+  registry.test.ts); regionals only where confident, tagged `"confidence":"medium"`; when in
+  doubt, leave the carrier out. Grades live in data/carriers/README.md (MA/TX full, CA/NH good,
+  rest starter). Deploy-prep rule: CORS allow-list is env-driven (CORS_ORIGIN, comma-separated;
+  localhost defaults only in dev), `trust proxy` set for hosted rate limiting, web API client
+  reads VITE_API_URL (empty = dev /api proxy). push_files batches stay <=50KB JSON.
+
 - 2026-10-08 (v0.5.1 validation+delight): client/server validation parity is the law —
   `apps/web/src/lib/validation.ts` is the single source of truth for client rules and must
   mirror `apps/api/src/lib/schemas.ts` regex-for-regex, limit-for-limit (ZIP exactly 5 digits,

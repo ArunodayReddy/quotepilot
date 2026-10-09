@@ -15,8 +15,17 @@ export const config = {
   version: "0.2.0",
   nodeEnv: process.env.NODE_ENV ?? "development",
   isProd: (process.env.NODE_ENV ?? "development") === "production",
-  // CORS allow-list: local dev origins only.
-  corsOrigins: ["http://localhost:5173", "http://localhost:5174"],
+  // CORS allow-list. Production: set CORS_ORIGIN to a comma-separated list of
+  // allowed origins (e.g. your Vercel URL). Dev defaults to the local Vite ports.
+  corsOrigins: [
+    ...((process.env.CORS_ORIGIN ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)),
+    ...((process.env.NODE_ENV ?? "development") === "production"
+      ? []
+      : ["http://localhost:5173", "http://localhost:5174"]),
+  ],
   // Repo-root-relative data directory; resolves from the api package dir.
   dataDir: process.env.QUOTEPILOT_DATA_DIR ?? "",
   analyticsDbPath:
