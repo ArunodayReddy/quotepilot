@@ -54,6 +54,10 @@ export interface QuoteRequest {
     renewalDate: string;
     termMonths: number;
   };
+  /** Quote-ready email consent flag. */
+  emailOptIn?: boolean;
+  /** TCPA express-written-consent flag for marketing calls/texts. */
+  phoneOptIn?: boolean;
 }
 
 export interface QuoteResult {
@@ -77,6 +81,8 @@ export interface QuoteJob {
   results: QuoteResult[];
   createdAt: string;
   completedAt?: string;
+  /** 2-letter state code the quote was run for (not PII) — drives state disclosures. */
+  state: string;
 }
 
 export interface QuoteJobCreated {
@@ -142,4 +148,32 @@ export interface CarriersResponse {
 
 export interface ApiErrorBody {
   error: { code: string; message: string; requestId: string };
+}
+
+/** Per-state consumer-education notes from GET /api/disclosures/:state. */
+export interface StateDisclosureNote {
+  title: string;
+  body: string;
+}
+
+/** State-mandated minimum auto coverage, where QuotePilot has verified data.
+ *  Only present for states in data/disclosures/<STATE>.json that carry it —
+ *  never guessed. pip is null where the state requires no PIP. */
+export interface StateMinCoverage {
+  biPerPerson: number;
+  biPerAccident: number;
+  propertyDamage: number;
+  pip: number | null;
+  notes: string;
+  verified: string;
+}
+
+export interface StateDisclosures {
+  state: string;
+  stateName: string;
+  notes: StateDisclosureNote[];
+  sources: string[];
+  updated: string;
+  educationalOnly: boolean;
+  minCoverage?: StateMinCoverage;
 }

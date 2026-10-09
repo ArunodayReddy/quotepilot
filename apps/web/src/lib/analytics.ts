@@ -3,6 +3,38 @@
 import { useCallback } from "react";
 
 const SESSION_KEY = "quotepilot.session";
+const CONSENT_KEY = "quotepilot.consent.v1";
+
+export type ConsentDecision = boolean | null;
+
+/** Read the stored analytics consent decision: true/false, or null if undecided. */
+export function getConsentDecision(): ConsentDecision {
+  try {
+    const raw = window.localStorage.getItem(CONSENT_KEY);
+    if (raw === null) return null;
+    const parsed = JSON.parse(raw) as { analytics?: boolean };
+    return parsed.analytics === true;
+  } catch {
+    return null;
+  }
+}
+
+/** Persist the user's analytics consent choice. */
+export function setConsentDecision(accepted: boolean): void {
+  try {
+    window.localStorage.setItem(
+      CONSENT_KEY,
+      JSON.stringify({ analytics: accepted, decidedAt: new Date().toISOString() }),
+    );
+  } catch {
+    // Storage unavailable — consent simply won't persist.
+  }
+}
+
+/** Re-open the cookie banner (used by the footer's "Cookie settings" link). */
+export function openCookieSettings(): void {
+  window.dispatchEvent(new CustomEvent("quotepilot:cookie-settings"));
+}
 
 export function getSessionId(): string {
   let id: string | null = null;
@@ -35,7 +67,8 @@ export type AnalyticsEventName =
   | "inline_email_capture"
   | "agents_section_view"
   | "agents_see_all_click"
-  | "loading_view";
+  | "loading_view"
+  | "consent_given";
 
 interface FireOptions {
   page: string;
@@ -45,8 +78,11 @@ interface FireOptions {
 
 const eventQueue: FireOptions[] = [];
 
-/** Fire-and-forget analytics POST. Never throws; never blocks UI. */
+/** Fire-and-forget analytics POST. Never throws; never blocks UI.
+ *  Gated on cookie consent: events are only sent after the user accepts
+ *  analytics in the cookie banner. Declined or undecided → dropped silently. */
 export function fireAnalytics(event: AnalyticsEventName, opts: FireOptions): void {
+  if (getConsentDecision() !== true) return;
   const payload = {
     event,
     page: opts.page,

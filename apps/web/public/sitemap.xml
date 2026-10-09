@@ -4,4 +4,7 @@
   <url><loc>https://quotepilot.example.com/quote</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://quotepilot.example.com/agents</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://quotepilot.example.com/about</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://quotepilot.example.com/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://quotepilot.example.com/privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://quotepilot.example.com/disclosures</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>

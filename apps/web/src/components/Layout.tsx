@@ -1,7 +1,8 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useTheme } from "../lib/theme";
-import { fireAnalytics } from "../lib/analytics";
+import { fireAnalytics, openCookieSettings } from "../lib/analytics";
+import { CookieBanner } from "./CookieBanner";
 
 function Header() {
   const { theme, toggle } = useTheme();
@@ -56,7 +57,7 @@ function Footer() {
         <div className="footer-grid">
           <div>
             <h4>QuotePilot</h4>
-            <p>One form. Every carrier. The best deal. Demo experience with simulated pricing.</p>
+            <p>One form. Compare carriers side by side. Demo experience with simulated pricing.</p>
           </div>
           <nav aria-label="Footer">
             <h4>Explore</h4>
@@ -67,6 +68,14 @@ function Footer() {
               <li><NavLink to="/about">About</NavLink></li>
             </ul>
           </nav>
+          <nav aria-label="Legal">
+            <h4>Legal</h4>
+            <ul>
+              <li><NavLink to="/terms">Terms of Service</NavLink></li>
+              <li><NavLink to="/privacy">Privacy Policy</NavLink></li>
+              <li><NavLink to="/disclosures">Important Disclosures</NavLink></li>
+            </ul>
+          </nav>
           <div>
             <h4>Honest pricing</h4>
             <ul>
@@ -75,9 +84,22 @@ function Footer() {
             </ul>
           </div>
         </div>
+        <p className="footer-disclaimer">
+          QuotePilot is not an insurance company or licensed insurance producer. All prices are
+          simulated estimates, not offers of insurance — your final premium is determined by the
+          carrier&apos;s underwriting. Carrier availability varies by state.
+        </p>
         <div className="footer-bottom">
           <span>© 2026 QuotePilot. Demo build — all prices simulated.</span>
           <span>Sample data only. No real PII.</span>
+          <button
+            type="button"
+            className="btn-danger-ghost"
+            onClick={openCookieSettings}
+            style={{ padding: 0 }}
+          >
+            Cookie settings
+          </button>
         </div>
       </div>
     </footer>
@@ -108,6 +130,7 @@ export function Layout() {
         <Outlet />
       </main>
       <Footer />
+      <CookieBanner />
     </>
   );
 }

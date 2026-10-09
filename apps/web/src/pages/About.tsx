@@ -9,7 +9,7 @@ export function About() {
     <div className="page">
       <Seo
         title="About QuotePilot — honest simulated quote comparison"
-        description="QuotePilot's mission: one form, every carrier, the best deal. Learn how the demo simulation works, how your data is handled, and what we do for security."
+        description="QuotePilot's mission: one form, every carrier, compared side by side. Learn how the demo simulation works, how your data is handled, and what we do for security."
         path="/about"
       />
       <div className="container">
@@ -27,9 +27,13 @@ export function About() {
             <h2>Our mission</h2>
             <p>
               QuotePilot exists to make car insurance shopping effortless: you describe yourself once, we
-              quietly ask every relevant carrier in your state to price that profile, and you pick the best
-              deal — on the site, side by side, and by email. No phone tag. No repeated forms. No dark
+              quietly ask every relevant carrier in your state to price that profile, and you compare
+              them side by side — on the site and by email. No phone tag. No repeated forms. No dark
               patterns.
+            </p>
+            <p>
+              <strong>QuotePilot is not a licensed insurance producer.</strong> We help you compare;
+              carriers issue policies. See our <Link to="/disclosures">Important Disclosures</Link>.
             </p>
           </Reveal>
 
