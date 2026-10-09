@@ -1,6 +1,6 @@
 # QuotePilot — Architecture
 
-> Living doc. Update when the system shape changes. Last updated: 2026-10-08 (v0.2.0 build).
+> Living doc. Update when the system shape changes. Last updated: 2026-10-08 (v0.10.1).
 
 ## 1. System diagram (ASCII)
 
@@ -9,17 +9,26 @@
 │  USER'S BROWSER                                                      │
 │                                                                      │
 │  ┌────────────────────────────┐      ┌────────────────────────────┐  │
-│  │ apps/web  (React + Vite)   │      │ analytics/dashboard (Vite) │  │
-│  │ port 5173                  │      │ port 5174                  │  │
+│  │ apps/web  (Next.js 14.2   │      │ analytics/dashboard (Vite) │  │
+│  │ App Router, React 18)     │      │ port 5174                  │  │
+│  │ port 5173                  │      │                            │  │
+│  │                            │      │ Clicks by element (SVG)    │  │
+│  │ app/ routes:               │      │ Wizard funnel              │  │
+│  │  / → SSR SEO shell         │      │ Carrier perf table         │  │
+│  │  /quote → Wizard (client)  │      │ Daily sessions             │  │
+│  │  /quotes/[jobId] (client)  │      │ polls /api/analytics/      │  │
+│  │  /agents (client, Leaflet) │      │ summary every 30s          │  │
+│  │  /about /terms /privacy /  │      │                            │  │
+│  │  disclosures (server HTML) │      │                            │  │
 │  │                            │      │                            │  │
-│  │ Home → Wizard (5 steps) →  │      │ Clicks by element (SVG)    │  │
-│  │ Quotes → Compare → Agents  │      │ Wizard funnel              │  │
-│  │                            │      │ Carrier perf table         │  │
-│  │ Fires POST /api/analytics/ │      │ Daily sessions             │  │
-│  │ event on every interaction │      │ polls /api/analytics/      │  │
-│  │                            │      │ summary every 30s          │  │
+│  │ src/views/ = client views; │      │                            │  │
+│  │ src/app/ = route shells +  │      │                            │  │
+│  │ generateMetadata per page  │      │                            │  │
+│  │ Fires POST /api/analytics/ │      │                            │  │
+│  │ event on every interaction │      │                            │  │
+│  │ (consent-gated)            │      │                            │  │
 │  └──────────────┬─────────────┘      └──────────────┬─────────────┘  │
-│                 │ /api proxy                        │ direct GET     │
+│                 │ /api rewrite       │ direct GET     │
 └─────────────────┼──────────────────────────────────┼──────────────┘
                   │                                  │
 ┌─────────────────▼──────────────────────────────────▼──────────────┐
@@ -35,11 +44,18 @@
 │  lib/           logger (structured JSON) · config · schemas         │
 │                                                                    │
 │  ┌──────────────┐   ┌────────────────────┐   ┌──────────────────┐   │
-│  │ SQLite       │   │ in-process job     │   │ SMTP (prod) /    │   │
-│  │ analytics.db │   │ queue (today) →    │   │ logged (dev)     │   │
-│  │ (better-     │   │ BullMQ + Redis     │   │ email delivery   │   │
-│  │  sqlite3)    │   │ (upgrade path)     │   │                  │   │
+│  │ Analytics      │   │ Job queue          │   │ Quote cache      │   │
+│  │ sink: SQLite   │   │ abstraction:       │   │ SHA-256 rating-  │   │
+│  │ default,       │   │ MemoryQueue /      │   │ factors key;     │   │
+│  │ Postgres when  │   │ BullMQ+Redis when  │   │ Redis or LRU     │   │
+│  │ DATABASE_URL   │   │ REDIS_URL set      │   │ (TTL 3600s)      │   │
+│  │ (fail-open)    │   │ (worker in-proc.)  │   │                  │   │
 │  └──────────────┘   └────────────────────┘   └──────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │ SMTP (prod) / logged (dev) — email delivery                 │   │
+│  │ GET /api/health reports live backends                       │   │
+│  │ (queue / analytics / cache / rateLimitStore)                 │   │
+│  └─────────────────────────────────────────────────────────────┘   │
 │                                                                    │
 │  packages/shared — QuoteAdapter interface + shared types +         │
 │                    state/carrier data helpers                      │
@@ -126,44 +142,49 @@ interface QuoteAdapter {
 
 ## 4. Job queue design
 
-### Today: in-process async queue (v0.2.0)
+### v0.9.0: queue abstraction (built)
 
-- `services/jobQueue.ts` — a bounded-concurrency promise pool inside the API process.
-- Concurrency: N carriers × M jobs, capped (default: 8 concurrent adapter calls per job).
-- Per-carrier timeout (default 8s) via `AbortController`-style racing; timeouts log
-  `quote.carrier.timeout` and mark the carrier failed, not the job.
-- Job lifecycle: `queued → running → complete | failed(partial)`; persisted in SQLite
-  so a restart doesn't lose the record (re-runnable from the last checkpoint).
-- Good enough for demo scale (tens of concurrent users, one API instance).
+`services/queue.ts` defines the `JobQueue` interface (`enqueue`, `getJob`,
+`onComplete`, `requestNotifyOnComplete`, `close`); `jobExecutor.ts` holds the
+shared execution core so every backend runs byte-identical fan-out, ranking,
+analytics, and email logic.
 
-### Upgrade path: BullMQ + Redis (when any of these become true)
+- **`MemoryQueue`** (default, zero config): the original v0.2.0 bounded-concurrency
+  promise pool — 8 concurrent adapter calls per job, 8s per-carrier timeout via
+  racing, timeouts log `quote.carrier.timeout` and fail the carrier (not the job).
+  Lifecycle `queued → running → complete | failed(partial)`; single process, jobs
+  lost on restart.
+- **`BullMQQueue`** (selected when `REDIS_URL` is set): job state in Redis hashes
+  (24h TTL), worker concurrency 10, attempts 2 with exponential backoff; jobs
+  survive restarts; any fleet instance can serve `GET /api/quotes/:jobId`.
+- The worker runs **in-process** for now (see DECISIONS.md #29) — no separate
+  worker deploy until real carrier APIs make it worthwhile.
+- Graceful shutdown: SIGTERM/SIGINT → stop accepting → 15s drain → close queue.
 
-- Multiple API instances behind a load balancer.
-- Quote jobs must survive API restarts/deploys.
-- We need retries with backoff, delayed jobs (e.g. re-quote reminders), or a dead-letter queue.
+### When to split further
 
-**Migration plan (interface-preserving):**
+- Multiple API instances behind a load balancer → set `REDIS_URL`; already done.
+- Quote jobs must survive deploys with retries/DLQ → per-carrier child jobs and a
+  dead-letter queue (documented in `docs/SCALING.md`; justified when real,
+  slow, flaky carrier APIs arrive — not for simulated adapters).
+- Email delivery retries at scale → move to a dedicated `emails` queue with
+  exponential backoff (same doc).
 
-1. Add `redis` (BullMQ dependency) + `ioredis`; run Redis (port 6379, see ports table).
-2. `services/jobQueue.ts` gains a `JobQueue` interface it already effectively has:
-   `enqueue(job)`, `getJob(id)`, `onProgress(cb)`. Implement `BullMQJobQueue` behind the
-   same interface — routes and the web app don't change.
-3. One queue per concern: `quotes` (adapter fan-out), `emails` (delivery), `analytics`
-   (event persistence batching).
-4. Adapter fan-out becomes child jobs: parent `quote-job` spawns one child per carrier;
-   progress = completed children / total children; a failed child degrades its card only.
-5. Email delivery moves to the `emails` queue with exponential-backoff retries (3 attempts)
-   and a dead-letter queue for permanent SMTP failures.
-6. Add a `QueueEvents` listener feeding the existing structured logger — same log fields,
-   new `event` values (`job.enqueued`, `job.child.completed`, `job.completed`).
+No schema or API contract changes are required for any of this; only the queue
+implementation and infra env vars.
 
-No schema or API contract changes are required for the upgrade; only the queue
-implementation and one new infra dependency (Redis).
+## 5. Analytics storage: sink abstraction (v0.9.0)
 
-## 5. SQLite analytics schema
+Analytics live behind an `AnalyticsSink` interface (`services/analyticsSink.ts`):
 
-Analytics live in a dedicated SQLite database (`analytics.db`, via `better-sqlite3`),
-kept separate from job records so analytics writes never block quote jobs.
+- **`SqliteSink`** (default): the original dedicated `analytics.db` via
+  `better-sqlite3`, kept separate from job records so analytics writes never
+  block quote jobs. Zero infra.
+- **`PostgresSink`** (when `DATABASE_URL` is set): schema-compatible tables via
+  `pg`. **Fail-open**: a Postgres outage warns loudly and falls back to SQLite —
+  analytics never breaks quoting (DECISIONS.md #28).
+
+Schema (both sinks):
 
 ```sql
 CREATE TABLE IF NOT EXISTS events (
@@ -189,17 +210,19 @@ CREATE INDEX IF NOT EXISTS idx_events_session  ON events (session_hash, ts);
 | `carriers`        | from job records: `quotes` count, `AVG(latencyMs)`, `winRate` = share of jobs where carrier had the cheapest quote |
 | `dailySessions`   | `SELECT date(ts/1000,'unixepoch') d, COUNT(DISTINCT session_hash) FROM events GROUP BY d` |
 
-Growth path: when daily events exceed ~1M, move `events` to Postgres/ClickHouse and keep
-the summary endpoint contract identical — the dashboard doesn't care about the store.
+Growth path: the sink interface means the dashboard never cares about the store.
+`GET /api/health` reports which sink is live. Rate limiting is likewise
+store-abstracted: `rate-limit-redis` when `REDIS_URL` is set, else the in-memory
+default — correct per-IP limits across a fleet (tiers via `RATE_LIMIT_*_PER_MIN`).
 
 ## 6. Ports table
 
 | Port | Service                 | URL                        | Notes                              |
 | ---- | ----------------------- | -------------------------- | ---------------------------------- |
-| 3001 | API (Express)           | http://localhost:3001      | `/api/*`, health at `/api/health`  |
-| 5173 | Web app (Vite + React)  | http://localhost:5173      | proxies `/api` → 3001              |
+| 3001 | API (Express)           | http://localhost:3001      | `/api/*`; health at `/api/health` reports live backends |
+| 5173 | Web app (Next.js 14.2)  | http://localhost:5173      | `next dev`; `/api` rewritten to 3001 (`API_PROXY_TARGET` override) |
 | 5174 | Analytics dashboard     | http://localhost:5174      | reads `/api/analytics/summary`     |
-| 6379 | Redis (future)          | —                          | BullMQ upgrade path only; not required for v0.2.0 |
+| 6379 | Redis (optional)        | —                          | v0.9.0: queue + rate limits + cache when `REDIS_URL` set |
 
 ## 7. Validation boundaries (where input is checked)
 

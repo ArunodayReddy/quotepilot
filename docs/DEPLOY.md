@@ -33,16 +33,31 @@
 
 1. Vercel dashboard → **Add New…** → **Project** → import `ArunodayReddy/quotepilot`.
 2. Configure:
-   - **Framework Preset:** Vite (auto-detected)
+   - **Framework Preset:** Next.js (auto-detected)
    - **Root Directory:** `apps/web` ← important (monorepo)
-   - **Build Command:** `npm run build` (default)
-   - **Output Directory:** `dist` (default)
-   - (`apps/web/vercel.json` also encodes the SPA rewrites + security headers)
+   - Build/Output: leave defaults — the Next.js preset handles them
+   - (`apps/web/vercel.json` is now minimal: `"framework": "nextjs"` + security headers)
 3. **Environment Variables** → add:
-   - `VITE_API_URL` → `https://quotepilot-api.onrender.com` (your Render URL, no trailing slash)
+   - `NEXT_PUBLIC_API_URL` → `https://quotepilot-api.onrender.com` (your Render URL, no trailing slash)
 4. Deploy. You get `https://quotepilot.vercel.app` (or your project name).
 5. Go back to Render and set `CORS_ORIGIN` to that Vercel URL, then redeploy the API
    (or it redeploys automatically on env change).
+
+## Scaling env vars (all optional — infrastructure-optional law)
+
+Set these on Render only when you want production-grade backends. With none of
+them set, the API runs exactly like your laptop: in-memory queue, SQLite
+analytics, in-memory rate limits. `GET /api/health` reports which backends are live.
+
+| Variable | Effect when set |
+|---|---|
+| `REDIS_URL` | BullMQ job queue (jobs survive restarts, any instance can serve status), Redis rate-limit store (correct per-IP limits across a fleet), shared quote cache + agent cache |
+| `DATABASE_URL` | Postgres analytics sink (schema-compatible; fail-open to SQLite on outage — analytics never breaks quoting) |
+| `CACHE_TTL_SECONDS` | Quote-result cache TTL (default 3600); cache keys are SHA-256 of rating factors only — email/phone/names never touch the key |
+| `RATE_LIMIT_GLOBAL_PER_MIN` / `RATE_LIMIT_QUOTE_PER_MIN` / `RATE_LIMIT_ANALYTICS_EVENT_PER_MIN` | Override the 300/10/120 per-minute tiers (e.g. relax during a load test) |
+
+Free-tier Redis: Upstash or Render's own Redis both work — paste the connection
+string into `REDIS_URL` and redeploy.
 
 ## Step 3 — Post-deploy smoke checklist (~2 min)
 
@@ -52,7 +67,8 @@
 - [ ] `/agents?state=TX&zip=76201` → map + 3 Denton agents sorted by distance
 - [ ] Analytics dashboard (optional 2nd Vercel project, root `analytics/dashboard`)
        shows the events you just generated
-- [ ] View-source: no API keys or secrets in the bundle (only `VITE_API_URL`, which is public by design)
+- [ ] View-source: no API keys or secrets in the bundle (only `NEXT_PUBLIC_API_URL`, which is public by design)
+- [ ] `/api/health` shows `"status":"ok"` plus the live backend selection (`queue`, `analytics`, `cache`, `rateLimitStore`) — memory defaults until you set `REDIS_URL`/`DATABASE_URL`
 
 ## Custom domain (optional)
 
@@ -73,7 +89,7 @@ and set the **Healthcheck Path** to `/api/health`.
 
 | Symptom | Fix |
 |---------|-----|
-| Web shows "couldn't reach the quote service" | `VITE_API_URL` wrong/missing on Vercel, or Render service asleep — hit `/api/health` first |
+| Web shows "couldn't reach the quote service" | `NEXT_PUBLIC_API_URL` wrong/missing on Vercel, or Render service asleep — hit `/api/health` first |
 | CORS errors in console | Render `CORS_ORIGIN` must exactly match the Vercel URL (no trailing slash) |
 | Agents show "Sample data" badge | `GOOGLE_PLACES_API_KEY` empty on Render — add it and redeploy |
 | Emails not arriving | SMTP vars empty → dev-log mode by design; add SMTP creds |
