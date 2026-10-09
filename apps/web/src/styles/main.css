@@ -1057,3 +1057,134 @@ fieldset.driver-card legend { padding: 0; }
   .orb-loader i { animation: none; opacity: 0.85; transform: none; }
   .loading-line { animation: none; }
 }
+
+/* ---------------- v0.7.0 compliance surfaces ---------------- */
+
+.footer-disclaimer {
+  margin: var(--space-6) 0 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle, rgba(128, 128, 128, 0.25));
+  color: var(--text-tertiary);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  max-width: 70ch;
+}
+
+.state-disclosures {
+  margin: var(--space-6) 0 0;
+  padding: var(--space-6);
+  border-radius: var(--radius-lg, 1rem);
+}
+
+.state-disclosures h2 {
+  margin: 0 0 var(--space-3);
+  font-size: 1.15rem;
+}
+
+.state-disclosure-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.state-disclosure-list li {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.state-disclosure-list strong {
+  color: var(--text);
+}
+
+.disclosure-fineprint {
+  margin: var(--space-4) 0 0;
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+}
+
+.disclosure-fineprint a {
+  color: var(--accent);
+  text-underline-offset: 2px;
+}
+
+.quote-disclaimer {
+  margin: var(--space-6) 0 0;
+  padding: var(--space-6);
+  border-radius: var(--radius-lg, 1rem);
+  border-left: 4px solid var(--accent, #4f7cff);
+}
+
+.quote-disclaimer-title {
+  margin: 0 0 var(--space-3);
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.quote-disclaimer p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  margin: 0 0 var(--space-2);
+}
+
+.quote-disclaimer p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------------- cookie consent banner ---------------- */
+
+.cookie-banner {
+  position: fixed;
+  inset-inline: 1rem;
+  bottom: 1rem;
+  z-index: 1000;
+  max-width: 560px;
+  margin-inline: auto;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg, 1rem);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.cookie-banner h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 1.05rem;
+}
+
+.cookie-banner p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0 0 var(--space-4);
+}
+
+.cookie-banner-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-banner {
+    transition: none;
+  }
+}
+
+.min-coverage-line {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius, 0.75rem);
+  background: rgba(79, 124, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.min-coverage-line strong {
+  color: var(--text);
+}
