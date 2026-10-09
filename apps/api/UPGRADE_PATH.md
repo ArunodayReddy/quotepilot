@@ -1,5 +1,12 @@
 # Job queue upgrade path: in-memory → BullMQ + Redis
 
+> **v0.9.0 status: IMPLEMENTED.** The checklist below is done — `JobQueue`
+> interface with `MemoryQueue` (default) and `BullMQQueue` (`REDIS_URL`),
+> shared `jobExecutor.ts`, Redis rate-limit store, Postgres analytics sink,
+> quote-result cache, shared Places cache, graceful shutdown. This document
+> is kept as the historical rationale. See `docs/SCALING.md` for the current
+> architecture and runbook.
+
 The v0.2.0 demo runs an in-memory job queue (`src/services/jobQueue.ts`).
 That is correct for a hackathon demo and a single process, and wrong the
 moment QuotePilot needs a second API replica, a deploy without losing
