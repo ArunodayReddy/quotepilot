@@ -1,0 +1,122 @@
+[
+ {
+  "id": "geico",
+  "name": "GEICO",
+  "channel": "direct",
+  "statesServed": [
+   "WY"
+  ],
+  "logo": "🦎",
+  "quotable": true,
+  "notes": "Direct writer; simulation adapter active (pricing bands anchored to MA research — approximate outside MA).",
+  "website": "geico.com"
+ },
+ {
+  "id": "progressive",
+  "name": "Progressive",
+  "channel": "direct",
+  "statesServed": [
+   "WY"
+  ],
+  "logo": "🛡️",
+  "quotable": true,
+  "notes": "Direct writer; simulation adapter active (pricing bands anchored to MA research — approximate outside MA).",
+  "website": "progressive.com"
+ },
+ {
+  "id": "allstate",
+  "name": "Allstate",
+  "channel": "direct",
+  "statesServed": [
+   "WY"
+  ],
+  "logo": "🏠",
+  "quotable": true,
+  "notes": "Direct writer; simulation adapter active (pricing bands anchored to MA research — approximate outside MA).",
+  "website": "allstate.com"
+ },
+ {
+  "id": "libertyMutual",
+  "name": "Liberty Mutual",
+  "channel": "direct",
+  "statesServed": [
+   "WY"
+  ],
+  "logo": "🗽",
+  "quotable": true,
+  "notes": "Direct writer; simulation adapter active (pricing bands anchored to MA research — approximate outside MA).",
+  "website": "libertymutual.com"
+ },
+ {
+  "id": "stateFarm",
+  "name": "State Farm",
+  "channel": "agent",
+  "statesServed": [
+   "WY"
+  ],
+  "logo": "🚜",
+  "quotable": false,
+  "notes": "Agent channel; no simulation adapter — see the local agent directory.",
+  "website": "statefarm.com"
+ },
+ {
+  "id": "farmers",
+  "name": "Farmers",
+  "channel": "agent",
+  "statesServed": [
+   "WY"
+  ],
+  "logo": "🌾",
+  "quotable": false,
+  "notes": "Agent channel; no simulation adapter — see the local agent directory.",
+  "website": "farmers.com"
+ },
+ {
+  "id": "nationwide",
+  "name": "Nationwide",
+  "channel": "agent",
+  "statesServed": [
+   "WY"
+  ],
+  "logo": "🏛️",
+  "quotable": false,
+  "notes": "Agent channel; no simulation adapter — see the local agent directory.",
+  "website": "nationwide.com"
+ },
+ {
+  "id": "travelers",
+  "name": "Travelers",
+  "channel": "agent",
+  "statesServed": [
+   "WY"
+  ],
+  "logo": "🧳",
+  "quotable": false,
+  "notes": "Agent channel; no simulation adapter — see the local agent directory.",
+  "website": "travelers.com"
+ },
+ {
+  "id": "usaa",
+  "name": "USAA",
+  "channel": "direct",
+  "statesServed": [
+   "WY"
+  ],
+  "logo": "🎖️",
+  "quotable": false,
+  "notes": "Military eligibility only; not quotable in simulation.",
+  "website": "usaa.com"
+ },
+ {
+  "id": "amica",
+  "name": "Amica",
+  "channel": "direct",
+  "statesServed": [
+   "WY"
+  ],
+  "logo": "⭐",
+  "quotable": true,
+  "notes": "Direct writer; simulation adapter active (pricing bands anchored to MA research — approximate outside MA).",
+  "website": "amica.com"
+ }
+]
