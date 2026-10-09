@@ -9,7 +9,8 @@ import { api } from "../lib/api";
 import { defaultWizardData, loadWizardData, saveWizardData } from "../lib/wizard";
 import { ZIP_RE } from "../lib/validation";
 import type { CarrierEntry } from "../lib/types";
-import { FAQ_DEFS, carriersAnswer } from "../lib/homeContent";
+import type { FaqItem, HomeContent } from "../lib/cms";
+import { carriersAnswer } from "../lib/homeContent";
 
 /** Shared carrier-registry fetch for the home page (marquee + FAQ). */
 function useMaCarriers(): { carriers: CarrierEntry[] | null; failed: boolean } {
@@ -32,13 +33,22 @@ function useMaCarriers(): { carriers: CarrierEntry[] | null; failed: boolean } {
   return { carriers, failed };
 }
 
+/** Resolve a CMS FAQ item to a rendered Q&A. `dynamic: "carriers"` slots in
+ *  live registry data; everything else renders verbatim from the CMS. */
+function resolveFaq(item: FaqItem, quotableNames: string[] | null): { q: string; a: string } {
+  if (item.dynamic === "carriers") {
+    return { q: item.q, a: carriersAnswer(quotableNames, item) };
+  }
+  return { q: item.q, a: item.a ?? "" };
+}
+
 /**
  * ZIP-first hero entry: the primary CTA. Validates a 5-digit ZIP, stashes it
  * into the wizard's localStorage (so the location step is prefilled), tracks
  * the event, and routes to the wizard. Unknown-state ZIPs still work — the
  * carriers endpoint degrades gracefully downstream.
  */
-function ZipHeroForm() {
+function ZipHeroForm({ content }: { content: HomeContent["hero"] }) {
   const track = useAnalytics("home");
   const router = useRouter();
   const [zip, setZip] = useState("");
@@ -48,7 +58,7 @@ function ZipHeroForm() {
     e.preventDefault();
     const z = zip.trim();
     if (!ZIP_RE.test(z)) {
-      setError("Enter a valid 5-digit ZIP code.");
+      setError(content.zipError);
       return;
     }
     setError(null);
@@ -67,13 +77,13 @@ function ZipHeroForm() {
   return (
     <form className="zip-hero-form glass" onSubmit={submit} noValidate aria-label="Start with your ZIP code">
       <div className="zip-hero-field">
-        <label htmlFor="zip-hero-input">Enter your ZIP code</label>
+        <label htmlFor="zip-hero-input">{content.zipLabel}</label>
         <input
           id="zip-hero-input"
           type="text"
           inputMode="numeric"
           autoComplete="postal-code"
-          placeholder="76201"
+          placeholder={content.zipPlaceholder}
           maxLength={5}
           value={zip}
           onChange={(e) => {
@@ -85,10 +95,10 @@ function ZipHeroForm() {
         />
       </div>
       <button type="submit" className="btn btn-primary btn-lg">
-        Get my quotes →
+        {content.zipCta}
       </button>
       <p id="zip-hero-hint" className="field-hint">
-        We check every carrier licensed in your state — online quotes plus local agents.
+        {content.zipHint}
       </p>
       {error && (
         <p id="zip-hero-error" className="field-error" role="alert">
@@ -99,7 +109,7 @@ function ZipHeroForm() {
   );
 }
 
-function Hero() {
+function Hero({ content }: { content: HomeContent["hero"] }) {
   const track = useAnalytics("home");
   return (
     <section className="hero" aria-labelledby="hero-title">
@@ -110,82 +120,65 @@ function Hero() {
       </div>
       <div className="container hero-inner">
         <Reveal>
-          <span className="hero-eyebrow">
-            <span aria-hidden="true">✨</span> Demo build — simulated pricing
-          </span>
+          <span className="hero-eyebrow">{content.eyebrow}</span>
         </Reveal>
         <Reveal>
           <h1 id="hero-title" className="hero-title">
-            One form. Every carrier. <span className="gradient-text">Compare side by side.</span>
+            {content.title} <span className="gradient-text">{content.titleAccent}</span>
           </h1>
         </Reveal>
         <Reveal>
-          <p className="hero-sub">
-            Tell us about yourself once. QuotePilot quietly gathers car insurance quotes from
-            every carrier in your state and ranks them for you — on the site and by email.
-          </p>
+          <p className="hero-sub">{content.subtitle}</p>
         </Reveal>
         <Reveal>
-          <ZipHeroForm />
+          <ZipHeroForm content={content} />
         </Reveal>
         <Reveal>
           <div className="hero-ctas hero-ctas-secondary">
-            <Link
-              href="/quote"
-              className="link-quiet"
-              onClick={() => track("cta_clicked", { element: "hero_get_my_quotes" })}
-            >
-              Start without a ZIP
-            </Link>
-            <span aria-hidden="true" className="cta-sep">·</span>
-            <Link
-              href="/quote"
-              className="link-quiet"
-              onClick={() => track("cta_clicked", { element: "hero_try_sample" })}
-            >
-              Try with sample data
-            </Link>
+            {content.secondaryCtas.map((cta, i) => (
+              <span key={cta.element}>
+                {i > 0 && (
+                  <span aria-hidden="true" className="cta-sep">
+                    ·
+                  </span>
+                )}
+                <Link
+                  href={cta.href}
+                  className="link-quiet"
+                  onClick={() => track("cta_clicked", { element: cta.element })}
+                >
+                  {cta.label}
+                </Link>
+              </span>
+            ))}
           </div>
         </Reveal>
         <Reveal>
-          <p className="hero-note">Takes about 2 minutes · No account needed · Free forever</p>
+          <p className="hero-note">{content.note}</p>
         </Reveal>
       </div>
     </section>
   );
 }
 
-function HowItWorks() {
-  const steps = [
-    {
-      n: "1",
-      title: "Answer once",
-      text: "A five-step wizard — location, drivers, vehicle, coverage, contact — with smart defaults and inline help. Your progress saves automatically.",
-    },
-    {
-      n: "2",
-      title: "We ask everyone",
-      text: "QuotePilot pings every relevant carrier for your state in the background while you watch live progress. Nobody is left out.",
-    },
-    {
-      n: "3",
-      title: "Compare and pick",
-      text: "Quotes arrive ranked by price with coverage-match scores, expandable details, a side-by-side compare view, and an emailed copy.",
-    },
-  ];
+function HowItWorks({ content }: { content: HomeContent["howItWorks"] }) {
   return (
     <section className="section" aria-labelledby="how-title">
       <div className="container">
         <Reveal>
-          <h2 id="how-title" className="section-heading">How it works</h2>
+          <h2 id="how-title" className="section-heading">
+            {content.heading}
+          </h2>
         </Reveal>
         <Reveal>
-          <p className="section-sub">Three steps. Zero phone calls. Zero repeated forms.</p>
+          <p className="section-sub">{content.sub}</p>
         </Reveal>
         <div className="steps-grid">
-          {steps.map((s) => (
+          {content.steps.map((s) => (
             <Reveal key={s.n} className="glass step-card" as="article">
-              <div className="step-number" aria-hidden="true">{s.n}</div>
+              <div className="step-number" aria-hidden="true">
+                {s.n}
+              </div>
               <h3>{s.title}</h3>
               <p>{s.text}</p>
             </Reveal>
@@ -197,9 +190,11 @@ function HowItWorks() {
 }
 
 function CarrierMarquee({
+  content,
   carriers,
   failed,
 }: {
+  content: HomeContent["carriers"];
   carriers: CarrierEntry[] | null;
   failed: boolean;
 }) {
@@ -210,16 +205,18 @@ function CarrierMarquee({
     <section className="section" aria-labelledby="carriers-title">
       <div className="container">
         <Reveal>
-          <h2 id="carriers-title" className="section-heading">Carriers we check</h2>
+          <h2 id="carriers-title" className="section-heading">
+            {content.heading}
+          </h2>
         </Reveal>
         <Reveal>
           <p className="section-sub">
-            Direct and agent-only carriers for your state. <SimBadge />
+            {content.sub} <SimBadge />
           </p>
         </Reveal>
       </div>
       {carriers === null && !failed && (
-        <div className="container" aria-label="Loading carriers">
+        <div className="container" aria-label={content.loadingAriaLabel}>
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
             {Array.from({ length: 6 }).map((_, i) => (
               <span key={i} className="skeleton" style={{ width: "9rem", height: "2.25rem" }} aria-hidden="true" />
@@ -230,13 +227,12 @@ function CarrierMarquee({
       {failed && (
         <div className="container">
           <p className="section-sub" role="status">
-            The carrier list is unavailable right now — the demo still works, and carriers
-            load on the results page.
+            {content.unavailableNote}
           </p>
         </div>
       )}
       {quotable.length > 0 && (
-        <div className="marquee-wrap" role="list" aria-label="Example carriers (simulated)">
+        <div className="marquee-wrap" role="list" aria-label={content.marqueeAriaLabel}>
           <div className="marquee">
             {items.map((c, i) => (
               <span key={`${c.id}-${i}`} className="carrier-badge" role="listitem" aria-hidden={i >= quotable.length}>
@@ -250,15 +246,23 @@ function CarrierMarquee({
   );
 }
 
-function Faq({ faqs }: { faqs: { q: string; a: string }[] }) {
+function Faq({
+  content,
+  faqs,
+}: {
+  content: HomeContent["faq"];
+  faqs: { q: string; a: string }[];
+}) {
   return (
     <section className="section" aria-labelledby="faq-title">
       <div className="container">
         <Reveal>
-          <h2 id="faq-title" className="section-heading">Questions, answered</h2>
+          <h2 id="faq-title" className="section-heading">
+            {content.heading}
+          </h2>
         </Reveal>
         <Reveal>
-          <p className="section-sub">The honest version — including what's simulated and what isn't.</p>
+          <p className="section-sub">{content.sub}</p>
         </Reveal>
         <div className="faq-list">
           {faqs.map((f, i) => (
@@ -266,7 +270,9 @@ function Faq({ faqs }: { faqs: { q: string; a: string }[] }) {
               <details>
                 <summary className="faq-question">
                   {f.q}
-                  <span className="faq-icon" aria-hidden="true">+</span>
+                  <span className="faq-icon" aria-hidden="true">
+                    +
+                  </span>
                 </summary>
                 <div className="faq-answer">{f.a}</div>
               </details>
@@ -278,23 +284,23 @@ function Faq({ faqs }: { faqs: { q: string; a: string }[] }) {
   );
 }
 
-function FinalCta() {
+function FinalCta({ content }: { content: HomeContent["finalCta"] }) {
   const track = useAnalytics("home");
   return (
     <section className="section" aria-labelledby="cta-title">
       <div className="container">
-        <Reveal className="glass" >
+        <Reveal className="glass">
           <div style={{ textAlign: "center", padding: "3.5rem 2rem" }}>
-            <h2 id="cta-title" className="section-heading">Ready to see your number?</h2>
-            <p className="section-sub">
-              Two minutes now could save you hundreds on your next six months.
-            </p>
+            <h2 id="cta-title" className="section-heading">
+              {content.heading}
+            </h2>
+            <p className="section-sub">{content.sub}</p>
             <Link
               href="/quote"
               className="btn btn-primary btn-lg"
               onClick={() => track("cta_clicked", { element: "final_cta" })}
             >
-              Get my quotes →
+              {content.cta}
             </Link>
           </div>
         </Reveal>
@@ -303,26 +309,23 @@ function FinalCta() {
   );
 }
 
-export function Home() {
+export function Home({ content }: { content: HomeContent }) {
   const { carriers, failed } = useMaCarriers();
   const quotableNames = useMemo(
     () => (carriers ? carriers.filter((c) => c.quotable).map((c) => c.name) : null),
     [carriers],
   );
   const faqs = useMemo(
-    () =>
-      FAQ_DEFS.map((f) =>
-        f.id === "carriers" ? { q: f.q, a: carriersAnswer(quotableNames) } : { q: f.q, a: f.a },
-      ),
-    [quotableNames],
+    () => content.faq.items.map((item) => resolveFaq(item, quotableNames)),
+    [content.faq.items, quotableNames],
   );
   return (
     <div className="page" style={{ paddingTop: 0 }}>
-      <Hero />
-      <HowItWorks />
-      <CarrierMarquee carriers={carriers} failed={failed} />
-      <Faq faqs={faqs} />
-      <FinalCta />
+      <Hero content={content.hero} />
+      <HowItWorks content={content.howItWorks} />
+      <CarrierMarquee content={content.carriers} carriers={carriers} failed={failed} />
+      <Faq content={content.faq} faqs={faqs} />
+      <FinalCta content={content.finalCta} />
     </div>
   );
 }

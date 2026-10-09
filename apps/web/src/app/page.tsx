@@ -1,29 +1,34 @@
 import type { Metadata } from "next";
 import { siteMetadata } from "../lib/metadata";
+import { getHomeContent } from "../lib/cms";
 import { buildJsonLd, staticFaqs } from "../lib/homeContent";
 import { Home } from "../views/Home";
-
-export const metadata: Metadata = siteMetadata({
-  title: "QuotePilot — One form. Every carrier. Compare side by side.",
-  description:
-    "QuotePilot gathers car insurance quotes from every relevant carrier in your state with one short form. Compare ranked quotes on the site and by email. Demo build with simulated pricing.",
-  path: "/",
-});
 
 /**
  * Home is an interactive client component (ZIP hero form, carrier marquee,
  * FAQ accordion all need browser state). The page shell — title, meta, OG,
- * and FAQ JSON-LD — is server-rendered for SEO.
+ * and FAQ JSON-LD — plus all page copy is server-rendered from the CMS:
+ * content loads here, on page load, and flows into <Home/> as props.
  */
+export async function generateMetadata(): Promise<Metadata> {
+  const content = getHomeContent();
+  return siteMetadata({
+    title: content.seo.title,
+    description: content.seo.description,
+    path: "/",
+  });
+}
+
 export default function HomePage() {
-  const jsonLd = buildJsonLd(staticFaqs());
+  const content = getHomeContent();
+  const jsonLd = buildJsonLd(staticFaqs(content.faq.items), content.jsonLd.description);
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Home />
+      <Home content={content} />
     </>
   );
 }

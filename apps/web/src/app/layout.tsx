@@ -5,20 +5,24 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { RouteTracker } from "../components/RouteTracker";
 import { CookieBanner } from "../components/CookieBanner";
+import { getSiteContent } from "../lib/cms";
 import "../styles/tokens.css";
 import "../styles/main.css";
 import "leaflet/dist/leaflet.css";
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://quotepilot.example.com"),
-  title: {
-    default: "QuotePilot — One form. Every carrier. Compare side by side.",
-    template: "%s",
-  },
-  description:
-    "QuotePilot gathers car insurance quotes from every relevant carrier in your state with one short form. Compare ranked quotes on the site and by email. Demo build with simulated pricing.",
-  icons: { icon: "/favicon.svg" },
-};
+/** Site-wide metadata comes from the CMS, like all other page copy. */
+export async function generateMetadata(): Promise<Metadata> {
+  const site = getSiteContent();
+  return {
+    metadataBase: new URL("https://quotepilot.example.com"),
+    title: {
+      default: site.meta.defaultTitle,
+      template: site.meta.titleTemplate,
+    },
+    description: site.meta.description,
+    icons: { icon: "/favicon.svg" },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -30,6 +34,7 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const site = getSiteContent();
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
@@ -41,9 +46,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <a className="skip-link" href="#main-content">
             Skip to main content
           </a>
-          <Header />
+          <Header content={site.header} brand={site.brand} />
           <main id="main-content">{children}</main>
-          <Footer />
+          <Footer content={site.footer} brandName={site.brand.name} />
           <CookieBanner />
         </ThemeProvider>
       </body>

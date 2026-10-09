@@ -2,56 +2,56 @@
 
 import Link from "next/link";
 import { openCookieSettings } from "../lib/analytics";
+import type { SiteContent } from "../lib/cms";
 
-export function Footer() {
+export function Footer({
+  content,
+  brandName,
+}: {
+  content: SiteContent["footer"];
+  brandName: string;
+}) {
   return (
     <footer className="site-footer">
       <div className="container">
         <div className="footer-grid">
           <div>
-            <h4>QuotePilot</h4>
-            <p>One form. Compare carriers side by side. Demo experience with simulated pricing.</p>
+            <h4>{brandName}</h4>
+            <p>{content.brandBlurb}</p>
           </div>
-          <nav aria-label="Footer">
-            <h4>Explore</h4>
-            <ul>
-              <li><Link href="/">Home</Link></li>
-              <li><Link href="/quote">Get quotes</Link></li>
-              <li><Link href="/agents">Local agents</Link></li>
-              <li><Link href="/about">About</Link></li>
-            </ul>
-          </nav>
-          <nav aria-label="Legal">
-            <h4>Legal</h4>
-            <ul>
-              <li><Link href="/terms">Terms of Service</Link></li>
-              <li><Link href="/privacy">Privacy Policy</Link></li>
-              <li><Link href="/disclosures">Important Disclosures</Link></li>
-            </ul>
-          </nav>
-          <div>
-            <h4>Honest pricing</h4>
-            <ul>
-              <li>All quotes shown are simulated demo pricing</li>
-              <li>No personal data is sold or shared</li>
-            </ul>
-          </div>
+          {content.columns.map((col) => (
+            <nav aria-label={col.heading} key={col.heading}>
+              <h4>{col.heading}</h4>
+              {col.links && (
+                <ul>
+                  {col.links.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href}>{link.label}</Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {col.bullets && (
+                <ul>
+                  {col.bullets.map((bullet) => (
+                    <li key={bullet}>{bullet}</li>
+                  ))}
+                </ul>
+              )}
+            </nav>
+          ))}
         </div>
-        <p className="footer-disclaimer">
-          QuotePilot is not an insurance company or licensed insurance producer. All prices are
-          simulated estimates, not offers of insurance — your final premium is determined by the
-          carrier&apos;s underwriting. Carrier availability varies by state.
-        </p>
+        <p className="footer-disclaimer">{content.disclaimer}</p>
         <div className="footer-bottom">
-          <span>© 2026 QuotePilot. Demo build — all prices simulated.</span>
-          <span>Sample data only. No real PII.</span>
+          <span>{content.bottom.copyright}</span>
+          <span>{content.bottom.sampleNote}</span>
           <button
             type="button"
             className="btn-danger-ghost"
             onClick={openCookieSettings}
             style={{ padding: 0 }}
           >
-            Cookie settings
+            {content.bottom.cookieSettings}
           </button>
         </div>
       </div>
