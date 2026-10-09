@@ -23,6 +23,11 @@ export interface QuoteRequest {
   currentPolicy?: CurrentPolicy;
   /** When true (default), email the user when their quotes are ready. */
   emailOptIn?: boolean;
+  /**
+   * TCPA express-written-consent flag for marketing calls/texts to the phone
+   * number provided. Must be unchecked by default on the client.
+   */
+  phoneOptIn?: boolean;
 }
 
 export interface Driver {
@@ -175,4 +180,6 @@ export interface QuoteJob {
   estimatedSeconds: number;
   createdAt: string;
   completedAt?: string;
+  /** 2-letter state code the quote was run for (not PII) — drives state disclosures. */
+  state: string;
 }
