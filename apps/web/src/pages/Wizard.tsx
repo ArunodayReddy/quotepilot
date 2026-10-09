@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Seo } from "../components/Seo";
 import { Field, SelectField, TextField, STATE_OPTIONS } from "../components/fields";
 import { api, ApiError } from "../lib/api";
@@ -31,6 +31,7 @@ import {
   ZIP_LEN,
   validateField,
 } from "../lib/validation";
+import { MinCoverageHint } from "../components/StateDisclosurePanel";
 
 /* ---------------- helpers ---------------- */
 
@@ -151,6 +152,10 @@ function StepLocation({
           hint="Used to match carriers and local agents in your area."
         />
       </div>
+      <p className="field-hint" role="note" style={{ marginTop: "0.5rem" }}>
+        QuotePilot is not a licensed insurance producer — we help you compare;
+        carriers issue policies.
+      </p>
     </>
   );
 }
@@ -618,6 +623,7 @@ function StepCoverage({
   const c = data.coverage;
   return (
     <>
+      <MinCoverageHint state={data.contact.state} />
       <div className="field-row">
         <LimitSelect
           id="wz-bi-person"
@@ -717,12 +723,14 @@ function StepContact({
   data,
   setContact,
   setConsent,
+  setPhoneConsent,
   errors,
   onBlurField,
 }: {
   data: WizardData;
   setContact: (patch: Partial<WizardData["contact"]>) => void;
   setConsent: (b: boolean) => void;
+  setPhoneConsent: (b: boolean) => void;
   errors: FieldErrors;
   onBlurField: (key: string) => void;
 }) {
@@ -756,7 +764,7 @@ function StepContact({
         onChange={(e) => setContact({ phone: e.target.value })}
         onBlur={() => onBlurField("contact.phone")}
         error={errors["contact.phone"]}
-        hint="Only used if a carrier needs to reach you about your quote."
+        hint="Only used if a carrier needs to reach you about your quote. We never call or text for marketing — ever."
       />
       <div className="field">
         <label className="check-row" htmlFor="wz-consent">
@@ -775,13 +783,39 @@ function StepContact({
           </span>
         </label>
         <div className="field-hint" id="wz-consent-hint">
-          No spam, no selling your info — just your quotes.
+          No spam, no selling your info — just your quotes. See our{" "}
+          <Link to="/privacy">Privacy Policy</Link> for how your information is used.
         </div>
         {errors["consentEmail"] && (
           <div className="field-error" id="wz-consent-error" role="alert">
             {errors["consentEmail"]}
           </div>
         )}
+      </div>
+      {/* TCPA express-written-consent: optional, UNCHECKED by default, never
+          pre-checked programmatically (COMPLIANCE.md §3). */}
+      <div className="field">
+        <label className="check-row" htmlFor="wz-consent-phone">
+          <input
+            id="wz-consent-phone"
+            type="checkbox"
+            checked={data.consentPhone}
+            onChange={(e) => setPhoneConsent(e.target.checked)}
+            aria-describedby="wz-consent-phone-hint"
+          />
+          <span>
+            Yes — I give my express written consent for QuotePilot and the
+            insurance carriers and licensed agents shown with my quotes to call
+            or text me at the phone number I entered about my quotes and
+            insurance options, including with automated dialing or prerecorded
+            messages. <strong>Consent is not a condition of getting quotes or
+            purchasing insurance.</strong> Message and data rates may apply.
+          </span>
+        </label>
+        <div className="field-hint" id="wz-consent-phone-hint">
+          Optional — leave this unchecked if you&apos;d rather not be contacted
+          by phone.
+        </div>
       </div>
     </>
   );
@@ -1003,6 +1037,7 @@ export function Wizard() {
               data={data}
               setContact={setContact}
               setConsent={(b) => applyData({ ...data, consentEmail: b })}
+              setPhoneConsent={(b) => applyData({ ...data, consentPhone: b })}
               errors={errors}
               onBlurField={handleBlur}
             />
