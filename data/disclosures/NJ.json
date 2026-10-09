@@ -1,0 +1,23 @@
+{
+  "state": "NJ",
+  "stateName": "New Jersey",
+  "educationalOnly": true,
+  "minCoverage": {
+    "biPerPerson": 15000,
+    "biPerAccident": 30000,
+    "propertyDamage": 5000,
+    "pip": 15000,
+    "notes": "Standard policy; $15,000 PIP required.",
+    "verified": "2026-10-08"
+  },
+  "notes": [
+    {
+      "title": "Check your state's insurance department",
+      "body": "Minimums change. Before you buy, verify current requirements with your state's department of insurance."
+    }
+  ],
+  "sources": [
+    "New Jersey Department of Insurance"
+  ],
+  "updated": "2026-10-08"
+}

@@ -1,0 +1,23 @@
+{
+  "state": "MN",
+  "stateName": "Minnesota",
+  "educationalOnly": true,
+  "minCoverage": {
+    "biPerPerson": 30000,
+    "biPerAccident": 60000,
+    "propertyDamage": 10000,
+    "pip": 40000,
+    "notes": "No-fault state; $40,000 PIP required.",
+    "verified": "2026-10-08"
+  },
+  "notes": [
+    {
+      "title": "Check your state's insurance department",
+      "body": "Minimums change. Before you buy, verify current requirements with your state's department of insurance."
+    }
+  ],
+  "sources": [
+    "Minnesota Department of Insurance"
+  ],
+  "updated": "2026-10-08"
+}

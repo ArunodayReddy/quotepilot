@@ -1,0 +1,23 @@
+{
+  "state": "FL",
+  "stateName": "Florida",
+  "educationalOnly": true,
+  "minCoverage": {
+    "biPerPerson": 10000,
+    "biPerAccident": 20000,
+    "propertyDamage": 10000,
+    "pip": 10000,
+    "notes": "No-fault state; $10,000 PIP required.",
+    "verified": "2026-10-08"
+  },
+  "notes": [
+    {
+      "title": "Check your state's insurance department",
+      "body": "Minimums change. Before you buy, verify current requirements with your state's department of insurance."
+    }
+  ],
+  "sources": [
+    "Florida Department of Insurance"
+  ],
+  "updated": "2026-10-08"
+}

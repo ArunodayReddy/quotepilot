@@ -1,0 +1,23 @@
+{
+  "state": "TN",
+  "stateName": "Tennessee",
+  "educationalOnly": true,
+  "minCoverage": {
+    "biPerPerson": 25000,
+    "biPerAccident": 50000,
+    "propertyDamage": 25000,
+    "pip": null,
+    "notes": "Property-damage minimum rose from $15,000 to $25,000 on Jan 1, 2023.",
+    "verified": "2026-10-08"
+  },
+  "notes": [
+    {
+      "title": "Check your state's insurance department",
+      "body": "Minimums change. Before you buy, verify current requirements with your state's department of insurance."
+    }
+  ],
+  "sources": [
+    "Tennessee Department of Insurance"
+  ],
+  "updated": "2026-10-08"
+}

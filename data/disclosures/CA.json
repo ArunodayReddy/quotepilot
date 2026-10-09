@@ -1,0 +1,36 @@
+{
+  "educationalOnly": true,
+  "notes": [
+    {
+      "body": "California's Proposition 103 requires the Insurance Commissioner to review and approve auto-insurance rate changes before they take effect \u2014 unlike file-and-use states.",
+      "title": "Proposition 103 \u2014 rates need approval first"
+    },
+    {
+      "body": "Premiums must be based primarily on three factors, in this order: your driving safety record, how many miles you drive each year, and your years of driving experience.",
+      "title": "What sets your rate (in order)"
+    },
+    {
+      "body": "If you've been licensed 3+ years with a clean record (no more than one moving violation, no at-fault injury accidents, no DUI in 7 years), insurers must offer you a Good Driver Discount policy at least 20% below the rate you'd otherwise pay.",
+      "title": "20% Good Driver Discount"
+    },
+    {
+      "body": "California bans credit-based insurance scores in auto rating, and ZIP code can't be used as the primary rating factor.",
+      "title": "What's not used in your rate"
+    }
+  ],
+  "sources": [
+    "CA Legislative Analyst's Office \u2014 Proposition 103 background",
+    "Consumer Watchdog \u2014 Proposition 103 & 20% Good Driver Discount"
+  ],
+  "state": "CA",
+  "stateName": "California",
+  "updated": "2026-10-08",
+  "minCoverage": {
+    "biPerPerson": 15000,
+    "biPerAccident": 30000,
+    "propertyDamage": 5000,
+    "pip": null,
+    "notes": "California requires prior approval of rate changes (Prop 103).",
+    "verified": "2026-10-08"
+  }
+}

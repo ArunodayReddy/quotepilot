@@ -1,0 +1,36 @@
+{
+  "educationalOnly": true,
+  "notes": [
+    {
+      "body": "Massachusetts adjusts your premium with your driving record through the SDIP merit-rating system. At-fault accidents and traffic violations add surcharge points (tracked by the Merit Rating Board); a clean record earns an excellent-driver credit.",
+      "title": "Safe Driver Insurance Plan (SDIP)"
+    },
+    {
+      "body": "Massachusetts is a no-fault state. Every policy must include at least $8,000 in PIP, which covers medical expenses and lost wages regardless of who caused the accident.",
+      "title": "Personal Injury Protection is mandatory"
+    },
+    {
+      "body": "MA requires at least $25,000/$50,000 bodily-injury liability, $30,000 property damage, and $8,000 PIP. Financed or leased cars typically need collision and comprehensive too.",
+      "title": "Minimum coverage"
+    },
+    {
+      "body": "Massachusetts insurers may not use credit-based insurance scores, gender, marital status, or homeownership when setting premiums. Age may only be used to give a discount at 65+.",
+      "title": "What's not used in your rate"
+    }
+  ],
+  "sources": [
+    "211 CMR 134.00 \u2014 Safe Driver Insurance and Merit Rating Plans (mass.gov)",
+    "Experian \u2014 Average Cost of Car Insurance in Massachusetts (2026)"
+  ],
+  "state": "MA",
+  "stateName": "Massachusetts",
+  "updated": "2026-10-08",
+  "minCoverage": {
+    "biPerPerson": 25000,
+    "biPerAccident": 50000,
+    "propertyDamage": 30000,
+    "pip": 8000,
+    "notes": "2026 law (Act H.5111) raised BI/PD minimums; 25/50 UM and $8,000 PIP required.",
+    "verified": "2026-10-08"
+  }
+}

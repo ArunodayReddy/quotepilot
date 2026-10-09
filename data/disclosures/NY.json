@@ -1,0 +1,23 @@
+{
+  "state": "NY",
+  "stateName": "New York",
+  "educationalOnly": true,
+  "minCoverage": {
+    "biPerPerson": 25000,
+    "biPerAccident": 50000,
+    "propertyDamage": 10000,
+    "pip": 50000,
+    "notes": "No-fault state; $50,000 PIP required.",
+    "verified": "2026-10-08"
+  },
+  "notes": [
+    {
+      "title": "Check your state's insurance department",
+      "body": "Minimums change. Before you buy, verify current requirements with your state's department of insurance."
+    }
+  ],
+  "sources": [
+    "New York Department of Insurance"
+  ],
+  "updated": "2026-10-08"
+}

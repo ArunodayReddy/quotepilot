@@ -1,0 +1,23 @@
+{
+  "state": "VA",
+  "stateName": "Virginia",
+  "educationalOnly": true,
+  "minCoverage": {
+    "biPerPerson": 50000,
+    "biPerAccident": 100000,
+    "propertyDamage": 25000,
+    "pip": null,
+    "notes": "Minimums raised to 50/100/25 effective Jan 1, 2025.",
+    "verified": "2026-10-08"
+  },
+  "notes": [
+    {
+      "title": "Check your state's insurance department",
+      "body": "Minimums change. Before you buy, verify current requirements with your state's department of insurance."
+    }
+  ],
+  "sources": [
+    "Virginia Department of Insurance"
+  ],
+  "updated": "2026-10-08"
+}

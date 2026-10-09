@@ -1,0 +1,23 @@
+{
+  "state": "MI",
+  "stateName": "Michigan",
+  "educationalOnly": true,
+  "minCoverage": {
+    "biPerPerson": 50000,
+    "biPerAccident": 100000,
+    "propertyDamage": 10000,
+    "pip": null,
+    "notes": "No-fault state; drivers choose a PIP coverage level \u2014 verify current options with Michigan DIFS.",
+    "verified": "2026-10-08"
+  },
+  "notes": [
+    {
+      "title": "Check your state's insurance department",
+      "body": "Minimums change. Before you buy, verify current requirements with your state's department of insurance."
+    }
+  ],
+  "sources": [
+    "Michigan Department of Insurance"
+  ],
+  "updated": "2026-10-08"
+}

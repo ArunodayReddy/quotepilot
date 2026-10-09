@@ -1,0 +1,23 @@
+{
+  "state": "OR",
+  "stateName": "Oregon",
+  "educationalOnly": true,
+  "minCoverage": {
+    "biPerPerson": 25000,
+    "biPerAccident": 50000,
+    "propertyDamage": 20000,
+    "pip": 15000,
+    "notes": "$15,000 PIP required.",
+    "verified": "2026-10-08"
+  },
+  "notes": [
+    {
+      "title": "Check your state's insurance department",
+      "body": "Minimums change. Before you buy, verify current requirements with your state's department of insurance."
+    }
+  ],
+  "sources": [
+    "Oregon Department of Insurance"
+  ],
+  "updated": "2026-10-08"
+}

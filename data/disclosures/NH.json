@@ -1,0 +1,32 @@
+{
+  "educationalOnly": true,
+  "notes": [
+    {
+      "body": "New Hampshire is the only U.S. state that doesn't require auto insurance by statute. A financial-responsibility law still applies: if you cause a crash, you must be able to pay for the damage.",
+      "title": "Insurance isn't required \u2014 but responsibility is"
+    },
+    {
+      "body": "Purchased policies must carry at least $25,000/$50,000 bodily-injury liability and $25,000 property damage, plus $1,000 in medical payments (MedPay) and 25/50 uninsured-motorist coverage.",
+      "title": "If you buy, minimums are 25/50/25"
+    },
+    {
+      "body": "State minimums only cover damage you cause to others \u2014 not your own car or injuries beyond the limits. Many drivers carry higher limits for real protection.",
+      "title": "Minimums may not be enough"
+    }
+  ],
+  "sources": [
+    "insurance.com \u2014 New Hampshire car insurance guide & laws (2026)",
+    "MoneyGeek \u2014 Best Car Insurance in New Hampshire (2026)"
+  ],
+  "state": "NH",
+  "stateName": "New Hampshire",
+  "updated": "2026-10-08",
+  "minCoverage": {
+    "biPerPerson": 25000,
+    "biPerAccident": 50000,
+    "propertyDamage": 25000,
+    "pip": null,
+    "notes": "Auto insurance is not required by NH statute; these are the financial-responsibility minimums that apply if you buy a policy or cause an accident.",
+    "verified": "2026-10-08"
+  }
+}

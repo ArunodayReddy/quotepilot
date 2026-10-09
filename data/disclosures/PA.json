@@ -1,0 +1,23 @@
+{
+  "state": "PA",
+  "stateName": "Pennsylvania",
+  "educationalOnly": true,
+  "minCoverage": {
+    "biPerPerson": 15000,
+    "biPerAccident": 30000,
+    "propertyDamage": 5000,
+    "pip": null,
+    "notes": "$5,000 in first-party medical benefits also required.",
+    "verified": "2026-10-08"
+  },
+  "notes": [
+    {
+      "title": "Check your state's insurance department",
+      "body": "Minimums change. Before you buy, verify current requirements with your state's department of insurance."
+    }
+  ],
+  "sources": [
+    "Pennsylvania Department of Insurance"
+  ],
+  "updated": "2026-10-08"
+}
