@@ -83,6 +83,27 @@ export const analyticsEventLimiter = limiter(
   "Too many analytics events — slow down.",
 );
 
+/**
+ * POST /api/quote-requests is a contact vector (it can trigger outbound
+ * email): 5 submissions per hour per IP, shared store when Redis is set.
+ */
+export const quoteRequestLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  ...(store ? { store } : {}),
+  handler: (req: Request, res: Response) => {
+    res.status(429).json({
+      error: {
+        code: "RATE_LIMITED",
+        message: "Too many quote requests — try again in an hour.",
+        requestId: (req as Request & { requestId?: string }).requestId,
+      },
+    });
+  },
+});
+
 /** Test seam: which store backend was selected. */
 export async function rateLimitStoreBackend(): Promise<"redis" | "memory"> {
   return rateLimitStoreKind;

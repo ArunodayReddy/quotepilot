@@ -15,6 +15,7 @@ import { globalLimiter } from "./middleware/rateLimit.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import { healthRouter } from "./routes/health.js";
 import { quoteRouter } from "./routes/quote.js";
+import { quoteRequestsRouter } from "./routes/quoteRequests.js";
 import { agentsRouter } from "./routes/agents.js";
 import { carriersRouter } from "./routes/carriers.js";
 import { analyticsRouter } from "./routes/analytics.js";
@@ -58,6 +59,7 @@ export function createApp(): express.Express {
 
   app.use("/api", healthRouter);
   app.use("/api", quoteRouter);
+  app.use("/api", quoteRequestsRouter);
   app.use("/api", agentsRouter);
   app.use("/api", carriersRouter);
   app.use("/api", analyticsRouter);

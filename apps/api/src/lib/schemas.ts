@@ -104,3 +104,26 @@ export const carriersQuerySchema = z.object({
 export const jobIdParamSchema = z.object({
   jobId: z.string().uuid(),
 });
+
+/**
+ * POST /api/quote-requests — agent-mediated real-quote request.
+ * consent must be literally `true`: anything else is a TCPA violation
+ * vector and is rejected outright (the client leaves it unchecked by
+ * default and only an explicit click sets it).
+ */
+export const quoteRequestSubmissionSchema = z.object({
+  jobId: z.string().uuid(),
+  agentIds: z.array(z.string().min(1).max(120)).min(1).max(3),
+  contact: z.object({
+    name: z.string().min(1).max(100),
+    email: z.string().email().max(254),
+    phone: z.string().min(7).max(20),
+  }),
+  consent: z.literal(true, {
+    errorMap: () => ({
+      message: "Explicit consent is required before we share your details with agents.",
+    }),
+  }),
+});
+
+export type QuoteRequestSubmissionInput = z.infer<typeof quoteRequestSubmissionSchema>;
