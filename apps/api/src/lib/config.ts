@@ -32,6 +32,25 @@ export const config = {
     process.env.ANALYTICS_DB ?? "data/analytics.db", // relative to api root; gitignored
   // Job engine
   perCarrierTimeoutMs: num("CARRIER_TIMEOUT_MS", 8000),
+  // --- Scaling (v0.9.0): ALL optional. Leave unset for laptop dev — every
+  // piece of infrastructure below degrades to a graceful in-memory fallback.
+  // REDIS_URL: enables BullMQ quote queue, Redis rate-limit store, Redis
+  //   quote-result cache, and the shared Places-agent cache. Unset → memory.
+  redisUrl: process.env.REDIS_URL ?? "",
+  // DATABASE_URL: Postgres analytics sink (e.g. postgres://user:pass@host/db).
+  //   Unset → the local better-sqlite3 store. On connection failure we warn
+  //   loudly and fall back to SQLite — analytics must never break quoting.
+  databaseUrl: process.env.DATABASE_URL ?? "",
+  // Quote-result cache TTL in seconds (default 1 hour). Applies to both the
+  // Redis and the in-memory LRU implementations.
+  cacheTtlSeconds: num("CACHE_TTL_SECONDS", 3600),
+  // Rate-limit tiers (per IP per minute). Defaults are the production-safe
+  // values; raise them for load testing (see docs/SCALING.md).
+  rateLimits: {
+    globalPerMin: num("RATE_LIMIT_GLOBAL_PER_MIN", 300),
+    quotePerMin: num("RATE_LIMIT_QUOTE_PER_MIN", 10),
+    analyticsEventPerMin: num("RATE_LIMIT_ANALYTICS_EVENT_PER_MIN", 120),
+  },
   // Email: when SMTP_HOST is set we send for real; otherwise dev-log mode.
   smtp: {
     host: process.env.SMTP_HOST,

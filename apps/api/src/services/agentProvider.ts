@@ -13,6 +13,7 @@
  */
 import type { Agent, AgentHours, AgentSource, AgentWithDistance } from "../../../../packages/shared/dist/types.js";
 import { logger } from "../lib/logger.js";
+import { getAgentCache, _resetAgentCacheInstance } from "./agentCache.js";
 
 export interface AgentProvider {
   readonly source: AgentSource;
@@ -194,20 +195,18 @@ export class PlacesAgentProvider implements AgentProvider {
 // Chain resolution + cache
 // ---------------------------------------------------------------------------
 
-interface CacheEntry {
-  at: number;
-  agents: AgentWithDistance[];
-}
-const placesCache = new Map<string, CacheEntry>();
+// v0.9.0: the Places cache moved to services/agentCache.ts — Redis when
+// REDIS_URL is set, otherwise the same per-instance in-memory Map as before.
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 function cacheKey(lat: number, lng: number, radiusMi: number): string {
-  return `places:${lat.toFixed(3)}:${lng.toFixed(3)}:${radiusMi}`;
+  return `qp:agents:${lat.toFixed(3)}:${lng.toFixed(3)}:${radiusMi}`;
 }
 
-/** Test seam: reset the in-memory Places cache. */
-export function _resetAgentCache(): void {
-  placesCache.clear();
+/** Test seam: reset the Places cache (both backends). */
+export async function _resetAgentCache(): Promise<void> {
+  _resetAgentCacheInstance();
+  await getAgentCache().clear();
 }
 
 /** Pick the provider for this request. Exported for tests. */
@@ -233,13 +232,14 @@ export async function searchAgentsWithFallback(
     return { agents: await primary.searchAgents(lat, lng, radiusMi), source: "sample", fallbackReason: "no_places_key" };
   }
   const key = cacheKey(lat, lng, radiusMi);
-  const cached = placesCache.get(key);
-  if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
-    return { agents: cached.agents, source: "google_places", fallbackReason: null };
+  const cache = getAgentCache();
+  const cached = await cache.get(key);
+  if (cached) {
+    return { agents: cached, source: "google_places", fallbackReason: null };
   }
   try {
     const agents = await primary.searchAgents(lat, lng, radiusMi);
-    placesCache.set(key, { at: Date.now(), agents });
+    await cache.set(key, agents, CACHE_TTL_MS);
     return { agents, source: "google_places", fallbackReason: null };
   } catch (err) {
     const reason = (err as Error).message;

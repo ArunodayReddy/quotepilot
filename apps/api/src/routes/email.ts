@@ -14,32 +14,36 @@ import { logger } from "../lib/logger.js";
 
 export const emailRouter = Router();
 
-emailRouter.post("/email/notify", validate(emailNotifySchema, "body"), async (req, res) => {
-  const { jobId, email } = req.body as { jobId: string; email: string };
-  const verdict = requestNotifyOnComplete(jobId, email);
+emailRouter.post("/email/notify", validate(emailNotifySchema, "body"), async (req, res, next) => {
+  try {
+    const { jobId, email } = req.body as { jobId: string; email: string };
+    const verdict = await requestNotifyOnComplete(jobId, email);
 
-  if (verdict === "not-found") {
-    res.status(404).json({
-      error: { code: "NOT_FOUND", message: `Unknown job ${jobId}`, requestId: req.requestId },
-    });
-    return;
+    if (verdict === "not-found") {
+      res.status(404).json({
+        error: { code: "NOT_FOUND", message: `Unknown job ${jobId}`, requestId: req.requestId },
+      });
+      return;
+    }
+
+    if (verdict === "send-now") {
+      const job = await getQuoteJob(jobId);
+      const ranked = (job?.results ?? [])
+        .filter((r) => r.success && r.premium6Mo !== undefined)
+        .sort((a, b) => (a.premium6Mo as number) - (b.premium6Mo as number));
+      await sendQuotesReady(email, {
+        jobId,
+        carrierCount: job?.carrierCount ?? 0,
+        cheapestCarrierName: ranked[0]?.carrierName,
+        cheapestPremium6Mo: ranked[0]?.premium6Mo,
+      });
+      logger.info({ msg: "email_notify_sent_on_request", jobId });
+    } else {
+      logger.info({ msg: "email_notify_parked", jobId });
+    }
+
+    res.status(202).json({ ok: true });
+  } catch (err) {
+    next(err);
   }
-
-  if (verdict === "send-now") {
-    const job = getQuoteJob(jobId);
-    const ranked = (job?.results ?? [])
-      .filter((r) => r.success && r.premium6Mo !== undefined)
-      .sort((a, b) => (a.premium6Mo as number) - (b.premium6Mo as number));
-    await sendQuotesReady(email, {
-      jobId,
-      carrierCount: job?.carrierCount ?? 0,
-      cheapestCarrierName: ranked[0]?.carrierName,
-      cheapestPremium6Mo: ranked[0]?.premium6Mo,
-    });
-    logger.info({ msg: "email_notify_sent_on_request", jobId });
-  } else {
-    logger.info({ msg: "email_notify_parked", jobId });
-  }
-
-  res.status(202).json({ ok: true });
 });

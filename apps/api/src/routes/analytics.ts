@@ -36,6 +36,6 @@ analyticsRouter.post(
   },
 );
 
-analyticsRouter.get("/analytics/summary", (_req, res) => {
-  res.json(summary());
+analyticsRouter.get("/analytics/summary", async (_req, res) => {
+  res.json(await summary());
 });

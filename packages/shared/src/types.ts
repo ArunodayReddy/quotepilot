@@ -182,4 +182,9 @@ export interface QuoteJob {
   completedAt?: string;
   /** 2-letter state code the quote was run for (not PII) — drives state disclosures. */
   state: string;
+  /**
+   * True when this result was served from the quote-result cache rather than a
+   * fresh carrier fan-out. Set by the API; never stored.
+   */
+  cached?: boolean;
 }
