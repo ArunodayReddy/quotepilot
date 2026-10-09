@@ -120,6 +120,13 @@ change must be recorded there with a date.
 
 ## 8. Rule log (append-only; newest at bottom)
 
+- 2026-10-08 (v0.8.0 documentation): narrative docs are deliverables —
+  docs/PRODUCT.md (case study), docs/DECISIONS.md (append-only ADR log), and
+  docs/AI_ARCHITECTURE.md (processes, components, flows, contracts, honest ML
+  roadmap) must be updated when behavior changes, and must link to deep-dive docs
+  instead of duplicating them. Every technical claim traceable to code; roadmap
+  items explicitly marked — never imply a feature exists that doesn't.
+
 - 2026-10-08 (v0.6.0 nationwide+deploy): 50-state data-grade rule — every state file must
   be valid with >=3 carriers; `quotable:true` ONLY with a wired adapter (test-enforced in
   registry.test.ts); regionals only where confident, tagged `"confidence":"medium"`; when in

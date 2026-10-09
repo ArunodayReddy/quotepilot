@@ -3,6 +3,29 @@
 All notable changes to this project are documented here. Newest at the top.
 Format: `## [version] — date` with Added / Changed / Fixed / Security sections.
 
+## [0.8.0] — 2026-10-08 — Portfolio documentation pass
+
+### Added
+- **`docs/PRODUCT.md`** — portfolio case study: problem & users, product decisions
+  with reasoning (one form, ZIP-first, background fan-out, unified results, honest
+  degradation, engagement without dark patterns, 50-state grades, compliance-first),
+  architecture overview with mermaid diagram, tech stack with per-choice rationale,
+  design-system thinking, APIs & integrations (current + planned), SEO/analytics/
+  dashboard strategy, legal approach, content-feed freshness model, ZIP functionality,
+  map integration, estimate-engine deep-dive, and an explicit real-vs-roadmap section.
+- **`docs/DECISIONS.md`** — append-only ADR-style decision log, 24 entries seeded
+  from the full build history (adapter pattern, simulation anchors, sample-data
+  honesty, feed-driven UI, provider chain, Leaflet, ZIP-first, honest degradation,
+  validation parity, 50-state grades, compliance + attorney-review-required,
+  consent-gated analytics, Vite-SPA-today/SSR-deferred, push mechanics), each dated
+  and tied to its release.
+- **`docs/AI_ARCHITECTURE.md`** — systems/intelligence document: running-process
+  inventory (web :5173, API :3001, dashboard :5174 + in-API subsystems), decision-
+  making components, mermaid sequence diagrams for the quote-job lifecycle and
+  agent search flow, full API contract table, and an explicitly-marked ML roadmap
+  (rules-based today; learned pricing, win-rate prediction, personalized ranking
+  as future insertion points — no ML claimed that doesn't exist).
+
 ## [0.7.0] — 2026-10-08 — Compliance build
 
 ### Added
