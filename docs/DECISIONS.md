@@ -182,13 +182,13 @@
 - **Decision:** (b). `quotepilot.consent.v1`; decline/undecided → events dropped in `fireAnalytics`; "Cookie settings" re-opens the banner.
 - **Consequences:** Rule 6 now reads "every interaction *with consent*" — the dashboard shows consented traffic only, which is the legally correct denominator.
 
-## 23. Rendering: Vite SPA today, SSR deferred
+## 23. Rendering: Next.js 14.2 App Router (SSR), migrated from Vite SPA
 
-- **Date:** 2026-10-08 · **Release:** v0.7.0 era (question raised by owner) · **Status:** Proposed — decision pending
-- **Context:** Owner asked whether the project uses Next.js and whether SSR is possible.
-- **Options:** (a) Migrate to Next.js for SSR; (b) stay Vite SPA; (c) prerender at build time.
-- **Decision:** Deferred. The SPA was chosen at kickoff for speed and portability (one static host, no server); SEO is currently served via semantic HTML, meta/OG tags, sitemap, and JSON-LD — which covers crawler needs for a form-driven app whose quote pages are `noindex` by design. If organic search becomes a growth channel, (c) prerendering public routes or (a) a Next.js migration are the documented options.
-- **Consequences:** No action now; the question and options are recorded so the trade-off is explicit.
+- **Date:** 2026-10-08 · **Release:** v0.10.0 · **Status:** Accepted — **decided, built, and shipped**
+- **Context:** Owner asked whether the project uses Next.js and whether SSR is possible. The v0.8.0 log entry recorded the question as "decision pending."
+- **Options:** (a) Migrate to Next.js for SSR; (b) stay Vite SPA; (c) prerender at build time. (The owner briefly floated Stencil + Express — rejected: Stencil is a web-component compiler, not an app framework; it would mean hand-rolling routing, SSR, and metadata.)
+- **Decision:** (a). In-place migration to Next.js 14.2 App Router, React 18 kept. **SSR split rule:** server components for static/crawlable content (About, legal pages, Home SEO shell with title/meta/OG + FAQ JSON-LD); client components only where the browser is required (wizard localStorage, quote polling, Leaflet, cookie banner). Nothing indexable lives behind a form or job id, so SSR there is complexity without SEO gain. `VITE_API_URL` → `NEXT_PUBLIC_API_URL`; dev `/api` proxy via `next.config.mjs` rewrites.
+- **Consequences:** Crawlers and link previews get real HTML on the pages that matter; `react-helmet-async` retired for the metadata API; Vercel deploy is preset-native; `scripts/dev.sh` unchanged. React 19 deliberately deferred (see #25).
 
 ## 24. GitHub push mechanics: divergent histories, small batches
 
@@ -197,3 +197,43 @@
 - **Options:** (a) Fight for git push; (b) accept divergent histories, push via API in small batches.
 - **Decision:** (b). Local git and GitHub histories are intentionally divergent; batches stay ≤50KB JSON (larger hangs the API); `package-lock.json` skipped (`npm install` regenerates).
 - **Consequences:** Reliable pushes at the cost of conventional git history on the remote. Documented so future sessions don't re-learn it.
+
+## 25. Next.js 14 + React 18 — no React 19 upgrade
+
+- **Date:** 2026-10-08 · **Release:** v0.10.0 · **Status:** Accepted
+- **Context:** Next.js 15 wants React 19; the migration was already the biggest frontend change in the project's history.
+- **Options:** (a) Next 15 + React 19; (b) Next 14.2 + React 18.
+- **Decision:** (b). React 18 is what every component was written and tested against; the migration's goal was SSR, not a React upgrade.
+- **Consequences:** Zero React-API churn during the migration; React 19 becomes a separate, deliberate upgrade when its features are actually wanted.
+
+## 26. Infrastructure-optional law
+
+- **Date:** 2026-10-08 · **Release:** v0.9.0 · **Status:** Accepted (CONTEXT law)
+- **Context:** Scaling to 100k users wants Redis (queue, rate limits, cache) and Postgres (analytics) — but the project's core promise is "runnable in 2 minutes from a clean checkout."
+- **Options:** (a) Require Redis/Postgres for dev; (b) every infra piece optional with a graceful in-memory fallback.
+- **Decision:** (b). `REDIS_URL`, `DATABASE_URL`, `CACHE_TTL_SECONDS` are all unset-able; `scripts/dev.sh` works with zero new config; `GET /api/health` reports which backends are actually live.
+- **Consequences:** Laptop dev stays one command; production gets real infrastructure by setting env vars, not by code changes.
+
+## 27. Cache-key PII rule
+
+- **Date:** 2026-10-08 · **Release:** v0.9.0 · **Status:** Accepted (CONTEXT law)
+- **Context:** The quote-result cache keys by request identity — a cache key containing an email or phone number is a PII leak waiting for a cache dump.
+- **Options:** (a) Hash the whole request; (b) hash rating factors only, exclude contact fields by construction.
+- **Decision:** (b). SHA-256 over state, ZIP, driver risk fields, vehicle fields, and coverage — email, phone, and names never touch the key. Test-enforced (`scaling.test.ts`).
+- **Consequences:** Cache hits are safe to log and share across instances; the rule holds even if the request shape grows new PII fields later.
+
+## 28. Fail-open analytics
+
+- **Date:** 2026-10-08 · **Release:** v0.9.0 · **Status:** Accepted (CONTEXT law)
+- **Context:** With Postgres as an optional sink, a database outage could take down quoting — the product's reason to exist.
+- **Options:** (a) Fail closed (error if Postgres is down); (b) fail open: warn loudly, fall back to SQLite.
+- **Decision:** (b). Analytics is the product's nervous system, not its heart — `track()` stays non-blocking and quoting never breaks for an analytics outage.
+- **Consequences:** Degraded observability instead of a dead product; the loud warning means the fallback is never silent.
+
+## 29. BullMQ worker runs in-process — no separate worker deploy yet
+
+- **Date:** 2026-10-08 · **Release:** v0.9.0 · **Status:** Accepted
+- **Context:** BullMQ's canonical pattern is a separate worker process; the queue abstraction supports it.
+- **Options:** (a) Separate worker deploy now; (b) run the worker in-process (concurrency 10) until load justifies the split.
+- **Decision:** (b). Simulated adapters are fast and cheap; a second deployable doubles the ops surface for no current gain. The abstraction means splitting later is a deployment change, not a code change.
+- **Consequences:** One API process does everything in production; the split is documented in `docs/SCALING.md` for when real carrier APIs (slow, flaky, rate-limited) make it worthwhile.

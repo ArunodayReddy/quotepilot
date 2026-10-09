@@ -1,7 +1,7 @@
 # QuotePilot — Product Case Study
 
 > The portfolio narrative: what was built, why, and how. Every claim below is
-> traceable to the code, data, or docs it names. Last updated: 2026-10-08 (v0.7.0).
+> traceable to the code, data, or docs it names. Last updated: 2026-10-08 (v0.10.1).
 
 ## 1. The problem
 
@@ -103,19 +103,20 @@ Monorepo, three runtime services, one shared contract:
 
 ```mermaid
 flowchart LR
-    U[User browser] -->|ZIP-first entry| W[apps/web :5173<br/>React + Vite + TS]
+    U[User browser] -->|ZIP-first entry| W[apps/web :5173<br/>Next.js 14.2 App Router<br/>React 18 + TS]
     W -->|wizard submit| Q[POST /api/quote]
     Q --> A[apps/api :3001<br/>Express + TS]
-    A --> JQ[(In-memory job queue)]
+    A --> JQ[(Job queue<br/>MemoryQueue / BullMQ+Redis)]
     JQ -->|fan-out, 8s timeout/carrier| AD[6 carrier adapters<br/>QuoteAdapter interface]
     AD -->|results stream| A
     W -->|poll 2s| A
+    A -->|cache hit| C[Quote cache<br/>SHA-256 rating-factors<br/>~10ms]
     A -->|complete| E[Email: quotes ready<br/>nodemailer / dev-log]
     A -->|ZIP search| P{Places key?}
     P -->|yes| GP[Google Places<br/>insurance_agency]
     P -->|no| S[data/agents sample seeds]
     GP & S --> M[Leaflet map + distance-ranked cards]
-    W -->|every click| AN[(SQLite analytics.db<br/>hashed sessions)]
+    W -->|every click, consent-gated| AN[(SQLite default<br/>Postgres when DATABASE_URL)]
     AN --> D[analytics/dashboard :5174<br/>funnels, win-rates]
 ```
 
@@ -129,19 +130,20 @@ See `docs/ARCHITECTURE.md` for the full treatment.
 
 | Layer | Choice | Why |
 |---|---|---|
-| Frontend | React 18 + Vite 6 + TypeScript (strict) | Component model for the wizard/results complexity; Vite for instant dev + tiny prod bundles (232KB JS, under the 200KB-gzip SEO budget); strict TS catches the enum-drift class of bugs at compile time |
+| Frontend | Next.js 14.2 App Router + React 18 + TypeScript (strict) | Component model for the wizard/results complexity; SSR for crawlable pages and server-rendered metadata (v0.10.0 migration from Vite — see §14); React 18 kept to avoid a risky React 19 upgrade; strict TS catches the enum-drift class of bugs at compile time |
 | Styling | Hand-rolled CSS + design tokens | No UI framework — the Apple-grade glassmorphism *is* the brand; tokens (`tokens.css`) are the visual law every screen is reviewed against |
 | Maps | Leaflet + OpenStreetMap tiles | Zero API key, zero cost, no vendor lock-in; custom divIcon pins dodge bundler-broken default markers |
 | Backend | Node + Express + TypeScript | One language across the monorepo; Express is boring in the best way for a JSON API with a job queue |
 | Validation | zod, both ends | Single schema language; client `validation.ts` mirrors server `schemas.ts` regex-for-regex (parity is a tested law after v0.5.1 fixed four drift bugs) |
 | Quote engine | Adapter pattern (`QuoteAdapter` in `packages/shared`) | **The** architectural bet: one file per carrier behind a frozen interface — real carrier APIs slot in later with zero UI or queue changes |
-| Jobs | In-process bounded-concurrency queue | Demo-scale correct; narrow seam with a documented BullMQ/Redis upgrade path (`UPGRADE_PATH.md`) when multi-instance or restart-proof jobs are needed |
-| Analytics store | SQLite (`better-sqlite3`) | Zero infrastructure, survives demos; summary endpoint contract is store-agnostic (Postgres/ClickHouse path documented past ~1M events/day) |
+| Jobs | Queue abstraction (`JobQueue` interface): `MemoryQueue` default, `BullMQQueue` when `REDIS_URL` is set | Demo-scale correct with zero config, fleet-ready the moment Redis exists — same execution core (`jobExecutor.ts`) so both backends behave identically; graceful shutdown with 15s drain |
+| Analytics store | SQLite (`better-sqlite3`) default; Postgres when `DATABASE_URL` is set | Zero infrastructure until you need it; `AnalyticsSink` interface with fail-open fallback (Postgres outage → SQLite, loudly); the summary-endpoint contract is store-agnostic, so the dashboard never cares |
+| Quote cache | SHA-256 of rating factors only, Redis or in-memory LRU, TTL 3600s | Repeat quote requests answer in ~10ms (`cached:true`) instead of re-running the fan-out; email/phone/names never touch the cache key — a tested PII rule |
 | Dashboard | Separate tiny Vite app, hand-rolled SVG charts | No chart library keeps it at 151KB; separate deployable reading one endpoint |
 | Email | nodemailer (SMTP env) / dev-log mode | Real sending the moment creds exist; dev mode logs domain + jobId only — never addresses or content |
 | Data | JSON registries (`data/carriers`, `data/agents`, `data/geocode`, `data/disclosures`) | Content, not code: new states/carriers ship without deploys; every file carries honesty metadata (confidence, data grade, verified flags) |
-| Tests | vitest, 120+ assertions green | Adapter pricing bands, registry validity for all 50 states, route E2E, compliance surfaces |
-| Hosting (prepped) | Vercel (web) + Render (API) | Free tiers, 10-minute deploy via `render.yaml` + `docs/DEPLOY.md`; env-driven CORS and `trust proxy` for correct rate limiting behind the proxy |
+| Tests | vitest, 138/138 assertions green | Adapter pricing bands, registry validity for all 50 states, scaling backends (queue parity, cache, sink fail-open), compliance surfaces |
+| Hosting (prepped) | Vercel (web) + Render (API) | Free tiers, 10-minute deploy via `render.yaml` + `docs/DEPLOY.md`; Next.js framework preset on Vercel (minimal `vercel.json`); env-driven CORS and `trust proxy` for correct rate limiting behind the proxy; web→API link via `NEXT_PUBLIC_API_URL` |
 
 **Deliberately boring where it counts** (Express, SQLite, JSON files) so anyone can
 run the whole thing with `npm install` and one script — **deliberately fancy
@@ -181,19 +183,25 @@ and every screen is reviewed against it before shipping (CONTEXT rule 1):
 | SMTP | nodemailer via env | Real sends when configured; CAN-SPAM footer needs `SENDER_POSTAL_ADDRESS` before production |
 | US Census Geocoder | Documented as the production replacement for the demo ZIP-centroid file | Free, no key |
 
+**Built in v0.9.0 (infrastructure-gated, zero-config dev):** BullMQ/Redis for
+the job queue, Postgres for analytics, Redis-backed rate-limit store, and a
+quote-result cache — all behind interfaces with in-memory fallbacks, selected
+by `REDIS_URL` / `DATABASE_URL` / `CACHE_TTL_SECONDS`. `GET /api/health`
+reports which backends are live. See `docs/SCALING.md` for the capacity math
+(k6: 2,205 iterations, 0 failures, submit p95 3.7ms).
+
 **Planned (architecture ready, not built):** real carrier API integrations behind
 the unchanged `QuoteAdapter` interface — the interface docstring forbids adding
-required members, so existing adapters keep compiling. BullMQ/Redis for the job
-queue and Postgres/ClickHouse for analytics, both with interface-preserving
-migration plans already written.
+required members, so existing adapters keep compiling.
 
 ## 7. SEO, analytics & dashboard strategy
 
 - **SEO from day one** (CONTEXT rule 4): unique title/meta/OG/canonical per page
-  via `react-helmet-async`, sitemap + robots.txt (quote pages and `/api/*`
-  disallowed — personalized content never indexed), JSON-LD Organization + FAQ,
-  one `<h1>` per page, semantic landmarks. Performance budget enforced:
-  LCP < 2.5s, JS < 200KB gzip, CLS < 0.1. See `docs/SEO.md`.
+  via the Next.js metadata API (`generateMetadata` — server-rendered since
+  v0.10.0, replacing `react-helmet-async`), sitemap + robots.txt (quote pages
+  and `/api/*` disallowed — personalized content never indexed), JSON-LD
+  Organization + FAQ, one `<h1>` per page, semantic landmarks. Performance
+  budget enforced: LCP < 2.5s, JS < 200KB gzip, CLS < 0.1. See `docs/SEO.md`.
 - **Analytics on every interaction** (rule 6): page views, wizard steps, CTAs,
   quote lifecycle, compare opens, email opt-ins, agent phone taps, loading views —
   all funneled to SQLite with session IDs stored as truncated SHA-256 hashes and
@@ -269,15 +277,44 @@ results page.
   in the built bundle; per-carrier caveats (telematics, underwriting review)
   ship with each quote.
 
+### SSR rendering split (v0.10.0)
+
+The Vite SPA became a Next.js 14.2 App Router app — full SSR, not a redesign.
+The rendering split is deliberate: **server components for static/crawlable
+content** (About, legal pages, and an SEO shell on Home with title/meta/OG +
+FAQ JSON-LD), **client components only where the browser is required**
+(wizard's localStorage, quote polling, Leaflet map, cookie banner). Nothing
+indexable lives behind a form or a job id, so SSR there would be complexity
+for zero SEO gain — that rule is now CONTEXT law. React 18 was kept (no
+React 19 upgrade); the web→API link is `NEXT_PUBLIC_API_URL`; dev still
+proxies `/api` via `next.config.mjs` rewrites, so `scripts/dev.sh` is
+unchanged. *Why:* crawlers and link previews get real HTML on the pages that
+matter, while the interactive core stays exactly as fast as before.
+
+### Scaled for 100k users (v0.9.0)
+
+The backend grew a queue abstraction (`MemoryQueue` default, `BullMQQueue`
+when `REDIS_URL` is set), a SHA-256 quote-result cache (~10ms on hit,
+`cached:true`), a Postgres analytics sink (fail-open to SQLite — analytics
+never breaks quoting), a Redis rate-limit store, and a statelessness audit so
+N API instances can run behind a load balancer. Every piece is
+**infrastructure-optional**: `scripts/dev.sh` still boots from a clean
+checkout with zero new config. A k6 load test (2,205 iterations, 0 failures,
+submit p95 3.7ms) proves the story instead of claiming it. *Why:* a demo that
+dies on Hacker News traffic is a failed demo; boring infra behind interfaces
+keeps the laptop workflow intact while the production story is real.
+See `docs/SCALING.md`.
+
 ## 13. What's real vs. roadmap
 
-**Real today:** 50-state registries, 6 simulation adapters, async job engine,
+**Real today:** 50-state registries, 6 simulation adapters, async job engine
+(MemoryQueue/BullMQ), quote-result cache, Postgres-ready analytics,
 ZIP-first wizard with validation parity, distance-ranked agent finder with map,
 Places provider chain (key pending), analytics + dashboard, SEO/accessibility/
-security pass, compliance surfaces, deploy configs.
+security pass, compliance surfaces, SSR frontend, deploy configs.
 
 **Roadmap (architected, not built):** real carrier API integrations (interface
-frozen for it), BullMQ/Redis queue, Postgres/ClickHouse analytics, real
-geocoder, production SMTP + postal address, ML pricing bands and win-rate
-prediction (see `docs/AI_ARCHITECTURE.md` §5), mobile apps. Every roadmap item
-has a documented insertion point — none require re-architecture.
+frozen for it), real geocoder, production SMTP + postal address, ML pricing
+bands and win-rate prediction (see `docs/AI_ARCHITECTURE.md` §5), mobile apps.
+Every roadmap item has a documented insertion point — none require
+re-architecture.
