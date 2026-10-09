@@ -6,6 +6,7 @@ import type {
   QuoteJob,
   QuoteJobCreated,
   QuoteRequest,
+  StateDisclosures,
 } from "./types";
 
 export class ApiError extends Error {
@@ -73,5 +74,8 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ jobId, email }),
     });
+  },
+  getDisclosures(state: string): Promise<StateDisclosures> {
+    return request(`/api/disclosures/${encodeURIComponent(state.toUpperCase())}`);
   },
 };
